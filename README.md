@@ -294,7 +294,7 @@ test_results = tools.build_and_run_tests(project_path, "A1")
 Each practice folder contains:
 
 - **judge.sh**: Main testing script with compilation and test execution
-- **config.sh**: Configuration file for test parameters  
+- **config.sh**: Configuration file for test parameters
 - **clone.sh**: Repository cloning and commit analysis
 - **repos.json**: Student repository mappings for each phase (A6)
 
@@ -305,7 +305,7 @@ For A6 assignments, the system automatically runs tests for all three phases:
 ```bash
 # Automatically runs Phase 1, 2, and 3 tests
 ./judge.sh -p 1 && ./judge.sh -t
-./judge.sh -p 2 && ./judge.sh -t  
+./judge.sh -p 2 && ./judge.sh -t
 ./judge.sh -p 3 && ./judge.sh -t
 ```
 

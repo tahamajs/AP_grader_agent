@@ -612,7 +612,10 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
 
     # Try to use judge.sh for other practices
     judge_results = run_judge_tests(project_path, practice_name)
-    if judge_results["total_tests"] > 0 or "Judge folder not found" not in judge_results["execution_summary"]:
+    if (
+        judge_results["total_tests"] > 0
+        or "Judge folder not found" not in judge_results["execution_summary"]
+    ):
         return judge_results
 
     # Fallback to original test system if judge.sh is not available
@@ -688,9 +691,14 @@ def run_judge_tests(
 
         if results["total_tests"] == 0:
             # If parsing failed, assume build was successful if no clear errors
-            if "Compiled Successfully" in process.stdout or "Compiled successfully" in process.stdout:
+            if (
+                "Compiled Successfully" in process.stdout
+                or "Compiled successfully" in process.stdout
+            ):
                 results["build_successful"] = True
-                results["execution_summary"] += "\n⚠️ Could not parse test results, but compilation was successful."
+                results[
+                    "execution_summary"
+                ] += "\n⚠️ Could not parse test results, but compilation was successful."
 
         return results
 
@@ -869,7 +877,7 @@ def run_judge_tests_a6(project_path: str, practice_name: str) -> dict:
         "execution_summary": "",
         "build_output": "",
         "test_details": [],
-        "phase_results": {}
+        "phase_results": {},
     }
 
     # Find the judge folder for A6
@@ -895,6 +903,7 @@ def run_judge_tests_a6(project_path: str, practice_name: str) -> dict:
         temp_run_dir = os.path.join(judge_dir, "temp-P3")  # Use P3 as default
         if os.path.exists(temp_run_dir):
             import shutil
+
             shutil.rmtree(temp_run_dir)
         os.makedirs(temp_run_dir)
 
@@ -905,6 +914,7 @@ def run_judge_tests_a6(project_path: str, practice_name: str) -> dict:
                     src_path = os.path.join(root, file)
                     dst_path = os.path.join(temp_run_dir, file)
                     import shutil
+
                     shutil.copy2(src_path, dst_path)
 
         # Run tests for all phases
@@ -917,7 +927,9 @@ def run_judge_tests_a6(project_path: str, practice_name: str) -> dict:
 
             # Change to the specific phase
             change_command = [judge_script, "-p", str(phase)]
-            subprocess.run(change_command, cwd=judge_dir, capture_output=True, text=True)
+            subprocess.run(
+                change_command, cwd=judge_dir, capture_output=True, text=True
+            )
 
             # Run tests for this phase
             test_command = [judge_script, "-t"]
@@ -951,7 +963,7 @@ def run_judge_tests_a6(project_path: str, practice_name: str) -> dict:
             phase_results[f"phase{phase}"] = {
                 "passed": passed,
                 "total": total,
-                "output": phase_output
+                "output": phase_output,
             }
 
             total_passed += passed
