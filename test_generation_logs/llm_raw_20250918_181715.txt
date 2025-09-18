@@ -1,0 +1,27 @@
+```json
+{
+  "test_cases": [
+    {
+      "id": 1,
+      "description": "Test case for adding and listing projects and tasks with normal inputs.",
+      "category": "normal",
+      "input": "add_project ProjectA\nadd_task ProjectA Task1\nadd_task ProjectA Task2\nlist_projects\nlist_tasks ProjectA\n",
+      "expected_output": "Project added: ProjectA\nTask added to ProjectA: Task1\nTask added to ProjectA: Task2\nProjects:\nProjectA\nTasks for ProjectA:\nTask1\nTask2\n",
+      "rationale": "This test case validates the basic functionality of adding projects and tasks, and then listing them. It covers the main success path of the application. It verifies that the output format is correct and the project/task names are stored and retrieved correctly."
+    },
+    {
+      "id": 2,
+      "description": "Test case for handling non-existent project while adding/listing tasks and handling empty input.",
+      "category": "error",
+      "input": "add_task NonExistentProject Task1\nlist_tasks NonExistentProject\nlist_projects\n",
+      "expected_output": "Project not found: NonExistentProject\nProject not found: NonExistentProject\nProjects:\n",
+      "rationale": "This test case checks error handling when a project doesn't exist. It also validates that listing projects when none exist outputs an empty 'Projects:' section, ensuring no crashes or unexpected behavior with invalid inputs."
+    }
+  ],
+  "metadata": {
+    "total_cases": 2,
+    "coverage_areas": ["Adding projects", "Adding tasks", "Listing projects", "Listing tasks", "Error handling for non-existent projects", "Empty input handling"],
+    "complexity_level": "basic"
+  }
+}
+```

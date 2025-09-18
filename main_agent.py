@@ -368,6 +368,8 @@ def get_test_failure_impact(failures):
             return 0.5, "Multiple logic failures - moderate impact"
         elif failure_count >= 2:
             return 0.7, "Some test failures - minor impact"
+        else:
+            return 0.8, "Minor test failures - slight impact"
 
 
 def print_recommendations(comment):

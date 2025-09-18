@@ -1,0 +1,12 @@
+{
+  "session_id": "20250918_181506",
+  "assignment": "A1",
+  "num_cases_requested": 1,
+  "use_llm": false,
+  "start_time": "2025-09-18T18:15:06.534128",
+  "status": "completed",
+  "end_time": "2025-09-18T18:15:06.879563",
+  "generated_cases": 1,
+  "metadata_file": "/Users/tahamajs/Documents/uni/LLM/grading_agent/test_cases/A1/generation_metadata.json",
+  "test_directory": "/Users/tahamajs/Documents/uni/LLM/grading_agent/test_cases/A1/tests"
+}

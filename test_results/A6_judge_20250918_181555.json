@@ -1,0 +1,16 @@
+{
+  "practice_name": "A6",
+  "test_type": "judge",
+  "student_id": null,
+  "timestamp": "2025-09-18T18:15:55.291168",
+  "test_results": {
+    "build_successful": false,
+    "passed_tests": 0,
+    "total_tests": 0,
+    "failed_tests": [],
+    "execution_summary": "❌ Error running judge.sh: [Errno 1] Operation not permitted: '/Users/tahamajs/Documents/uni/LLM/grading_agent/test_cases/practice6/judge/judge.sh'",
+    "build_output": "",
+    "test_details": [],
+    "phase_results": {}
+  }
+}

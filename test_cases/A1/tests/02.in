@@ -1,0 +1,3 @@
+add_task NonExistentProject Task1
+list_tasks NonExistentProject
+list_projects

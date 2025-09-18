@@ -1,2 +1,5 @@
-5
-1 2 3 4 5
+add_project ProjectA
+add_task ProjectA Task1
+add_task ProjectA Task2
+list_projects
+list_tasks ProjectA

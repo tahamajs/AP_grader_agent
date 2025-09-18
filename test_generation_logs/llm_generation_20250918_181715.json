@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-09-18T18:17:15.584733",
+  "assignment_description": "برنامه‌سازی پیشرفته تمرین کامپیوتری شماره ۱\n \n:مدرس رامتین خسروی \n:طراحان الهه خداوردی، شهریار عطار\n مهلت \n:تحویل دوشنبه ۶ اسفند \n۱۴۰۳\n، ساعت\n۲۳:۵۹\nمقدمه \nهدف از این تمرین آشنایی شما با \ncontainerها-\n...",
+  "requirements": {
+    "objectives": [],
+    "constraints": [],
+    "required_features": [],
+    "grading_criteria": [],
+    "bonus_features": []
+  },
+  "requested_cases": 2,
+  "generated_cases": 2,
+  "llm_raw_file": "/Users/tahamajs/Documents/uni/LLM/grading_agent/test_generation_logs/llm_raw_20250918_181715.txt",
+  "parsed_preview": {
+    "test_cases_count": 2
+  }
+}
