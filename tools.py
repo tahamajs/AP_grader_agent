@@ -390,21 +390,117 @@ def extract_practice_requirements(pdf_text: str) -> dict:
     return requirements
 
 
+def summarize_text(text: str, max_length: int = 500) -> str:
+    """Summarizes the given text to the specified maximum length."""
+    if len(text) <= max_length:
+        return text
+
+    # Simple summarization by truncating and appending ellipsis
+    return text[:max_length] + "..."
+
+
 def get_practice_descriptions(practices_dir: str) -> dict:
-    """Reads all practice description PDFs from a directory."""
+    """Reads and summarizes all practice description PDFs from a directory."""
     practice_descriptions = {}
     if not os.path.exists(practices_dir):
         return practice_descriptions
 
-    for file in os.listdir(practices_dir):
-        if file.endswith(".pdf"):
-            practice_name = os.path.splitext(file)[0]
-            pdf_path = os.path.join(practices_dir, file)
-            description = read_practice_description(pdf_path)
-            practice_descriptions[practice_name] = description
-            print(f"Loaded practice description: {practice_name}")
+    # Walk through the directory and subdirectories
+    for root, _, files in os.walk(practices_dir):
+        for file in files:
+            if file.lower().endswith(".pdf"):
+                pdf_path = os.path.join(root, file)
+                practice_name = os.path.splitext(file)[0]
+                full_text = read_practice_description(pdf_path)
+                summarized_text = summarize_text(full_text)
+                practice_descriptions[practice_name] = summarized_text
 
     return practice_descriptions
+
+
+def _make_testcase_pair(test_dir: str, index: int, input_text: str, output_text: str):
+    """Helper: write a .in/.out pair in test_dir with zero-padded index."""
+    os.makedirs(test_dir, exist_ok=True)
+    name = f"{index:02d}"
+    in_path = os.path.join(test_dir, f"{name}.in")
+    out_path = os.path.join(test_dir, f"{name}.out")
+    with open(in_path, "w") as f:
+        f.write(input_text)
+    with open(out_path, "w") as f:
+        f.write(output_text)
+
+
+def generate_testcases_from_description(assignment: str, num_cases: int = 3) -> str:
+    """Generates simple testcase skeletons for an assignment based on its description.
+
+    - assignment: assignment name or key, e.g., 'A1' or 'APS04-A1-Description'
+    - num_cases: number of test pairs to generate
+
+    Returns the path to the created test directory.
+    This function creates files under `config.TEST_CASES_DIR/<assignment>/tests/`.
+    """
+    descriptions = get_practice_descriptions(config.PRACTICES_DIR)
+    # Try exact key, then look for key-containing entry
+    text = descriptions.get(assignment)
+    if not text:
+        # fallback: find first key that contains the assignment substring
+        for k, v in descriptions.items():
+            if assignment.lower() in k.lower():
+                text = v
+                break
+
+    if not text:
+        raise FileNotFoundError(
+            f"No practice description found for assignment '{assignment}'"
+        )
+
+    reqs = extract_practice_requirements(text)
+
+    # Create test directory
+    target_dir = os.path.join(config.TEST_CASES_DIR, assignment)
+    tests_dir = os.path.join(target_dir, "tests")
+
+    # Simple heuristic to produce input/output based on required features or objectives
+    features = reqs.get("required_features", []) or reqs.get("objectives", [])
+    # If no features found, produce generic arithmetic tests
+    if not features:
+        features = ["Sum numbers", "Multiply numbers", "Edge case zero"]
+
+    # Generate testcases
+    for i in range(1, num_cases + 1):
+        feature = features[(i - 1) % len(features)]
+        # Very simple mapping: if feature mentions 'sum' or 'add' -> sum input
+        feature_lower = feature.lower()
+        if any(w in feature_lower for w in ["sum", "add", "total"]):
+            inp = "5\n1 2 3 4 5\n"
+            out = str(sum([1, 2, 3, 4, 5])) + "\n"
+        elif any(w in feature_lower for w in ["multiply", "product"]):
+            inp = "3\n2 3 4\n"
+            out = str(2 * 3 * 4) + "\n"
+        elif any(w in feature_lower for w in ["edge", "zero"]):
+            inp = "1\n0\n"
+            out = "0\n"
+        else:
+            # default numeric test
+            inp = f"{i}\n{ ' '.join(str(x) for x in range(1, i+2)) }\n"
+            out = str(sum(range(1, i + 2))) + "\n"
+
+        _make_testcase_pair(tests_dir, i, inp, out)
+
+    print(f"Generated {num_cases} testcases for {assignment} in {tests_dir}")
+    return tests_dir
+
+
+def generate_all_testcases():
+    """Generates test cases for all assignments in the practices directory."""
+    descriptions = get_practice_descriptions(config.PRACTICES_DIR)
+    for assignment in descriptions.keys():
+        try:
+            generate_testcases_from_description(assignment)
+        except Exception as e:
+            print(f"Failed to generate test cases for {assignment}: {e}")
+
+    print("Test case generation completed for all assignments.")
 
 
 def run_static_analysis(project_path: str) -> str:
