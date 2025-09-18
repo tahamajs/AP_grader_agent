@@ -9,7 +9,6 @@ import google.generativeai as genai
 
 load_dotenv()
 
-# Configure Gemini API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 
@@ -536,7 +535,7 @@ def grade_student_project(
 
     # Initialize the model with optimized settings
     model = genai.GenerativeModel(
-        "gemini-pro",
+        "gemini-2.0-flash",
         generation_config=genai.types.GenerationConfig(
             temperature=0.1,  # Lower temperature for more consistent grading
             top_p=0.8,
@@ -650,7 +649,7 @@ def save_grading_output(
         "assignment_type": assignment_type,
         "timestamp": datetime.now().isoformat(),
         "grading_output": raw_dict,
-        "model_used": "gemini-pro",
+        "model_used": "gemini-2.0-flash",
         "structured_output": (
             grading_output.model_dump()
             if hasattr(grading_output, "model_dump")

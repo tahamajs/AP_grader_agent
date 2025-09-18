@@ -109,6 +109,17 @@ def parse_and_validate_response(
                 f"Failed to parse JSON response{ctx}: {e1}\nRaw: {txt[:1000]}"
             )
 
+    # Handle common LLM formatting issues where properties are wrapped
+    if isinstance(parsed, dict) and "properties" in parsed and len(parsed) == 1:
+        # Check if this looks like a JSON schema response that wrapped the actual data
+        properties_data = parsed["properties"]
+        if isinstance(properties_data, dict):
+            # Look for grading-related field names to confirm this is the wrapped case
+            grading_fields = [k for k in properties_data.keys() if k.startswith(('p1_', 'p2_', 'p3_')) or k in ['generated_comment']]
+            if grading_fields:
+                logger.info(f"Detected wrapped 'properties' structure, unwrapping for {description}")
+                parsed = properties_data
+
     # Optionally validate using provided callable
     if validator:
         try:
@@ -455,13 +466,21 @@ def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
     Returns:
         Format instructions string
     """
+    # Get the field names from the model for clearer instructions
+    field_names = list(grading_model.model_fields.keys())
+
     return f"""
     CRITICAL: Respond ONLY with a valid JSON object. No markdown, no explanations, no additional text.
 
     Required JSON format for {assignment_type}:
-    {grading_model.model_json_schema()}
+    {{
+{chr(10).join([f'      "{field}": <score>,' for field in field_names[:-1]])}
+      "{field_names[-1]}": "<constructive feedback comment>"
+    }}
 
-    Scoring Guidelines:
+    IMPORTANT:
+    - Return the JSON object directly, NOT wrapped in any "properties" or other structure
+    - All field names must match exactly: {", ".join(f'"{f}"' for f in field_names)}
     - Use decimal scores (e.g., 3.5, 7.2) for partial credit
     - Be precise and consistent in scoring
     - Base scores on evidence from the code
@@ -475,8 +494,8 @@ def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
 
 # Default prompt settings that can be easily modified
 PROMPT_CONFIG = {
-    "test_generation": {"temperature": 0.7, "max_tokens": 4096, "model": "gemini-pro"},
-    "grading": {"temperature": 0.1, "max_tokens": 4096, "model": "gemini-pro"},
+    "test_generation": {"temperature": 0.7, "max_tokens": 4096, "model": "gemini-2.0-flash"},
+    "grading": {"temperature": 0.1, "max_tokens": 4096, "model": "gemini-2.0-flash"},
 }
 
 

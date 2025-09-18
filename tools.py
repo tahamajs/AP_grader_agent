@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def clone_student_repo(
     repo_url: str, commit_sha: str = None, student_id: str = None
 ) -> str:
-    """Clones a student's repository using SSH with AP-F03 configuration."""
+    """Clones a student's repository using HTTPS."""
     try:
         # Create a unique directory for this student
         if student_id:
@@ -30,66 +30,21 @@ def clone_student_repo(
         # Clean up any existing directory
         if os.path.exists(clone_path):
             import shutil
-
             shutil.rmtree(clone_path)
 
         os.makedirs(clone_path, exist_ok=True)
 
-        # Configure SSH for AP-F03 if not already configured
-        ssh_config_path = os.path.expanduser("~/.ssh/config")
-        apf03_config = """
-# AP-F03 GitHub configuration
-Host AP-F03
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/AP-F03
-    IdentitiesOnly yes
-"""
-
-        # Check if AP-F03 config already exists
-        if os.path.exists(ssh_config_path):
-            with open(ssh_config_path, "r") as f:
-                ssh_config_content = f.read()
-            if "Host AP-F03" not in ssh_config_content:
-                with open(ssh_config_path, "a") as f:
-                    f.write(apf03_config)
-        else:
-            # Create SSH config directory if it doesn't exist
-            os.makedirs(os.path.dirname(ssh_config_path), exist_ok=True)
-            with open(ssh_config_path, "w") as f:
-                f.write(apf03_config)
-
-        # Set proper permissions on SSH config
-        os.chmod(ssh_config_path, 0o600)
-
-        # Copy the SSH private key if it exists in the test cases directory
-        ssh_key_source = os.path.join(
-            config.TEST_CASES_DIR, "practice6", "AP-F03-git-ssh", "ssh.txt"
-        )
-        ssh_key_dest = os.path.expanduser("~/.ssh/AP-F03")
-
-        if os.path.exists(ssh_key_source):
-            import shutil
-
-            os.makedirs(os.path.dirname(ssh_key_dest), exist_ok=True)
-            shutil.copy2(ssh_key_source, ssh_key_dest)
-            os.chmod(ssh_key_dest, 0o600)
-
-        # Convert HTTPS URL to SSH URL using AP-F03 host
+        # Use HTTPS URL directly (don't add .git if already present)
         if repo_url.startswith("https://github.com/"):
-            # Extract owner/repo from HTTPS URL
-            parts = repo_url.replace("https://github.com/", "").split("/")
-            if len(parts) >= 2:
-                owner = parts[0]
-                repo = parts[1].replace(".git", "")
-                ssh_url = f"git@AP-F03:{owner}/{repo}.git"
+            if not repo_url.endswith(".git"):
+                https_url = repo_url + ".git"
             else:
-                ssh_url = repo_url  # fallback
+                https_url = repo_url
         else:
-            ssh_url = repo_url  # already SSH or other format
+            https_url = repo_url  # fallback
 
-        # Clone the repository
-        clone_command = ["git", "clone", "--depth", "1", ssh_url, clone_path]
+        # Clone the repository using HTTPS
+        clone_command = ["git", "clone", "--depth", "1", https_url, clone_path]
         process = subprocess.run(
             clone_command,
             capture_output=True,
@@ -619,7 +574,7 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
             f"Generating {num_cases} test cases using LLM for assignment with requirements: {list(reqs.keys())}"
         )
 
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
 
         # Use centralized parser/validator from prompts.py

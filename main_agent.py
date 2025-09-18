@@ -433,7 +433,7 @@ def _grade_student_flow(student_id, repo_url, assignment_type):
     """Run full grading pipeline for a single student and return summary paths."""
     print(f"\n--- Processing Student: {student_id} (Assignment: {assignment_type}) ---")
 
-    project_path = tools.clone_student_repo(repo_url, student_id)
+    project_path = tools.clone_student_repo(repo_url, student_id=student_id)
     if not project_path:
         return None
 
@@ -462,8 +462,7 @@ CODE ANALYSIS SUMMARY:
 """
 
     print("Invoking AI for qualitative grading...")
-    grading_function = langchain_integration.get_grading_chain()
-    llm_response = grading_function(
+    llm_response = langchain_integration.grade_student_project(
         test_results=test_results["execution_summary"],
         static_analysis=analysis_report,
         source_code=source_code,
