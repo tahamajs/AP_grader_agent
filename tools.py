@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from git import Repo, GitCommandError
 import config
+from config import MODEL_CONFIG
 import fitz  # PyMuPDF for PDF reading
 import time
 
@@ -575,7 +576,15 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
             f"Generating {num_cases} test cases using LLM for assignment with requirements: {list(reqs.keys())}"
         )
 
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel(
+            MODEL_CONFIG["model"],
+            generation_config=genai.types.GenerationConfig(
+                temperature=MODEL_CONFIG["generation"]["temperature"],
+                top_p=MODEL_CONFIG["generation"]["top_p"],
+                top_k=MODEL_CONFIG["generation"]["top_k"],
+                max_output_tokens=MODEL_CONFIG["generation"]["max_output_tokens"],
+            ),
+        )
         response = model.generate_content(prompt)
 
         # Use centralized parser/validator from prompts.py

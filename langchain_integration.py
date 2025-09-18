@@ -9,7 +9,10 @@ import google.generativeai as genai
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+# Import configuration
+from config import MODEL_CONFIG
+
+genai.configure(api_key=MODEL_CONFIG["api_key"])
 
 
 # Setup logging
@@ -535,12 +538,12 @@ def grade_student_project(
 
     # Initialize the model with optimized settings
     model = genai.GenerativeModel(
-        "gemini-2.0-flash",
+        MODEL_CONFIG["model"],
         generation_config=genai.types.GenerationConfig(
-            temperature=0.1,  # Lower temperature for more consistent grading
-            top_p=0.8,
-            top_k=40,
-            max_output_tokens=4096,  # Increased for A6 multi-phase
+            temperature=MODEL_CONFIG["grading"]["temperature"],
+            top_p=MODEL_CONFIG["grading"]["top_p"],
+            top_k=MODEL_CONFIG["grading"]["top_k"],
+            max_output_tokens=MODEL_CONFIG["grading"]["max_output_tokens"],
         ),
     )
 
@@ -552,7 +555,7 @@ def grade_student_project(
     full_prompt = prompt + format_instructions
 
     # Generate response with retry logic
-    max_retries = 3
+    max_retries = MODEL_CONFIG["retry"]["max_retries"]
     for attempt in range(max_retries):
         try:
             logger.info(
@@ -649,7 +652,7 @@ def save_grading_output(
         "assignment_type": assignment_type,
         "timestamp": datetime.now().isoformat(),
         "grading_output": raw_dict,
-        "model_used": "gemini-2.0-flash",
+        "model_used": MODEL_CONFIG["model"],
         "structured_output": (
             grading_output.model_dump()
             if hasattr(grading_output, "model_dump")

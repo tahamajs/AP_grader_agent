@@ -1,5 +1,11 @@
 # config.py
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 # Google Sheets Configuration
 SHEET_NAME = "1swgtRM3awVelITJdgJC9cc6eUIsBvd5GKq1YhwVFGEg"
 CREDENTIALS_FILE = "credentials.json"
@@ -21,6 +27,35 @@ BUILD_COMMAND = "make"
 
 # The name of the executable produced by the build
 EXECUTABLE_NAME = "student_program"
+
+# Model Configuration
+MODEL_CONFIG = {
+    "api_key": os.getenv("GOOGLE_API_KEY"),
+    "model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+    "grading": {
+        "temperature": float(os.getenv("GRADING_TEMPERATURE", "0.1")),
+        "top_p": float(os.getenv("GRADING_TOP_P", "0.8")),
+        "top_k": int(os.getenv("GRADING_TOP_K", "40")),
+        "max_output_tokens": int(os.getenv("GRADING_MAX_OUTPUT_TOKENS", "4096")),
+    },
+    "generation": {
+        "temperature": float(os.getenv("GENERATION_TEMPERATURE", "0.7")),
+        "top_p": float(os.getenv("GENERATION_TOP_P", "0.9")),
+        "top_k": int(os.getenv("GENERATION_TOP_K", "50")),
+        "max_output_tokens": int(os.getenv("GENERATION_MAX_OUTPUT_TOKENS", "2048")),
+    },
+    "retry": {
+        "max_retries": int(os.getenv("MAX_RETRIES", "3")),
+        "delay": float(os.getenv("RETRY_DELAY", "1.0")),
+    },
+}
+
+# Logging Configuration
+LOG_CONFIG = {
+    "level": os.getenv("LOG_LEVEL", "INFO"),
+    "max_size": int(os.getenv("LOG_MAX_SIZE", "10485760")),  # 10MB
+    "backup_count": int(os.getenv("LOG_BACKUP_COUNT", "5")),
+}
 
 # Practice-specific configurations with detailed grading metrics
 PRACTICE_CONFIGS = {

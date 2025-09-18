@@ -1219,14 +1219,36 @@ def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
 # =============================================================================
 
 # Default prompt settings that can be easily modified
-PROMPT_CONFIG = {
-    "test_generation": {
-        "temperature": 0.7,
-        "max_tokens": 4096,
-        "model": "gemini-2.0-flash",
-    },
-    "grading": {"temperature": 0.1, "max_tokens": 4096, "model": "gemini-2.0-flash"},
-}
+# Import model configuration from config.py
+try:
+    from config import MODEL_CONFIG
+
+    PROMPT_CONFIG = {
+        "test_generation": {
+            "temperature": MODEL_CONFIG["generation"]["temperature"],
+            "max_tokens": MODEL_CONFIG["generation"]["max_output_tokens"],
+            "model": MODEL_CONFIG["model"],
+        },
+        "grading": {
+            "temperature": MODEL_CONFIG["grading"]["temperature"],
+            "max_tokens": MODEL_CONFIG["grading"]["max_output_tokens"],
+            "model": MODEL_CONFIG["model"],
+        },
+    }
+except ImportError:
+    # Fallback to hardcoded values if config import fails
+    PROMPT_CONFIG = {
+        "test_generation": {
+            "temperature": 0.7,
+            "max_tokens": 4096,
+            "model": "gemini-2.0-flash",
+        },
+        "grading": {
+            "temperature": 0.1,
+            "max_tokens": 4096,
+            "model": "gemini-2.0-flash",
+        },
+    }
 
 
 def update_prompt_config(config_updates: Dict[str, Any]) -> None:
