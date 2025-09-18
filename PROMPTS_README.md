@@ -1,4 +1,5 @@
 # PROMPTS CONFIGURATION GUIDE
+
 """
 This file explains how to modify prompts in the grading agent system.
 
@@ -7,26 +8,32 @@ All prompts are now centralized in prompts.py for easy maintenance and modificat
 ## HOW TO MODIFY PROMPTS:
 
 ### 1. Test Generation Prompts
+
 Located in: `get_test_generation_prompt()` function
 
 To modify test generation behavior:
+
 - Change the prompt text in the function
 - Modify the JSON output format requirements
 - Adjust test case categories or requirements
 
 ### 2. Grading Prompts
+
 Located in: Various `get_*_grading_criteria()` functions
 
 To modify grading criteria for any assignment:
+
 - Edit the corresponding function (e.g., `get_a3_grading_criteria()`)
 - Update point allocations
 - Modify evaluation criteria
 - Change scoring guidelines
 
 ### 3. Format Instructions
+
 Located in: `get_format_instructions()` function
 
 To modify output format requirements:
+
 - Change JSON schema requirements
 - Update scoring guidelines
 - Modify response format expectations
@@ -34,7 +41,9 @@ To modify output format requirements:
 ## CONFIGURATION OPTIONS:
 
 ### Prompt Settings
+
 Modify `PROMPT_CONFIG` dictionary to change:
+
 - Temperature settings
 - Max tokens
 - Model selection
@@ -77,4 +86,4 @@ def get_test_generation_prompt(description, reqs, num_cases):
 - `get_*_grading_criteria()` - Assignment-specific grading criteria
 - `get_format_instructions()` - Output format requirements
 - `PROMPT_CONFIG` - Model and generation settings
-"""
+  """

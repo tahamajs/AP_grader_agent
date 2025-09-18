@@ -436,7 +436,9 @@ def _make_testcase_pair(test_dir: str, index: int, input_text: str, output_text:
         f.write(output_text)
 
 
-def generate_testcases_from_description(assignment: str, num_cases: int = 3, use_llm: bool = False) -> str:
+def generate_testcases_from_description(
+    assignment: str, num_cases: int = 3, use_llm: bool = False
+) -> str:
     """Generates testcase skeletons for an assignment based on its description.
 
     - assignment: assignment name or key, e.g., 'A1' or 'APS04-A1-Description'
@@ -446,7 +448,9 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3, use
     Returns the path to the created test directory.
     This function creates files under `config.TEST_CASES_DIR/<assignment>/tests/`.
     """
-    logger.info(f"Starting test case generation for assignment {assignment}, num_cases={num_cases}, use_llm={use_llm}")
+    logger.info(
+        f"Starting test case generation for assignment {assignment}, num_cases={num_cases}, use_llm={use_llm}"
+    )
 
     # Create logs directory for comprehensive logging
     logs_dir = os.path.join(os.getcwd(), "test_generation_logs")
@@ -459,11 +463,13 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3, use
         "num_cases_requested": num_cases,
         "use_llm": use_llm,
         "start_time": datetime.now().isoformat(),
-        "status": "in_progress"
+        "status": "in_progress",
     }
 
-    session_log_file = os.path.join(logs_dir, f"session_{session_log['session_id']}.json")
-    with open(session_log_file, 'w', encoding='utf-8') as f:
+    session_log_file = os.path.join(
+        logs_dir, f"session_{session_log['session_id']}.json"
+    )
+    with open(session_log_file, "w", encoding="utf-8") as f:
         json.dump(session_log, f, indent=2, ensure_ascii=False)
 
     descriptions = get_practice_descriptions(config.PRACTICES_DIR)
@@ -484,7 +490,7 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3, use
         session_log["status"] = "failed"
         session_log["error"] = error_msg
         session_log["end_time"] = datetime.now().isoformat()
-        with open(session_log_file, 'w', encoding='utf-8') as f:
+        with open(session_log_file, "w", encoding="utf-8") as f:
             json.dump(session_log, f, indent=2, ensure_ascii=False)
 
         raise FileNotFoundError(error_msg)
@@ -500,10 +506,13 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3, use
         "assignment": assignment,
         "description_length": len(text),
         "extracted_requirements": reqs,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
-    reqs_file = os.path.join(logs_dir, f"requirements_{assignment}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
-    with open(reqs_file, 'w', encoding='utf-8') as f:
+    reqs_file = os.path.join(
+        logs_dir,
+        f"requirements_{assignment}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+    )
+    with open(reqs_file, "w", encoding="utf-8") as f:
         json.dump(reqs_log, f, indent=2, ensure_ascii=False)
 
     if use_llm:
@@ -533,11 +542,11 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3, use
         "test_directory": tests_dir,
         "logs_directory": logs_dir,
         "generation_method": "llm" if use_llm else "heuristic",
-        "requirements_file": reqs_file
+        "requirements_file": reqs_file,
     }
 
     metadata_path = os.path.join(target_dir, "generation_metadata.json")
-    with open(metadata_path, 'w', encoding='utf-8') as f:
+    with open(metadata_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
     # Update session log with success
@@ -546,10 +555,12 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3, use
     session_log["generated_cases"] = len(test_cases)
     session_log["metadata_file"] = metadata_path
     session_log["test_directory"] = tests_dir
-    with open(session_log_file, 'w', encoding='utf-8') as f:
+    with open(session_log_file, "w", encoding="utf-8") as f:
         json.dump(session_log, f, indent=2, ensure_ascii=False)
 
-    logger.info(f"Successfully generated {num_cases} testcases for {assignment} in {tests_dir}")
+    logger.info(
+        f"Successfully generated {num_cases} testcases for {assignment} in {tests_dir}"
+    )
     logger.info(f"Comprehensive logs saved to: {logs_dir}")
     print(f"Generated {num_cases} testcases for {assignment} in {tests_dir}")
     print(f"Logs and metadata saved to: {logs_dir}")
@@ -604,7 +615,9 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
         # Get the prompt from the centralized prompts module
         prompt = get_test_generation_prompt(description, reqs, num_cases)
 
-        logger.info(f"Generating {num_cases} test cases using LLM for assignment with requirements: {list(reqs.keys())}")
+        logger.info(
+            f"Generating {num_cases} test cases using LLM for assignment with requirements: {list(reqs.keys())}"
+        )
 
         model = genai.GenerativeModel("gemini-pro")
         response = model.generate_content(prompt)
@@ -635,10 +648,14 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
 
             test_cases_data = parsed_data["test_cases"]
             if not isinstance(test_cases_data, list):
-                raise ValueError("Invalid response structure: 'test_cases' must be a list")
+                raise ValueError(
+                    "Invalid response structure: 'test_cases' must be a list"
+                )
 
             if len(test_cases_data) != num_cases:
-                logger.warning(f"LLM generated {len(test_cases_data)} test cases, expected {num_cases}")
+                logger.warning(
+                    f"LLM generated {len(test_cases_data)} test cases, expected {num_cases}"
+                )
 
             # Convert to (input, output) tuples and validate each test case
             test_cases = []
@@ -659,7 +676,9 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
                 # Log test case details
                 description = tc.get("description", f"Test case {i+1}")
                 category = tc.get("category", "unknown")
-                logger.info(f"Generated test case {i+1}: {description} (category: {category})")
+                logger.info(
+                    f"Generated test case {i+1}: {description} (category: {category})"
+                )
 
                 test_cases.append((input_data, expected_output))
 
@@ -669,23 +688,30 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
             # Save generation metadata
             metadata = {
                 "timestamp": datetime.now().isoformat(),
-                "assignment_description": description[:200] + "..." if len(description) > 200 else description,
+                "assignment_description": (
+                    description[:200] + "..." if len(description) > 200 else description
+                ),
                 "requirements": reqs,
                 "requested_cases": num_cases,
                 "generated_cases": len(test_cases),
                 "llm_response_metadata": parsed_data.get("metadata", {}),
-                "raw_response_length": len(response_text)
+                "raw_response_length": len(response_text),
             }
 
             # Save metadata to file
             metadata_dir = os.path.join(os.getcwd(), "test_generation_logs")
             os.makedirs(metadata_dir, exist_ok=True)
-            metadata_file = os.path.join(metadata_dir, f"llm_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+            metadata_file = os.path.join(
+                metadata_dir,
+                f"llm_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            )
 
-            with open(metadata_file, 'w', encoding='utf-8') as f:
+            with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"Successfully generated {len(test_cases)} test cases using LLM. Metadata saved to: {metadata_file}")
+            logger.info(
+                f"Successfully generated {len(test_cases)} test cases using LLM. Metadata saved to: {metadata_file}"
+            )
             return test_cases
 
         except json.JSONDecodeError as e:
@@ -700,16 +726,20 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
             "timestamp": datetime.now().isoformat(),
             "error_type": type(e).__name__,
             "error_message": str(e),
-            "assignment_description": description[:200] + "..." if len(description) > 200 else description,
+            "assignment_description": (
+                description[:200] + "..." if len(description) > 200 else description
+            ),
             "requirements": reqs,
-            "requested_cases": num_cases
+            "requested_cases": num_cases,
         }
 
         error_dir = os.path.join(os.getcwd(), "test_generation_logs")
         os.makedirs(error_dir, exist_ok=True)
-        error_file = os.path.join(error_dir, f"llm_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+        error_file = os.path.join(
+            error_dir, f"llm_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
 
-        with open(error_file, 'w', encoding='utf-8') as f:
+        with open(error_file, "w", encoding="utf-8") as f:
             json.dump(error_metadata, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Error metadata saved to: {error_file}")
@@ -819,7 +849,9 @@ def run_static_analysis(project_path: str) -> str:
 def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
     """Builds the project and runs it against test cases using the judge.sh system."""
 
-    logger.info(f"Starting build and test process for practice {practice_name} in {project_path}")
+    logger.info(
+        f"Starting build and test process for practice {practice_name} in {project_path}"
+    )
 
     # Try to use judge.sh for all practices
     judge_results = run_judge_tests(project_path, practice_name)
@@ -827,7 +859,9 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
         judge_results["total_tests"] > 0
         or "Judge folder not found" not in judge_results["execution_summary"]
     ):
-        logger.info(f"Using judge.sh system for {practice_name}, results: {judge_results['passed_tests']}/{judge_results['total_tests']} tests passed")
+        logger.info(
+            f"Using judge.sh system for {practice_name}, results: {judge_results['passed_tests']}/{judge_results['total_tests']} tests passed"
+        )
         save_test_results(judge_results, practice_name, "judge")
         return judge_results
 
@@ -841,7 +875,9 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
 
 def run_judge_tests(project_path: str, practice_name: str) -> dict:
     """Runs tests using the judge.sh system for any practice assignment."""
-    logger.info(f"Attempting to run judge tests for practice {practice_name} in {project_path}")
+    logger.info(
+        f"Attempting to run judge tests for practice {practice_name} in {project_path}"
+    )
 
     results = {
         "build_successful": False,
@@ -937,7 +973,9 @@ def run_judge_tests_single_phase(
 
                     shutil.copy2(src_path, dst_path)
 
-        logger.info(f"Copied {len([f for f in os.listdir(temp_run_dir) if f.endswith(('.cpp', '.h', '.hpp'))])} source files to judge directory")
+        logger.info(
+            f"Copied {len([f for f in os.listdir(temp_run_dir) if f.endswith(('.cpp', '.h', '.hpp'))])} source files to judge directory"
+        )
 
         # Run the judge.sh test command
         judge_command = [judge_script, "-t"]
@@ -981,7 +1019,9 @@ def run_judge_tests_single_phase(
                     "execution_summary"
                 ] += "\n⚠️ Could not parse test results, but compilation was successful."
 
-        logger.info(f"Single-phase judge test results for {practice_name}: {results['passed_tests']}/{results['total_tests']} tests passed")
+        logger.info(
+            f"Single-phase judge test results for {practice_name}: {results['passed_tests']}/{results['total_tests']} tests passed"
+        )
         return results
 
     except subprocess.TimeoutExpired:
@@ -990,7 +1030,9 @@ def run_judge_tests_single_phase(
         return results
     except Exception as e:
         results["execution_summary"] = f"❌ Error running judge.sh: {str(e)}"
-        logger.error(f"Error in single-phase judge testing for {practice_name}: {str(e)}")
+        logger.error(
+            f"Error in single-phase judge testing for {practice_name}: {str(e)}"
+        )
         return results
 
 
@@ -1113,7 +1155,9 @@ def run_judge_tests_multi_phase(
         return results
 
 
-def save_test_results(test_results: dict, practice_name: str, test_type: str, student_id: str = None):
+def save_test_results(
+    test_results: dict, practice_name: str, test_type: str, student_id: str = None
+):
     """Save test results as JSON file with timestamp."""
     # Create test results directory if it doesn't exist
     results_dir = os.path.join(os.getcwd(), "test_results")
@@ -1131,18 +1175,20 @@ def save_test_results(test_results: dict, practice_name: str, test_type: str, st
         "test_type": test_type,
         "student_id": student_id,
         "timestamp": datetime.now().isoformat(),
-        "test_results": test_results
+        "test_results": test_results,
     }
 
     # Save to JSON file
-    with open(filepath, 'w', encoding='utf-8') as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
     logger.info(f"Test results saved to: {filepath}")
     return filepath
 
 
-def run_standard_tests(project_path: str, practice_name: str, practice_config: dict) -> dict:
+def run_standard_tests(
+    project_path: str, practice_name: str, practice_config: dict
+) -> dict:
     """Runs tests using the standard test system for assignments."""
     results = {
         "build_successful": False,

@@ -12,6 +12,7 @@ import json
 # TEST GENERATION PROMPTS
 # =============================================================================
 
+
 def get_test_generation_prompt(description: str, reqs: dict, num_cases: int) -> str:
     """
     Generate the prompt for LLM-based test case generation.
@@ -74,11 +75,9 @@ IMPORTANT:
 # GRADING PROMPTS
 # =============================================================================
 
+
 def get_base_grading_prompt(
-    practice_description: str,
-    test_results: str,
-    static_analysis: str,
-    source_code: str
+    practice_description: str, test_results: str, static_analysis: str, source_code: str
 ) -> str:
     """
     Get the base grading prompt that applies to all assignment types.
@@ -299,7 +298,7 @@ def get_grading_prompt(
     practice_description: str,
     test_results: str,
     static_analysis: str,
-    source_code: str
+    source_code: str,
 ) -> str:
     """
     Get the complete grading prompt for a specific assignment type.
@@ -329,6 +328,7 @@ def get_grading_prompt(
 # =============================================================================
 # FORMAT INSTRUCTIONS
 # =============================================================================
+
 
 def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
     """
@@ -361,16 +361,8 @@ def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
 
 # Default prompt settings that can be easily modified
 PROMPT_CONFIG = {
-    "test_generation": {
-        "temperature": 0.7,
-        "max_tokens": 4096,
-        "model": "gemini-pro"
-    },
-    "grading": {
-        "temperature": 0.1,
-        "max_tokens": 4096,
-        "model": "gemini-pro"
-    }
+    "test_generation": {"temperature": 0.7, "max_tokens": 4096, "model": "gemini-pro"},
+    "grading": {"temperature": 0.1, "max_tokens": 4096, "model": "gemini-pro"},
 }
 
 

@@ -12,6 +12,7 @@ load_dotenv()
 # Configure Gemini API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+
 # Setup logging
 def setup_logging():
     """Setup logging configuration for the grading system."""
@@ -22,14 +23,15 @@ def setup_logging():
 
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[
-            logging.FileHandler(log_file, encoding='utf-8'),
-            logging.StreamHandler()
-        ]
+            logging.FileHandler(log_file, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
     )
 
     return logging.getLogger(__name__)
+
 
 logger = setup_logging()
 
@@ -545,6 +547,7 @@ def grade_student_project(
 
     # Format instructions for the specific model
     from prompts import get_format_instructions
+
     format_instructions = get_format_instructions(assignment_type, grading_model)
 
     full_prompt = prompt + format_instructions
@@ -553,7 +556,9 @@ def grade_student_project(
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            logger.info(f"Starting grading attempt {attempt + 1} for student {student_id}, assignment {assignment_type}")
+            logger.info(
+                f"Starting grading attempt {attempt + 1} for student {student_id}, assignment {assignment_type}"
+            )
 
             response = model.generate_content(full_prompt)
 
@@ -571,27 +576,39 @@ def grade_student_project(
             result_dict = json.loads(response_text)
             grading_output = grading_model(**result_dict)
 
-            logger.info(f"Successfully graded student {student_id} for {assignment_type}")
+            logger.info(
+                f"Successfully graded student {student_id} for {assignment_type}"
+            )
 
             # Save outputs if requested
             if save_outputs and student_id:
-                saved_path = save_grading_output(grading_output, assignment_type, student_id, result_dict)
+                saved_path = save_grading_output(
+                    grading_output, assignment_type, student_id, result_dict
+                )
                 logger.info(f"Grading output saved to {saved_path}")
 
             return grading_output
 
         except json.JSONDecodeError as e:
-            logger.warning(f"JSON parsing failed (attempt {attempt + 1}) for student {student_id}: {e}")
+            logger.warning(
+                f"JSON parsing failed (attempt {attempt + 1}) for student {student_id}: {e}"
+            )
             if attempt == max_retries - 1:
-                logger.error(f"Failed to parse JSON after {max_retries} attempts for student {student_id}: {e}. Response: {response_text}")
+                logger.error(
+                    f"Failed to parse JSON after {max_retries} attempts for student {student_id}: {e}. Response: {response_text}"
+                )
                 raise ValueError(
                     f"Failed to parse JSON after {max_retries} attempts: {e}. Response: {response_text}"
                 )
             continue
         except Exception as e:
-            logger.error(f"API call failed (attempt {attempt + 1}) for student {student_id}: {e}")
+            logger.error(
+                f"API call failed (attempt {attempt + 1}) for student {student_id}: {e}"
+            )
             if attempt == max_retries - 1:
-                logger.error(f"Error processing response after {max_retries} attempts for student {student_id}: {e}")
+                logger.error(
+                    f"Error processing response after {max_retries} attempts for student {student_id}: {e}"
+                )
                 raise ValueError(
                     f"Error processing response after {max_retries} attempts: {e}"
                 )
@@ -602,7 +619,9 @@ def grade_student_project(
     raise ValueError("Unexpected error in grading function")
 
 
-def save_grading_output(grading_output: BaseModel, assignment_type: str, student_id: str, raw_dict: dict):
+def save_grading_output(
+    grading_output: BaseModel, assignment_type: str, student_id: str, raw_dict: dict
+):
     """Save grading output as JSON file with timestamp."""
     import os
     from datetime import datetime
@@ -623,11 +642,15 @@ def save_grading_output(grading_output: BaseModel, assignment_type: str, student
         "timestamp": datetime.now().isoformat(),
         "grading_output": raw_dict,
         "model_used": "gemini-pro",
-        "structured_output": grading_output.model_dump() if hasattr(grading_output, 'model_dump') else grading_output.dict()
+        "structured_output": (
+            grading_output.model_dump()
+            if hasattr(grading_output, "model_dump")
+            else grading_output.dict()
+        ),
     }
 
     # Save to JSON file
-    with open(filepath, 'w', encoding='utf-8') as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
     print(f"✅ Grading output saved to: {filepath}")
