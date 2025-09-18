@@ -8,7 +8,9 @@ import fitz  # PyMuPDF for PDF reading
 import time
 
 
-def clone_student_repo(repo_url: str, commit_sha: str = None, student_id: str = None) -> str:
+def clone_student_repo(
+    repo_url: str, commit_sha: str = None, student_id: str = None
+) -> str:
     """Clones a student's repository using SSH with AP-F03 configuration."""
     try:
         # Create a unique directory for this student
@@ -22,6 +24,7 @@ def clone_student_repo(repo_url: str, commit_sha: str = None, student_id: str = 
         # Clean up any existing directory
         if os.path.exists(clone_path):
             import shutil
+
             shutil.rmtree(clone_path)
 
         os.makedirs(clone_path, exist_ok=True)
@@ -39,26 +42,29 @@ Host AP-F03
 
         # Check if AP-F03 config already exists
         if os.path.exists(ssh_config_path):
-            with open(ssh_config_path, 'r') as f:
+            with open(ssh_config_path, "r") as f:
                 ssh_config_content = f.read()
             if "Host AP-F03" not in ssh_config_content:
-                with open(ssh_config_path, 'a') as f:
+                with open(ssh_config_path, "a") as f:
                     f.write(apf03_config)
         else:
             # Create SSH config directory if it doesn't exist
             os.makedirs(os.path.dirname(ssh_config_path), exist_ok=True)
-            with open(ssh_config_path, 'w') as f:
+            with open(ssh_config_path, "w") as f:
                 f.write(apf03_config)
 
         # Set proper permissions on SSH config
         os.chmod(ssh_config_path, 0o600)
 
         # Copy the SSH private key if it exists in the test cases directory
-        ssh_key_source = os.path.join(config.TEST_CASES_DIR, "practice6", "AP-F03-git-ssh", "ssh.txt")
+        ssh_key_source = os.path.join(
+            config.TEST_CASES_DIR, "practice6", "AP-F03-git-ssh", "ssh.txt"
+        )
         ssh_key_dest = os.path.expanduser("~/.ssh/AP-F03")
 
         if os.path.exists(ssh_key_source):
             import shutil
+
             os.makedirs(os.path.dirname(ssh_key_dest), exist_ok=True)
             shutil.copy2(ssh_key_source, ssh_key_dest)
             os.chmod(ssh_key_dest, 0o600)
@@ -82,7 +88,7 @@ Host AP-F03
             clone_command,
             capture_output=True,
             text=True,
-            timeout=120  # 2-minute timeout
+            timeout=120,  # 2-minute timeout
         )
 
         if process.returncode != 0:
@@ -96,7 +102,7 @@ Host AP-F03
                 cwd=clone_path,
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
 
             if process.returncode != 0:
@@ -524,7 +530,9 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
     }
 
     # Check if we have the judge.sh system available
-    judge_script_path = os.path.join(config.TEST_CASES_DIR, "practice6", "APF03-A6-judge (1)", "judge.sh")
+    judge_script_path = os.path.join(
+        config.TEST_CASES_DIR, "practice6", "APF03-A6-judge (1)", "judge.sh"
+    )
     if os.path.exists(judge_script_path):
         # Use the judge.sh system for A6 assignments
         return run_judge_tests(project_path, practice_name, judge_script_path)
@@ -533,7 +541,9 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
     return run_standard_tests(project_path, practice_name, practice_config)
 
 
-def run_judge_tests(project_path: str, practice_name: str, judge_script_path: str) -> dict:
+def run_judge_tests(
+    project_path: str, practice_name: str, judge_script_path: str
+) -> dict:
     """Runs tests using the judge.sh system for A6 assignments."""
     results = {
         "build_successful": False,
@@ -553,16 +563,18 @@ def run_judge_tests(project_path: str, practice_name: str, judge_script_path: st
         # Clean and create temp directory
         if os.path.exists(temp_run_dir):
             import shutil
+
             shutil.rmtree(temp_run_dir)
         os.makedirs(temp_run_dir)
 
         # Copy all source files from student's project
         for root, _, files in os.walk(project_path):
             for file in files:
-                if file.endswith(('.cpp', '.h', '.hpp', 'Makefile', 'makefile')):
+                if file.endswith((".cpp", ".h", ".hpp", "Makefile", "makefile")):
                     src_path = os.path.join(root, file)
                     dst_path = os.path.join(temp_run_dir, file)
                     import shutil
+
                     shutil.copy2(src_path, dst_path)
 
         # Run the judge.sh test command
@@ -572,7 +584,7 @@ def run_judge_tests(project_path: str, practice_name: str, judge_script_path: st
             cwd=judge_dir,
             capture_output=True,
             text=True,
-            timeout=300  # 5-minute timeout
+            timeout=300,  # 5-minute timeout
         )
 
         results["execution_summary"] = process.stdout
@@ -580,7 +592,7 @@ def run_judge_tests(project_path: str, practice_name: str, judge_script_path: st
             results["execution_summary"] += f"\nSTDERR:\n{process.stderr}"
 
         # Parse the output to extract test results
-        output_lines = process.stdout.split('\n')
+        output_lines = process.stdout.split("\n")
         for line in output_lines:
             if "Passed:" in line and "Failed:" in line:
                 # Parse summary line like "Passed: 3 out of 5"
@@ -599,7 +611,9 @@ def run_judge_tests(project_path: str, practice_name: str, judge_script_path: st
             # If parsing failed, assume build was successful if no clear errors
             if "Compiled Successfully" in process.stdout:
                 results["build_successful"] = True
-                results["execution_summary"] += "\n⚠️ Could not parse test results, but compilation was successful."
+                results[
+                    "execution_summary"
+                ] += "\n⚠️ Could not parse test results, but compilation was successful."
 
         return results
 
@@ -611,7 +625,9 @@ def run_judge_tests(project_path: str, practice_name: str, judge_script_path: st
         return results
 
 
-def run_standard_tests(project_path: str, practice_name: str, practice_config: dict) -> dict:
+def run_standard_tests(
+    project_path: str, practice_name: str, practice_config: dict
+) -> dict:
     """Runs tests using the standard test system for non-A6 assignments."""
     results = {
         "build_successful": False,

@@ -8,10 +8,10 @@ CREDENTIALS_FILE = "credentials.json"
 PROJECTS_DIR = "student_projects"
 
 # Path to your test cases directory (organized by practice)
-TEST_CASES_DIR = "/Users/tahamajs/Documents/uni/LLM/Files/CAs/CA4"
+TEST_CASES_DIR = "/Users/tahamajs/Documents/uni/LLM/grading_agent/test_cases"
 
 # Path to practice description PDFs
-PRACTICES_DIR = "practice_descriptions"
+PRACTICES_DIR = "/Users/tahamajs/Documents/uni/LLM/grading_agent/description"
 
 # Clone directory for student repositories
 CLONE_DIR = "cloned_repos"
