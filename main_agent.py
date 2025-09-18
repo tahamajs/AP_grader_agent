@@ -3,12 +3,452 @@ import tools
 import sheets_updater
 import langchain_integration
 import config
+from prompts import get_grading_prompt, get_format_instructions
+from langchain_integration import A6GradingOutput
 
 import argparse
 import os
 import csv
 import json
+import re
 from datetime import datetime
+
+
+# ANSI color codes for better terminal output
+class Colors:
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+    END = "\033[0m"
+
+
+def print_header(text):
+    """Print a formatted header"""
+    print(f"\n{Colors.HEADER}{Colors.BOLD}{'='*60}{Colors.END}")
+    print(f"{Colors.HEADER}{Colors.BOLD}{text.center(60)}{Colors.END}")
+    print(f"{Colors.HEADER}{Colors.BOLD}{'='*60}{Colors.END}")
+
+
+def print_section(title, content="", color=Colors.BLUE):
+    """Print a section with title and content"""
+    print(f"\n{color}{Colors.BOLD}{title}:{Colors.END}")
+    if content:
+        print(f"{color}{content}{Colors.END}")
+
+
+def print_score(score, max_score, label):
+    """Print a score with color coding"""
+    percentage = (score / max_score) * 100 if max_score > 0 else 0
+    if percentage >= 90:
+        color = Colors.GREEN
+    elif percentage >= 70:
+        color = Colors.YELLOW
+    else:
+        color = Colors.RED
+
+    print(
+        f"  {label}: {color}{Colors.BOLD}{score:.1f}/{max_score:.1f}{Colors.END} ({percentage:.1f}%)"
+    )
+
+
+def analyze_test_failures(test_results):
+    """Analyze test results for failures and provide debugging recommendations."""
+    failures = []
+    debug_recommendations = []
+
+    # Parse test results for failures
+    execution_summary = test_results.get("execution_summary", "")
+
+    # Common failure patterns to look for
+    failure_patterns = [
+        (r"FAILED", "Test Failure"),
+        (r"ERROR", "Test Error"),
+        (r"SEGFAULT|Segmentation fault", "Memory Error"),
+        (r"Exception|std::exception", "Exception Error"),
+        (r"Assertion failed", "Assertion Failure"),
+        (r"Timeout", "Timeout Error"),
+        (r"Memory leak", "Memory Leak"),
+    ]
+
+    for pattern, failure_type in failure_patterns:
+        if re.search(pattern, execution_summary, re.IGNORECASE):
+            failures.append(failure_type)
+
+    # Generate debugging recommendations based on failure types
+    if "Memory Error" in failures:
+        debug_recommendations.append(
+            {
+                "type": "Memory Error",
+                "priority": "High",
+                "description": "Segmentation fault or memory corruption detected",
+                "debug_steps": [
+                    "Run with gdb: gdb ./your_program",
+                    "Set breakpoint at suspected location",
+                    "Use valgrind: valgrind --leak-check=full ./your_program",
+                    "Check for null pointer dereferences",
+                    "Verify array bounds and vector access",
+                ],
+                "common_fixes": [
+                    "Add null checks before pointer dereference",
+                    "Use smart pointers (unique_ptr, shared_ptr)",
+                    "Validate array indices before access",
+                    "Check vector bounds with .at() instead of []",
+                ],
+                "code_example": """
+// Before: Unsafe pointer access
+if (ptr->getValue() > 0)
+
+// After: Safe pointer access
+if (ptr != nullptr && ptr->getValue() > 0)
+
+// Before: Unsafe array access
+arr[i] = value;
+
+// After: Safe array access
+if (i >= 0 && i < arr.size()) {
+    arr[i] = value;
+}""",
+            }
+        )
+
+    if "Exception Error" in failures:
+        debug_recommendations.append(
+            {
+                "type": "Exception Error",
+                "priority": "High",
+                "description": "Unhandled exceptions causing program crashes",
+                "debug_steps": [
+                    "Use try-catch blocks around risky operations",
+                    "Check exception propagation in call stack",
+                    "Use gdb to catch unhandled exceptions",
+                    "Review error handling in file I/O operations",
+                ],
+                "common_fixes": [
+                    "Add try-catch blocks around file operations",
+                    "Handle std::exception and derived classes",
+                    "Provide meaningful error messages",
+                    "Use RAII for resource management",
+                ],
+                "code_example": """
+// Before: No exception handling
+std::ifstream file(filename);
+std::string line;
+while (std::getline(file, line)) {
+    process_line(line);
+}
+
+// After: With exception handling
+try {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        process_line(line);
+    }
+} catch (const std::exception& e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+    return false;
+}""",
+            }
+        )
+
+    if "Test Failure" in failures or "Assertion Failure" in failures:
+        debug_recommendations.append(
+            {
+                "type": "Logic Error",
+                "priority": "Medium",
+                "description": "Test assertions failing due to incorrect logic",
+                "debug_steps": [
+                    "Review the failing test case requirements",
+                    "Add debug output to trace execution flow",
+                    "Use debugger to step through the failing code",
+                    "Compare expected vs actual values",
+                    "Check boundary conditions and edge cases",
+                ],
+                "common_fixes": [
+                    "Fix algorithm logic errors",
+                    "Handle edge cases properly",
+                    "Validate input parameters",
+                    "Add boundary checks for calculations",
+                ],
+                "code_example": """
+// Before: Missing boundary check
+int divide(int a, int b) {
+    return a / b;  // Division by zero possible
+}
+
+// After: With boundary check
+int divide(int a, int b) {
+    if (b == 0) {
+        throw std::invalid_argument("Division by zero");
+    }
+    return a / b;
+}
+
+// Before: Array access without bounds check
+for (int i = 0; i <= size; i++) {  // Off-by-one error
+    arr[i] = 0;
+}
+
+// After: Correct bounds checking
+for (int i = 0; i < size; i++) {
+    arr[i] = 0;
+}""",
+            }
+        )
+
+    if "Memory Leak" in failures:
+        debug_recommendations.append(
+            {
+                "type": "Memory Leak",
+                "priority": "Medium",
+                "description": "Memory not properly deallocated",
+                "debug_steps": [
+                    "Use valgrind to detect memory leaks",
+                    "Check for missing delete/delete[] calls",
+                    "Review pointer ownership and lifecycle",
+                    "Use smart pointers where appropriate",
+                ],
+                "common_fixes": [
+                    "Use RAII principle with smart pointers",
+                    "Ensure delete/delete[] for every new/new[]",
+                    "Use std::unique_ptr for exclusive ownership",
+                    "Use std::shared_ptr for shared ownership",
+                ],
+                "code_example": """
+// Before: Manual memory management (leak prone)
+Event* event = new Event();
+events.push_back(event);
+// Forgot to delete - memory leak!
+
+// After: Smart pointer management
+std::unique_ptr<Event> event = std::make_unique<Event>();
+events.push_back(event.get());  // Store raw pointer if needed
+// Automatic cleanup when unique_ptr goes out of scope
+
+// Before: Raw pointer in container
+std::vector<Event*> events;
+events.push_back(new Event());
+
+// After: Smart pointer container
+std::vector<std::unique_ptr<Event>> events;
+events.push_back(std::make_unique<Event>());
+// Automatic cleanup of all elements""",
+            }
+        )
+
+    return failures, debug_recommendations
+
+
+def print_test_failure_analysis(failures, debug_recommendations):
+    """Print detailed test failure analysis and debugging help."""
+    if not failures:
+        print(f"\n{Colors.GREEN}✅ NO TEST FAILURES DETECTED{Colors.END}")
+        print(f"{Colors.GREEN}All tests are passing! Great job!{Colors.END}")
+        return
+
+    print(f"\n{Colors.RED}❌ TEST FAILURES DETECTED{Colors.END}")
+    print(f"{Colors.RED}{'='*60}{Colors.END}")
+
+    print(f"\n{Colors.YELLOW}🔍 FAILURE TYPES IDENTIFIED:{Colors.END}")
+    for failure in failures:
+        print(f"  {Colors.RED}• {failure}{Colors.END}")
+
+    print(f"\n{Colors.BLUE}🛠️ DEBUGGING RECOMMENDATIONS:{Colors.END}")
+    print(f"{Colors.BLUE}{'-'*60}{Colors.END}")
+
+    for i, rec in enumerate(debug_recommendations, 1):
+        priority_color = (
+            Colors.RED
+            if rec["priority"] == "High"
+            else Colors.YELLOW if rec["priority"] == "Medium" else Colors.GREEN
+        )
+        priority_icon = (
+            "🔴"
+            if rec["priority"] == "High"
+            else "🟡" if rec["priority"] == "Medium" else "🟢"
+        )
+
+        print(
+            f"\n{priority_color}{Colors.BOLD}{i}. {rec['type']} ({rec['priority']} Priority){Colors.END}"
+        )
+        print(f"  {Colors.BLUE}📝 {rec['description']}{Colors.END}")
+
+        print(f"\n  {Colors.GREEN}🔧 DEBUG STEPS:{Colors.END}")
+        for step in rec["debug_steps"]:
+            print(f"    {Colors.BLUE}• {step}{Colors.END}")
+
+        print(f"\n  {Colors.GREEN}💡 COMMON FIXES:{Colors.END}")
+        for fix in rec["common_fixes"]:
+            print(f"    {Colors.BLUE}• {fix}{Colors.END}")
+
+        if rec.get("code_example"):
+            print(f"\n  {Colors.GREEN}📋 CODE EXAMPLE:{Colors.END}")
+            print(f"  {Colors.BLUE}{rec['code_example'].strip()}{Colors.END}")
+
+
+def print_debugging_workflow():
+    """Print a comprehensive debugging workflow."""
+    print(
+        f"\n{Colors.BOLD}{Colors.BLUE}🔧 COMPREHENSIVE DEBUGGING WORKFLOW:{Colors.END}"
+    )
+    print(f"{Colors.BLUE}{'-'*60}{Colors.END}")
+
+    workflow_steps = [
+        (
+            "1. Reproduce the Issue",
+            "Run the failing test in isolation to confirm the problem",
+        ),
+        (
+            "2. Gather Information",
+            "Collect stack traces, error messages, and test input data",
+        ),
+        (
+            "3. Isolate the Problem",
+            "Use debugger to narrow down the exact location of failure",
+        ),
+        (
+            "4. Analyze Root Cause",
+            "Determine why the code is failing (logic, memory, I/O, etc.)",
+        ),
+        ("5. Implement Fix", "Apply the appropriate solution based on the analysis"),
+        ("6. Test the Fix", "Run the test again to verify the fix works"),
+        (
+            "7. Add Regression Test",
+            "Create additional tests to prevent this issue in the future",
+        ),
+        ("8. Code Review", "Have someone else review your fix for correctness"),
+    ]
+
+    for step, description in workflow_steps:
+        print(
+            f"  {Colors.BOLD}{step}:{Colors.END} {Colors.BLUE}{description}{Colors.END}"
+        )
+
+    print(f"\n{Colors.BOLD}{Colors.GREEN}🛠️ USEFUL DEBUGGING TOOLS:{Colors.END}")
+    tools_list = [
+        ("gdb", "GNU Debugger - step through code, inspect variables"),
+        ("valgrind", "Memory error detector and profiler"),
+        ("cppcheck", "Static analysis tool for C/C++ code"),
+        (
+            "AddressSanitizer",
+            "Fast memory error detector (compile with -fsanitize=address)",
+        ),
+        ("ThreadSanitizer", "Data race detector (compile with -fsanitize=thread)"),
+    ]
+
+    for tool, description in tools_list:
+        print(
+            f"  {Colors.BOLD}{tool}:{Colors.END} {Colors.BLUE}{description}{Colors.END}"
+        )
+
+
+def get_test_failure_impact(failures):
+    """Calculate the impact of test failures on grading."""
+    if not failures:
+        return 1.0, "No test failures - full credit"
+
+    failure_count = len(failures)
+    has_critical = any(f in ["Memory Error", "Exception Error"] for f in failures)
+
+    if has_critical:
+        if failure_count >= 3:
+            return 0.2, "Critical failures with multiple issues - severe impact"
+        else:
+            return 0.4, "Critical failures detected - significant impact"
+    else:
+        if failure_count >= 4:
+            return 0.5, "Multiple logic failures - moderate impact"
+        elif failure_count >= 2:
+            return 0.7, "Some test failures - minor impact"
+
+
+def print_recommendations(comment):
+    """Print recommendations with better formatting"""
+    if not comment or comment.strip() == "":
+        return
+
+    print(f"\n{Colors.YELLOW}{Colors.BOLD}📋 DETAILED RECOMMENDATIONS:{Colors.END}")
+    print(f"{Colors.YELLOW}{'-'*60}{Colors.END}")
+
+    # Split comment into sections
+    lines = comment.split("\n")
+    current_section = ""
+    in_code_block = False
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        # Check for section headers
+        if line.startswith("**") and line.endswith("**"):
+            section_title = line.strip("*")
+            if "Priority" in section_title:
+                if "High" in section_title:
+                    color = Colors.RED
+                elif "Medium" in section_title:
+                    color = Colors.YELLOW
+                else:
+                    color = Colors.GREEN
+                print(f"\n{color}{Colors.BOLD}⚡ {section_title}:{Colors.END}")
+            else:
+                print(f"\n{Colors.BLUE}{Colors.BOLD}📌 {section_title}:{Colors.END}")
+        elif (
+            line.startswith("- **")
+            or line.startswith("**High")
+            or line.startswith("**Medium")
+            or line.startswith("**Low")
+        ):
+            # Priority items
+            if "**High" in line:
+                color = Colors.RED
+                icon = "🔴"
+            elif "**Medium" in line:
+                color = Colors.YELLOW
+                icon = "🟡"
+            else:
+                color = Colors.GREEN
+                icon = "🟢"
+            print(f"  {icon} {color}{line.strip('*')}{Colors.END}")
+        elif line.startswith("- ") and (
+            "Priority" in line or "Why" in line or "How" in line
+        ):
+            print(f"    {Colors.BLUE}• {line[2:]}{Colors.END}")
+        elif line.startswith("**Before**") or line.startswith("**After**"):
+            if "**Before**" in line:
+                print(
+                    f"    {Colors.RED}❌ BEFORE: {line.replace('**Before**:', '').replace('**Before**', '').strip()}{Colors.END}"
+                )
+            else:
+                print(
+                    f"    {Colors.GREEN}✅ AFTER: {line.replace('**After**:', '').replace('**After**', '').strip()}{Colors.END}"
+                )
+        elif line.startswith("* **"):
+            print(f"  {Colors.BLUE}• {line[4:].strip('*')}{Colors.END}")
+        else:
+            # Regular content
+            if len(line) > 80:
+                # Wrap long lines
+                words = line.split()
+                current_line = ""
+                for word in words:
+                    if len(current_line + " " + word) > 80:
+                        print(f"  {Colors.BLUE}{current_line}{Colors.END}")
+                        current_line = word
+                    else:
+                        current_line += " " + word if current_line else word
+                if current_line:
+                    print(f"  {Colors.BLUE}{current_line}{Colors.END}")
+            else:
+                print(f"  {Colors.BLUE}{line}{Colors.END}")
 
 
 def _ensure_dir(path: str):
@@ -431,16 +871,47 @@ def calculate_a6_scores(llm_grades, test_results):
 
 def _grade_student_flow(student_id, repo_url, assignment_type):
     """Run full grading pipeline for a single student and return summary paths."""
-    print(f"\n--- Processing Student: {student_id} (Assignment: {assignment_type}) ---")
+    print_header(f"🎯 GRADING STUDENT: {student_id} - {assignment_type}")
 
     project_path = tools.clone_student_repo(repo_url, student_id=student_id)
     if not project_path:
+        print(f"{Colors.RED}❌ Failed to clone repository for {student_id}{Colors.END}")
         return None
 
+    print_section("📋 RUNNING TESTS", "", Colors.GREEN)
     test_results = tools.build_and_run_tests(project_path, assignment_type)
+    print(f"✅ Tests completed: {test_results['execution_summary']}")
+
+    print_section("🔬 STATIC ANALYSIS", "", Colors.GREEN)
     analysis_report = tools.run_static_analysis(project_path)
+    print("✅ Static analysis completed")
+
+    print_section("📖 READING SOURCE CODE", "", Colors.GREEN)
     source_code = tools.read_project_files(project_path)
+    print(f"✅ Source code read: {len(source_code):,} characters")
+
+    print_section("🧠 CODE QUALITY ANALYSIS", "", Colors.GREEN)
     code_analysis = tools.analyze_code_quality(source_code)
+    print("✅ Code analysis completed")
+
+    # Test failure analysis and debugging help
+    print_section("🔍 ANALYZING TEST FAILURES", "", Colors.GREEN)
+    failures, debug_recommendations = analyze_test_failures(test_results)
+    print(f"✅ Test failure analysis completed")
+
+    # Display test failure analysis
+    print_test_failure_analysis(failures, debug_recommendations)
+
+    # Show debugging workflow if there are failures
+    if failures:
+        print_debugging_workflow()
+
+    # Calculate test failure impact
+    failure_multiplier, failure_description = get_test_failure_impact(failures)
+    print(f"\n{Colors.BOLD}📊 TEST FAILURE IMPACT:{Colors.END}")
+    print(
+        f"  {Colors.BLUE}Multiplier: {failure_multiplier:.1f}x ({failure_description}){Colors.END}"
+    )
 
     assignment_config = config.PRACTICE_CONFIGS[assignment_type]
     assignment_desc = assignment_config.get("name", f"Assignment {assignment_type}")
@@ -461,44 +932,191 @@ CODE ANALYSIS SUMMARY:
 - Comment Lines: {code_analysis['comment_lines']}
 """
 
-    print("Invoking AI for qualitative grading...")
-    llm_response = langchain_integration.grade_student_project(
+    print_section("🤖 GENERATING GRADING PROMPT", "", Colors.GREEN)
+    grading_prompt = get_grading_prompt(
+        assignment_type=assignment_type,
+        practice_description=enhanced_desc,
         test_results=test_results["execution_summary"],
         static_analysis=analysis_report,
         source_code=source_code,
-        practice_description=enhanced_desc,
-        assignment_type=assignment_type,
-        student_id=student_id,
     )
 
-    if assignment_type == "A6":
-        final_grade_data = calculate_a6_scores(llm_response.model_dump(), test_results)
-        sheets_updater.update_multi_phase_grades(
-            student_id, final_grade_data, assignment_type
-        )
-    else:
-        final_grade_data = calculate_scores(
-            llm_response.model_dump(), test_results, assignment_type
-        )
-        sheets_updater.update_student_grade(
-            student_id, final_grade_data, assignment_type
+    format_instructions = get_format_instructions("A6", A6GradingOutput)
+
+    print("✅ Enhanced grading prompt generated")
+    print(f"📏 Prompt length: {len(grading_prompt):,} characters")
+
+    print_section("🎯 RUNNING AI GRADING", "", Colors.GREEN)
+    try:
+        llm_response = langchain_integration.grade_student_project(
+            test_results=test_results["execution_summary"],
+            static_analysis=analysis_report,
+            source_code=source_code,
+            practice_description=enhanced_desc,
+            assignment_type=assignment_type,
+            student_id=student_id,
         )
 
-    # Save full feedback
-    csv_path, details_path = save_full_feedback(
-        student_id,
-        assignment_type,
-        final_grade_data,
-        llm_response.model_dump(),
-        test_results,
-        analysis_report,
-        source_code,
-    )
+        print("✅ Grading completed successfully!")
 
-    print(
-        f"✅ Student {student_id} processed successfully! Saved feedback to: {details_path}"
-    )
-    return {"csv": csv_path, "details": details_path}
+        # Display results
+        grading_data = llm_response.model_dump()
+
+        print_header("📊 GRADING RESULTS")
+
+        # Phase 1 Scores
+        print_section("🏗️ PHASE 1 - CORE FEATURES (91 points)", "", Colors.BOLD)
+        phase1_total = 0
+        phase1_scores = [
+            ("Login/SignUp", grading_data.get("p1_login_signup", 0), 2),
+            ("Normal Event", grading_data.get("p1_normal_event", 0), 2),
+            ("Periodic Event", grading_data.get("p1_periodic_event", 0), 2),
+            ("Task Management", grading_data.get("p1_task", 0), 2),
+            ("OOP Design", grading_data.get("p1_object_oriented", 0), 2),
+            ("No God Class", grading_data.get("p1_no_god_class", 0), 1),
+            ("Polymorphism", grading_data.get("p1_polymorphism", 0), 2),
+            ("No Downcast", grading_data.get("p1_no_downcast", 0), 1),
+            ("Encapsulation", grading_data.get("p1_encapsulation", 0), 2),
+            ("I/O Separation", grading_data.get("p1_separate_io", 0), 1),
+            ("Exception Handling", grading_data.get("p1_exception_handling", 0), 2),
+            ("No Duplication", grading_data.get("p1_no_duplication", 0), 2),
+            ("Indentation", grading_data.get("p1_indentation", 0), 1),
+            ("Magic Values", grading_data.get("p1_magic_values", 0), 1),
+            ("Naming", grading_data.get("p1_naming", 0), 3),
+            ("Consistency", grading_data.get("p1_consistency", 0), 3),
+            ("File Organization", grading_data.get("p1_break_files", 0), 1),
+            ("Makefile", grading_data.get("p1_makefile", 0), 1),
+            ("Test Cases", grading_data.get("p1_test_cases", 0), 30),
+        ]
+
+        for label, score, max_score in phase1_scores:
+            print_score(score, max_score, label)
+            phase1_total += score
+
+        print(
+            f"\n  {Colors.BOLD}Phase 1 Total: {Colors.GREEN}{phase1_total:.1f}/{91.0}{Colors.END} ({(phase1_total/91)*100:.1f}%)"
+        )
+
+        # Phase 2 Scores
+        print_section("⚡ PHASE 2 - ADVANCED FEATURES (15 points)", "", Colors.BOLD)
+        phase2_total = 0
+        phase2_scores = [
+            ("Joint Events", grading_data.get("p2_add_joint_event", 0), 3),
+            ("Joint Requests", grading_data.get("p2_see_joint_requests", 0), 3),
+            ("Accept/Reject", grading_data.get("p2_reject_confirm", 0), 3),
+            ("Report Command", grading_data.get("p2_change_report_cmd", 0), 3),
+            ("Polymorphism", grading_data.get("p2_polymorphism", 0), 2),
+            ("No Downcast", grading_data.get("p2_no_downcast", 0), 1),
+        ]
+
+        for label, score, max_score in phase2_scores:
+            print_score(score, max_score, label)
+            phase2_total += score
+
+        print(
+            f"\n  {Colors.BOLD}Phase 2 Total: {Colors.YELLOW}{phase2_total:.1f}/15.0{Colors.END} ({(phase2_total/15)*100:.1f}%)"
+        )
+
+        # Phase 3 Scores
+        print_section("🌐 PHASE 3 - WEB INTERFACE (70 points)", "", Colors.BOLD)
+        phase3_total = 0
+        phase3_scores = [
+            ("Signup/Login Pages", grading_data.get("p3_signup_page", 0), 10),
+            ("Home/Dashboard", grading_data.get("p3_home_page", 0), 10),
+            ("Task Management UI", grading_data.get("p3_add_task", 0), 15),
+            ("Event Management UI", grading_data.get("p3_add_events", 0), 15),
+            ("Joint Events UI", grading_data.get("p3_get_join_events", 0), 10),
+            ("Report Generation", grading_data.get("p3_report", 0), 5),
+            ("Clean Coding", grading_data.get("p3_clean_coding", 0), 5),
+        ]
+
+        for label, score, max_score in phase3_scores:
+            print_score(score, max_score, label)
+            phase3_total += score
+
+        print(
+            f"\n  {Colors.BOLD}Phase 3 Total: {Colors.BLUE}{phase3_total:.1f}/70.0{Colors.END} ({(phase3_total/70)*100:.1f}%)"
+        )
+
+        # Overall Total
+        total_score = phase1_total + phase2_total + phase3_total
+        max_total = 91 + 15 + 70
+
+        print_header("🏆 FINAL GRADE SUMMARY")
+        print(
+            f"  {Colors.BOLD}Overall Score: {Colors.GREEN}{total_score:.1f}/{max_total:.1f}{Colors.END}"
+        )
+        print(
+            f"  {Colors.BOLD}Percentage: {Colors.GREEN}{Colors.BOLD}{(total_score/max_total)*100:.1f}%{Colors.END}"
+        )
+
+        # Letter grade
+        percentage = (total_score / max_total) * 100
+        if percentage >= 90:
+            grade = "A"
+            color = Colors.GREEN
+        elif percentage >= 80:
+            grade = "B"
+            color = Colors.YELLOW
+        elif percentage >= 70:
+            grade = "C"
+            color = Colors.BLUE
+        elif percentage >= 60:
+            grade = "D"
+            color = Colors.YELLOW
+        else:
+            grade = "F"
+            color = Colors.RED
+
+        print(f"  {Colors.BOLD}Letter Grade: {color}{Colors.BOLD}{grade}{Colors.END}")
+
+        # Print recommendations
+        comment = grading_data.get("generated_comment", "")
+        if comment:
+            print_recommendations(comment)
+
+        print_header("✅ GRADING COMPLETE")
+        print(
+            f"{Colors.GREEN}Enhanced grading system successfully completed for {student_id}!{Colors.END}"
+        )
+        print(
+            f"{Colors.BLUE}All assignments (A1-A6) now have comprehensive recommendations.{Colors.END}"
+        )
+
+        if assignment_type == "A6":
+            final_grade_data = calculate_a6_scores(
+                llm_response.model_dump(), test_results
+            )
+            sheets_updater.update_multi_phase_grades(
+                student_id, final_grade_data, assignment_type
+            )
+        else:
+            final_grade_data = calculate_scores(
+                llm_response.model_dump(), test_results, assignment_type
+            )
+            sheets_updater.update_student_grade(
+                student_id, final_grade_data, assignment_type
+            )
+
+        # Save full feedback
+        csv_path, details_path = save_full_feedback(
+            student_id,
+            assignment_type,
+            final_grade_data,
+            llm_response.model_dump(),
+            test_results,
+            analysis_report,
+            source_code,
+        )
+
+        print(
+            f"✅ Student {student_id} processed successfully! Saved feedback to: {details_path}"
+        )
+        return {"csv": csv_path, "details": details_path}
+
+    except Exception as e:
+        print(f"{Colors.RED}❌ Grading failed: {e}{Colors.END}")
+        return None
 
 
 def run_cli():
