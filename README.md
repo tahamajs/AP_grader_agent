@@ -23,6 +23,7 @@ This agent automates the grading of C++ programming assignments for an Advanced 
 grading_agent/
 ├── .gitignore                  # Git ignore rules for logs, credentials, etc.
 ├── .gitattributes             # Git attributes for line endings and binary files
+├── LICENSE                     # MIT License
 ├── config.py                    # Configuration settings
 ├── main_agent.py               # Main grading workflow
 ├── langchain_integration.py    # Gemini API integration
@@ -419,4 +420,4 @@ Use the shared parser in `prompts.py` to validate and load LLM responses. If you
 
 ## License
 
-This project is part of the Advanced Programming course grading system.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
