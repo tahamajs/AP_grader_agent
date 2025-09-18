@@ -1,0 +1,5 @@
+POST login ? username "amin" password "aqashir"
+POST signup ? username "amin" password "aqashir"
+POST login ? username "amin" password "aqapir"
+POST login ? username "amin" password "aqashir"
+POST login ? username "mehdi" password "mn1234"

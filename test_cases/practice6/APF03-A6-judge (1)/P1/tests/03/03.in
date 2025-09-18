@@ -1,0 +1,15 @@
+POST signup ? username "low_mist" password "meow"
+POST logout ?
+POST signup ? username "cool_man" password "1234"
+POST logout ?
+POST signup ? username "amir_akbar" password "1382"
+GET districts ?
+POST logout ?
+POST login ? username "cool_man" password "1234"
+GET districts ? district "SatarKhan"
+GET districts ? district "Meydan Sanat"
+POST logout ?
+POST login ? username "low_mist" password "meow"
+GET districts ?
+GET districts ? district "Mirdamad"
+POST logout ?

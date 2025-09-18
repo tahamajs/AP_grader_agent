@@ -1,0 +1,21 @@
+restaurant_name,total_price_discount,first_order_discount,food_discount
+rouhi,none,percent;20,none
+shila1,amount;300;120,none,amount;morgh sookhari:100|percent;pitza:40
+khorsand,percent;200;10,percent;10,percent;ghalyeh mahi:50|amount;mahi:100
+sib,percent;300;30,none,amount;burger:100|percent;pitza:50
+fish & chips,percent;300;10,none,amount;mahi:10|amount;meigo:20
+lidoma,amount;500;10,amount;40,amount;cholo morgh:80|percent;kabab koobideh:50
+niko sefat,percent;300;30,amount;10,amount;ash:10|percent;halim:10
+shila2,percent;200;30,amount;50,amount;burger:60
+yas,amount;230;40,amount;40,percent;kabab koobideh:40
+shiraz,none,none,none
+orkideh,amount;200;30,none,amount;joojeh:20|amount;kabab koobideh:60
+martin,percent;500;30,amount;50,amount;hotdog:100
+hossein garden,none,amount;60,amount;kabab koobideh:70
+burger land,percent;500;30,amount;50,percent;burger:10|amount;hotdog:100|amount;pitza:20
+shila3,percent;500;30,amount;100,amount;burger:100
+gardino,percent;440;30,amount;50,none
+eram,none,none,none
+majid,percent;300;30,amount;50,amount;burger:100
+tehroonchi,percent;430;30,amount;40,none
+hani,percent;200;30,amount;40,amount;joojeh:20|amount;kabab koobideh:50

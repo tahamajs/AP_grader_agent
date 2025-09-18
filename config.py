@@ -1,7 +1,7 @@
 # config.py
 
 # Google Sheets Configuration
-SHEET_NAME = "Advanced Programming Grading"
+SHEET_NAME = "1swgtRM3awVelITJdgJC9cc6eUIsBvd5GKq1YhwVFGEg"
 CREDENTIALS_FILE = "credentials.json"
 
 # Local directory to store cloned student projects
@@ -334,6 +334,60 @@ PRACTICE_CONFIGS = {
         },
         "penalties": {
             "grace": 1,
+            "late_delivery": -10,
+            "raw_late": 4,
+            "final_late": 0.2,
+            "upload_structure": 4,
+            "penalty": 0.15,
+        },
+    },
+    "A2": {
+        "name": "Assignment 2 - Data Handling and Design",
+        "build_command": "make",
+        "executable_name": "student_program",
+        "test_cases_dir": "test_cases/A2",
+        "grading_criteria": {
+            "data": {
+                "weight": 15,
+                "sub_criteria": {
+                    "reading_input": 5,
+                    "storing_information_data_structures": 10,
+                },
+            },
+            "design": {
+                "weight": 28,
+                "sub_criteria": {
+                    "separate_io_from_logic": 8,
+                    "no_godly_main": 10,
+                    "small_functions_single_responsibility": 10,
+                },
+            },
+            "clean_coding": {
+                "weight": 28,
+                "sub_criteria": {
+                    "no_duplication": 7,
+                    "magic_values_no_global_vars": 7,
+                    "naming": 7,
+                    "consistency": 7,
+                },
+            },
+            "git": {
+                "weight": 7,
+                "sub_criteria": {
+                    "commit_messages": 4,
+                    "standard_commits": 3,
+                },
+            },
+            "correctness": {
+                "weight": 30,
+                "sub_criteria": {
+                    "test_cases": 20,
+                },
+            },
+        },
+        "penalties": {
+            "no_goto": -5,
+            "no_comment": -2,
             "late_delivery": -10,
             "raw_late": 4,
             "final_late": 0.2,

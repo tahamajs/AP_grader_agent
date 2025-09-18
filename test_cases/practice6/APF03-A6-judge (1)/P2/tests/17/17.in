@@ -1,0 +1,7 @@
+GET reserves ? restaurant_name "yas" reserve_id "1"
+POST signup ? username "amir" password "rfz82"
+POST increase_budget ? amount 1000
+GET reserves ? restaurant_name "yas" reserve_id "1"
+POST reserve ? restaurant_name "yas" table_id "3" start_time "13" end_time "15" foods "joojeh,kabab koobideh"
+GET reserves ? restaurant_name "yas" reserve_id "2"
+GET reserves ? restaurant_name "yas" reserve_id "1"

@@ -1,0 +1,5 @@
+POST reserve ? restaurant_name "lidoma" table_id "1" start_time "15" end_time "17" foods "joojeh"
+POST signup ? username "amir" password "rfz82"
+POST reserve ? restaurant_name "ladoma" table_id "1" start_time "15" end_time "17" foods "joojeh"
+POST increase_budget ? amount 1000
+POST reserve ? restaurant_name "lidoma" table_id "1" start_time "15" end_time "17" foods "joojeh"

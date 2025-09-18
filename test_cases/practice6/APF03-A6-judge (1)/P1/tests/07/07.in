@@ -1,0 +1,26 @@
+POST signup ? username "low_mist" password "meow"
+POST logout ?
+POST signup ? username "cool_man" password "1234"
+POST logout ?
+POST signup ? username "amir_akbar" password "1382"
+POST reserve ? restaurant_name "Na Koja Abad" table_id "3" start_time "16" end_time "17" ‌foods "pitza,burger"
+POST reserve ? restaurant_name "sib" table_id "3" start_time "16" end_time "17" ‌foods "pitza,burger"
+POST reserve ? restaurant_name "sib" table_id "2" start_time "16" end_time "19" foods "pitza,burger"
+POST logout ?
+POST login ? username "cool_man" password "1234"
+POST logout ?
+POST login ? username "low_mist" password "meow"
+POST reserve ? restaurant_name "sib" table_id "2" start_time "18" end_time "21" foods "pitza,burger"
+POST reserve ? restaurant_name "sib" table_id "2" start_time "19" end_time "21" foods "pitza,pitza,burger"
+POST reserve ? restaurant_name "niko sefat" table_id "3" start_time "19" end_time "21"
+POST logout ?
+POST login ? username "cool_man" password "1234"
+POST reserve ? restaurant_name "hani" table_id "1" start_time "18" end_time "21" foods "pitza,burger"
+POST reserve ? restaurant_name "hani" table_id "1" start_time "18" end_time "21" foods "joojeh,joojeh,cholo morgh"
+POST logout ?
+POST login ? username "amir_akbar" password "1382"
+POST reserve ? restaurant_name "burger land" table_id "1" start_time "15" end_time "17"
+POST reserve ? restaurant_name "burger land" table_id "1" start_time "14" end_time "15"
+POST reserve ? restaurant_name "burger land" table_id "1" start_time "14" end_time "15"
+GET restaurant_detail ? restaurant_name "sib"
+POST logout ?

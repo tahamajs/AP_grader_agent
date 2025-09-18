@@ -1,0 +1,34 @@
+OK
+OK
+OK
+OK
+OK
+Empty
+Reserve ID: 1
+Table 2 for 16 to 19 in sib
+Price: 560
+Bad Request
+OK
+OK
+OK
+OK
+Reserve ID: 2
+Table 2 for 19 to 21 in sib
+Price: 910
+Permission Denied
+OK
+OK
+Reserve ID: 1
+Table 1 for 18 to 21 in hani
+Price: 760
+Not Found
+1: hani 1 18-21 cholo morgh(1) joojeh(2)
+OK
+OK
+Reserve ID: 1
+Table 1 for 14 to 15 in burger land
+Price: 0
+1: burger land 1 14-15
+1: sib 2 16-19 burger(1) pitza(1)
+1: sib 2 16-19 burger(1) pitza(1)
+OK

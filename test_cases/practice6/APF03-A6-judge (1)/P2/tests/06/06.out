@@ -1,0 +1,82 @@
+OK
+OK
+OK
+OK
+OK
+OK
+Reserve ID: 1
+Table 2 for 16 to 19 in sib
+Original Price: 560
+Order Amount Discount: 0
+Total ItemSpecific Discount: 275
+First Order Discount: 0
+Total Discount: 275
+Total Price: 285
+Not Found
+Not Found
+OK
+OK
+OK
+OK
+OK
+Reserve ID: 2
+Table 2 for 19 to 21 in sib
+Original Price: 910
+Order Amount Discount: 138
+Total ItemSpecific Discount: 450
+First Order Discount: 0
+Total Discount: 588
+Total Price: 322
+Bad Request
+OK
+OK
+OK
+Reserve ID: 1
+Table 1 for 18 to 21 in hani
+Original Price: 760
+Order Amount Discount: 204
+Total ItemSpecific Discount: 40
+First Order Discount: 40
+Total Discount: 284
+Total Price: 476
+724
+Reserve ID: 1
+Table 3 for 12 to 15 in shiraz
+Original Price: 490
+Order Amount Discount: 0
+Total ItemSpecific Discount: 0
+First Order Discount: 0
+Total Discount: 0
+Total Price: 490
+234
+OK
+528
+OK
+OK
+Reserve ID: 1
+Table 1 for 14 to 15 in burger land
+Original Price: 0
+Order Amount Discount: 0
+Total ItemSpecific Discount: 0
+First Order Discount: 0
+Total Discount: 0
+Total Price: 0
+Name: sib
+District: Meydan Sanat
+Time: 9-23
+Menu: burger(210), hotdog(205), pitza(350)
+1:
+2: (16-19), (19-21)
+Order Amount Discount: percentage, 300, 30
+Item Specific Discount: burger(amount: 100), pitza(percentage: 50)
+OK
+Name: sib
+District: Meydan Sanat
+Time: 9-23
+Menu: burger(210), hotdog(205), pitza(350)
+1:
+2: (19-21)
+Order Amount Discount: percentage, 300, 30
+Item Specific Discount: burger(amount: 100), pitza(percentage: 50)
+Permission Denied
+OK

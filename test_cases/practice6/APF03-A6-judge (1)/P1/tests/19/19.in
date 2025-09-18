@@ -1,0 +1,15 @@
+POST signup ? username "sina" password "sipamo"
+POST signup ? username "mehdi" password "mn1234"
+POST login ? username "sina" password "sipamo"
+GET reserves ?
+GET reserves ? reserve_id "1"
+POST reserve ? restaurant_name "niko sefat" table_id "2" start_time "7" end_time "9"
+POST reserve ? restaurant_name "orkideh" table_id "5" start_time "14" end_time "16" foods "kabab koobideh,kabab koobideh"
+GET reserves ? restaurant_name "orkideh" reserve_id "2"
+GET reserves ?
+GET reserves ? restaurant_name "niko sefat"
+POST reserve ? restaurant_name "orkideh" table_id "3" start_time "17" end_time "19" foods "joojeh,joojeh,kabab koobideh"
+GET reserves ? restaurant_name "orkideh" reserve_id "2"
+POST logout ?
+POST signup ? username "mehdi" password "mn1234"
+GET reserves ? restaurant_name "orkideh" reserve_id "2"

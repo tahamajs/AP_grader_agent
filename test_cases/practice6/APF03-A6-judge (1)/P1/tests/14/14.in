@@ -1,0 +1,6 @@
+POST signup ? username "sina" password "sipamo"
+POST login ? username "sina" password "sipamo"
+GET districts ?
+GET districts ? district "sayad"
+GeT districts ? district "Pirouzi"
+GET districts ? district "Pirouzi"

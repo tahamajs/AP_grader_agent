@@ -1,0 +1,12 @@
+POST logout ?
+POST signup ? username "low_mist" password "meow"
+POST login ? username "low_mist" password "meow"
+POST logout ?
+POST signup ? username "cool_man" password "1234"
+POST logout ?
+POST login ? username "cool_man" password "4321"
+POST login ? username "cool_man" password "1234"
+POST logout ?
+POST login ? username "good_man" password "password"
+POST signup ? username "low_mist" password "meow"
+POST login ? username "low_mist" password "meow"

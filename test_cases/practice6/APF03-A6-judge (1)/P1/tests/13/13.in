@@ -1,0 +1,7 @@
+POST logout ?
+PoST logout ?
+POST log_out ?
+POST signup ? username "babak" password "kabab"
+POST logout ?
+POST login ? username "babak" password "kabab"
+POST logout ?

@@ -1,0 +1,6 @@
+POST signup ? username "amir" password "rfz"
+POST login ? username "amir" password "rfz"
+PUt my_district ? district "aliabad"
+PUT mydistrict ? district "aliabad"
+PUT my_district ? district "aliabad"
+PUT my_district ? district "Karegar"

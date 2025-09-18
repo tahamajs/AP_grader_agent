@@ -1,0 +1,17 @@
+POST signup ? username "low_mist" password "meow"
+POST increase_budget ? amount -15000
+POST increase_budget ? amount 15000
+POST logout ?
+POST signup ? username "cool_man" password "1234"
+POST increase_budget ? amount money
+POST logout ?
+POST login ? username "cool_man" password "1234"
+POST increase_budget ? amount gold
+POST logout ?
+POST login ? username "good_man" password "password"
+POST login ? username "low_mist" password "meow"
+POST increase_budget ? amount -100
+POST increase_budget ? amount 300
+POST increase_budget ? amount 400
+POST increase_budget ? amount -500
+POST logout ?

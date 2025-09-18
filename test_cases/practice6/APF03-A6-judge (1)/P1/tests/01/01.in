@@ -1,0 +1,8 @@
+POST login ? username "low_mist" password "meoow"
+POST signup ? username "low_mist" password "meow"
+POST signup ? username "amir_akbar" password "1382"
+POST logout ?
+POST login ? username "low_mist" password "meoow"
+POST login ? username "low_mist" password "meow"
+POST logout ?
+POST login ? username "low_mist" password "meoow"

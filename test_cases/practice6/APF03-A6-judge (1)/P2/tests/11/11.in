@@ -1,0 +1,7 @@
+POST signup ? username "ali" password "kabab"
+POsT increase_budget ? amount 15000
+POST increasebudget ? amount 1234
+POST increase_budget ? amount lala
+POST increase_budget ? amount 15000
+POST logout ?
+POST increase_budget ? amount 1999

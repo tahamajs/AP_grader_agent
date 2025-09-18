@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+
+CONFIG_FILE="./config.sh"
+
+source $CONFIG_FILE
+
+function error() {
+    echo -e "${RED}[ERROR] ${NC}$1"
+    exit
+}
+
+function info() {
+    echo -e "${GREEN}[INFO] ${NC}$1"
+}
+
+function check_dependency() {
+    dep=$1
+    if ! command -v $dep &>/dev/null; then
+        error "$dep could not be found"
+        exit
+    fi
+}
+
+function assure_repo_exists() {
+    repo=$1
+    if ! git ls-remote $repo &>/dev/null; then
+        error "$repo does not exist or is not accessible"
+        exit
+    fi
+}
+
+function assure_commit_exists() {
+    if ! git cat-file -e $1 &>/dev/null; then
+        error "$1 commit does not exist"
+        exit
+    fi
+}
+
+function clone_and_checkout() {
+    repo=$1
+    commit=$2
+    dir=$3
+    info "Cloning $repo to $dir and checking out $commit"
+    assure_repo_exists $repo
+    rm -rf $dir
+    git clone $repo $dir
+    pushd $dir >/dev/null
+    assure_commit_exists $commit
+    git config --local advice.detachedHead false
+    git checkout $commit
+    popd >/dev/null
+}
+
+function https_to_ssh() {
+    url=$1
+    ssh_url=${url/https:\/\/github.com\//git@AP-F03:}
+    echo $ssh_url
+}
+
+function get_user_statistic() {
+    info "Getting user statistic"
+    git log --format='%aN' | sort | uniq -c | while read count author; do
+        echo "Author: $author"
+        echo "Commits: $count"
+        echo "Lines added/removed:"
+        git log --author="$author" --pretty=tformat: --numstat | awk '/(\.cpp|\.hpp|\.c|\.cc|\.h|\.hh|makefile|Makefile)$/ { add += $1; subs += $2; loc += $1 + $2 } END { printf "Added: %s\nRemoved: %s\nTotal: %s\n", add, subs, loc }'
+        echo "---------------------------------------------"
+    done
+}
+
+function get_commit_delay() {
+    current_commit_date=$(git show -s --format=%ci)
+    current_commit_timestamp=$(date -d "$current_commit_date" +%s)
+    deadline_timestamp=$(date -d "$DEADLINE" +%s)
+    delay=$((current_commit_timestamp - deadline_timestamp))
+    if ((delay < 0)); then
+        echo 0
+    else
+        delay_in_days=$(((delay + 86399) / 86400)) # Round up to the nearest day
+        echo $delay_in_days
+    fi
+}
+
+function get_changed_lines_count() {
+    commit1=$1
+    commit2=$2
+    git diff --numstat $commit1 $commit2 | awk '/(\.cpp|\.hpp|\.c|\.cc|\.h|\.hh|makefile|Makefile)$/ { if ($1 > max) max = $1; if ($2 > max) max = $2 } END { print max }'
+}
+
+function get_repo_url_and_commit() {
+    sid=$1
+    repo=$(jq -r --arg sid "$sid" '.[] | select(.students | contains([$sid])) | .repo_url' $STUDENTS_FILE)
+    commit=$(jq -r --arg sid "$sid" '.[] | select(.students | contains([$sid])) | .commit_sha' $STUDENTS_FILE)
+    if [[ $repo == null || $commit == null ]]; then
+        error "Student with sid $sid not found"
+    fi
+    echo "$repo"
+    echo "$commit"
+}
+
+function list_commits() {
+    git log --oneline --abbrev-commit --format='%h %an %s' | cat
+}
+
+function clone() {
+    local sid=$1
+    repo_url=$(get_repo_url_and_commit $sid | head -n 1)
+    commit_sha=$(get_repo_url_and_commit $sid | tail -n 1)
+    url=$(https_to_ssh $repo_url)
+    clone_and_checkout $url $commit_sha $DIR_RUN
+
+    # In case you fucked things up, and didn't accept the repo invitations, use
+    # uncomment the section below. You should clone the repos by hand and put it
+    # next to the judge. Then run judge clone and you'll get the stats you need.
+    # local DIR_RUN=$1
+
+    pushd $DIR_RUN >/dev/null
+    info "Listing commits"
+    list_commits
+    echo "---------------------------------------------"
+    get_user_statistic
+    info "Getting commit delay"
+    echo "Commit delay: $(get_commit_delay) days"
+    popd >/dev/null
+}
+
+function make_and_run() {
+    pushd $DIR_RUN >/dev/null
+    make
+    if [[ $? -ne 0 ]]; then
+        error "Make failed"
+    fi
+    ./$EXE
+    popd >/dev/null
+}
+
+function edit_code() {
+    sid=$1
+    new_commit_sha=$2
+    repo_url=$(get_repo_url_and_commit $sid | head -n 1)
+    commit_sha=$(get_repo_url_and_commit $sid | tail -n 1)
+    url=$(https_to_ssh $repo_url)
+    clone_and_checkout $url $new_commit_sha $DIR_RUN
+    pushd $DIR_RUN >/dev/null
+    get_changed_lines_count $commit_sha $new_commit_sha
+    popd >/dev/null
+}
+
+# -------------------------------
+
+check_dependency jq
+check_dependency git
+check_dependency date
+check_dependency awk
+
+if [[ $# -eq 0 ]]; then
+    error "No arguments provided"
+fi
+
+case $1 in
+clone)
+    if [[ $# -ne 2 ]]; then
+        error "Invalid number of arguments"
+    fi
+    clone $2
+    ;;
+run)
+    make_and_run
+    ;;
+edit)
+    if [[ $# -ne 3 ]]; then
+        error "Invalid number of arguments"
+    fi
+    edit_code $2 $3
+    ;;
+--help)
+    echo "Usage: $0 [command] [args]"
+    echo "Commands:"
+    echo "  clone [sid] - clone student's repository and checkout to the commit"
+    echo "  run - make and run the code"
+    echo "  edit [sid] [new_commit_sha] - edit code and get changed lines count"
+    ;;
+*)
+    error "Invalid command"
+    ;;
+esac

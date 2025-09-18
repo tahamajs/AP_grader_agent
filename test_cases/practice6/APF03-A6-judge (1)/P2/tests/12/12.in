@@ -1,0 +1,6 @@
+POST signup ? username "amir" password "rfz82"
+GET show_budget ?
+POST increase_budget ? amount 123
+GET show_budget ?
+POST logout ?
+GET show_budget ?

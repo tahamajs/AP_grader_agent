@@ -1,0 +1,21 @@
+name,district,foods:prices,opening_time,closing_time,number_of_tables
+rouhi,Tajrish,berenj:120;cholo morgh:220;joojeh:250;kabab koobideh:270;shishlik:350,9,23,3
+shila1,Tajrish,burger:290;hotdog:285;morgh sookhari:200;pitza:320,14,22,4
+khorsand,Tajrish,berenj:130;ghalyeh mahi:215;mahi:230;meigo:340,8,21,6
+sib,Meydan Sanat,burger:210;hotdog:205;pitza:350,9,23,2
+fish & chips,Meydan Sanat,mahi:230;mahi sookhari:240;meigo:310,10,23,5
+lidoma,Meydan Sanat,cholo morgh:310;joojeh:320;kabab koobideh:360;shishlik:550,7,19,2
+niko sefat,Enghelab,ash:120;halim:130;kabab koobideh:200,6,15,6
+shila2,Enghelab,hotdog:290;pitza:330;burger:170,10,22,2
+yas,Enghelab,berenj:130;cholo morgh:220;joojeh:240;kabab koobideh:270,10,23,4
+shiraz,Enghelab,burger:250;morgh sookhari:240;pitza:350,7,23,5
+orkideh,Karegar,berenj:130;cholo morgh:250;joojeh:270;kabab koobideh:280,9,23,7
+martin,Karegar,burger:260;hotdog:285;pitza:320,9,23,3
+hossein garden,Hossein Abad,berenj:150;cholo morgh:240;joojeh:260;kabab koobideh:270;shishlik:360,9,23,8
+burger land,Tehranpars,burger:210;hotdog:195;pitza:340,12,23,2
+shila3,Tehranpars,burger:230;morgh sookhari:230;pitza:340,9,22,5
+gardino,Pirouzi,burger:270;pitza:370;salad ceasar:335,7,21,4
+eram,Dowlat Abad,berenj:130;cholo morgh:230;joojeh:270;kabab koobideh:280,9,23,3
+majid,Payane Jonoub,burger:190;hotdog:185;pitza:220,15,23,5
+tehroonchi,Mirdamad,berenj:120;cholo morgh:320;joojeh:350;kabab koobideh:350;shishlik:540,9,23,2
+hani,Mirdamad,berenj:125;cholo morgh:240;joojeh:260;kabab koobideh:280,8,22,3

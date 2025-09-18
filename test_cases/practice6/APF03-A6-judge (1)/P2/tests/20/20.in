@@ -1,0 +1,5 @@
+POST signup ? password "wow" username "madmamad"
+POST logout ?
+POST login ? username "madmamad" password "wow"
+PUT my_district ? district "Mirdamad"
+GET restaurants ? food_name "pitza"

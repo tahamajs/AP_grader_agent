@@ -1,0 +1,2 @@
+POST signup ? username "amir" password "rfz82"
+GET restaurant_detail ? restaurant_name "shiraz"

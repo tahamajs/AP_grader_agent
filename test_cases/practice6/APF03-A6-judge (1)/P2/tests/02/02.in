@@ -1,0 +1,23 @@
+POST signup ? username "low_mist" password "meow"
+GET show_budget ?
+POST increase_budget ? amount 2500
+GET show_budget ?
+POST logout ?
+POST signup ? username "cool_man" password "1234"
+POST increase_budget ? amount 1500
+GET show_budget ?
+POST logout ?
+POST login ? username "cool_man" password "1234"
+GET show_budget ?
+POST increase_budget ? amount 200
+GET show_budget ?
+POST logout ?
+POST login ? username "low_mist" password "meow"
+GET show_budget ?
+POST increase_budget ? amount 300
+GET show_budget ?
+POST increase_budget ? amount 400
+GET show_budget ?
+POST increase_budget ? amount -500
+GET show_budget ?
+POST logout ?

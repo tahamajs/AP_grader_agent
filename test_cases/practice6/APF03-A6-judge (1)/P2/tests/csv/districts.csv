@@ -1,0 +1,11 @@
+district,neighbors
+Tajrish,Mirdamad;Meydan Sanat;Hossein Abad
+Meydan Sanat,Karegar;Mirdamad;Tajrish
+Enghelab,Karegar;Payane Jonoub;Pirouzi
+Karegar,Enghelab;Meydan Sanat;Mirdamad
+Hossein Abad,Mirdamad;Tehranpars;Tajrish;Pirouzi
+Tehranpars,Hossein Abad;Pirouzi
+Pirouzi,Tehranpars;Payane Jonoub;Dowlat Abad;Hossein Abad;Enghelab
+Dowlat Abad,Payane Jonoub;Pirouzi
+Payane Jonoub,Dowlat Abad;Pirouzi;Enghelab
+Mirdamad,Hossein Abad;Tajrish;Meydan Sanat;Karegar

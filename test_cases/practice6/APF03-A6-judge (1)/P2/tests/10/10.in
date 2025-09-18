@@ -1,0 +1,61 @@
+POST logout ?
+POST signup ? username "king" password "meow"
+POST login ? username "king" password "meow"
+POST logout ?
+POST signup ? username "best_man" password "1234"
+POST logout ?
+POST login ? username "best_man" password "4321"
+POST login ? username "best_man" password "1234"
+POST logout ?
+POST login ? username "good_man" password "password"
+POST signup ? username "king" password "meow"
+POST login ? username "king" password "meow"
+POST logout ?
+POST signup ? username "amin" password "meow"
+PUT my_district ? district "Dowlat Abad"
+GET restaurants ?
+POST logout ?
+POST signup ? username "parsa" password "Succession"
+POST logout ?
+POST signup ? username "albert_einstein" password "Emc2"
+POST increase_budget ? amount 600
+POST reserve ? restaurant_name "sib" table_id "2" start_time "16" end_time "19" foods "pitza,burger"
+DELETE reserve ? restaurant_name "best place" reserve_id "2"
+DELETE reserve ? restaurant_name "sib" reserve_id "1382"
+POST logout ?
+POST login ? username "parsa" password "Succession"
+GET districts ?
+POST logout ?
+POST login ? username "amin" password "meow"
+POST increase_budget ? amount 500
+POST reserve ? restaurant_name "sib" table_id "2" start_time "19" end_time "21" foods "pitza,pitza,burger"
+DELETE reserve ? restaurant_name "hani"
+POST logout ?
+POST login ? username "parsa" password "Succession"
+GET districts ?
+POST increase_budget ? amount 1200
+POST reserve ? restaurant_name "hani" table_id "1" start_time "18" end_time "21" foods "joojeh,joojeh,cholo morgh"
+GET show_budget ?
+POST reserve ? restaurant_name "shiraz" table_id "3" start_time "12" end_time "15" foods "morgh sookhari,burger"
+GET show_budget ?
+DELETE reserve ? restaurant_name "shiraz" reserve_id "1"
+GET show_budget ?
+GET districts ? district "SatarKhan"
+GET districts ? district "Meydan Sanat"
+POST logout ?
+POST logout ?
+POST logout ?
+POST login ? username "albert_einstein" password "Emc2"
+POST reserve ? restaurant_name "burger land" table_id "1" start_time "14" end_time "15"
+GET restaurant_detail ? restaurant_name "sib"
+DELETE reserve ? restaurant_name "sib" reserve_id "1"
+GET restaurant_detail ? restaurant_name "sib"
+GET restaurants ?
+PUT my_district ? district "Pirouzi"
+GET restaurants ?
+POST logout ?
+POST signup ? username "king" password "meow"
+post login ? username "king" password "meow"
+POST login ? username "king" password "meow"
+POST logout ?
+post login ? "king" password "meow"

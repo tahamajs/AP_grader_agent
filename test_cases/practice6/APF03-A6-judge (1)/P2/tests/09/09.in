@@ -1,0 +1,67 @@
+POST logout ?
+pOST sign ? username "bad_guy" password "fire"
+POST signup ? "bad_guy" password "fire"
+post signup ? username "bad_guy" password "fire"
+POST signup ? username "bad_guy" password "fire"
+POST logout ?
+POST signup ? username "taha" password "top_secret"
+SHOW show_budget ?
+GET show_budget ?
+POST logout ?
+POST signup ? username "amir_asghar" password "rfz2003"
+POST increase_budget ? amount 600
+POST reserve ? restaurant_name "sib" table_id "2" start_time "16" end_time "19" foods "pitza,burger"
+DELETE reserve ? restaurant_name "sib" reserve_id "222"
+DELETE reserve ? restaurant_name "never land" reserve_id "2"
+POST logout ?
+POST signup ? username "james_bond" password "007"
+GET districts ?
+GET districts ? district "SatarKhan"
+GET districts ? district "Meydan Sanat"
+POST logout ?
+POST login ? username "taha" password "top_secret"
+PUT my_district ? district "Pirouzi"
+GET restaurants ? food_name "pitza"
+POST logout ?
+POST login ? username "bad_guy" password "fire"
+POST increase_budget ? amount 500
+POST reserve ? restaurant_name "sib" table_id "2" start_time "19" end_time "21" foods "pitza,pitza,burger"
+DELETE reserve ? restaurant_name "never land"
+POST logout ?
+POST login ? username "taha" password "top_secret"
+PUT my_district ? district "Dowlat Abad"
+GET restaurants ?
+POST increase_budget ? amount 1200
+POST reserve ? restaurant_name "hani" table_id "1" start_time "18" end_time "21" foods "joojeh,joojeh,cholo morgh"
+GET show_budget ?
+POST reserve ? restaurant_name "shiraz" table_id "3" start_time "12" end_time "15" foods "morgh sookhari,burger"
+GET show_budget ?
+DELETE reserve ? restaurant_name "shiraz" reserve_id "1"
+GET show_budget ?
+POST logout ?
+POST login ? username "amir_asghar" password "rfz2003"
+POST reserve ? restaurant_name "burger land" table_id "1" start_time "14" end_time "15"
+GET restaurant_detail ? restaurant_name "sib"
+DELETE reserve ? restaurant_name "sib" reserve_id "1"
+GET restaurant_detail ? restaurant_name "sib"
+DELETE reserve ? restaurant_name "sib" reserve_id "2"
+POST logout ?
+POST signup ? username "amir_akbar" password "1382"
+PUT my_district ? district "Dowlat Abad"
+GET restaurants ?
+POST login ? username "amir_akbar" password "1382"
+PUT my_district ? district "Tajrish"
+GET restaurants ? food_name "pasta"
+GET restaurants ? food_name "mahi"
+POST logout ?
+POST logout ?
+POST logout ?
+POST login ? username "reza" password "i_dont_know"
+POST login ? username "amir_akbar" password "i_dont_know"
+POST login ? username "amir_akbar" password "1382"
+GET show_budget ?
+POST increase_budget ? 1200
+POST increase_budget ? amount 2000
+GET show_budget ?
+POST logout ?
+GET show_budget ?

@@ -1,0 +1,5 @@
+POST signup ? username "babak" password "kabab"
+POST login ? username "babak" password "kabab"
+GET restaurant_detail ? restaurantname "babak kababi"
+GET restaurant_detail ? restaurant_name "babak kababi"
+GET restaurant_detail ? restaurant_name "martin"

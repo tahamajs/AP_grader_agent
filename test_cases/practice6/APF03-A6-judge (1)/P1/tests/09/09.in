@@ -1,0 +1,39 @@
+POST signup ? username "low_mist" password "meow"
+POST logout ?
+POST signup ? username "cool_man" password "1234"
+POST logout ?
+POST signup ? username "amir_akbar" password "1382"
+GET districts ? district "SatarKhan"
+GET districts ? district "Meydan Sanat"
+PUT my_district ? district "Dowlat Abad"
+GET restaurants ?
+GET restaurant_detail ? restaurant_name "rouhi"
+GET reserves ?
+POST reserve ? restaurant_name "Na Koja Abad" table_id "3" start_time "16" end_time "17" foods "pitza,burger"
+POST reserve ? restaurant_name "sib" table_id "3" start_time "16" end_time "17" foods "pitza,burger"
+POST reserve ? restaurant_name "sib" table_id "2" start_time "16" end_time "19" foods "pitza,burger"
+GET reserves ? reserve_id "1"
+POST logout ?
+POST login ? username "cool_man" password "1234"
+POST logout ?
+POST login ? username "low_mist" password "meow"
+POST reserve ? restaurant_name "sib" table_id "2" start_time "18" end_time "21" foods "pitza,burger"
+POST reserve ? restaurant_name "sib" table_id "2" start_time "19" end_time "21" foods "pitza,pitza,burger"
+GET reserves ? restaurant_name "sib" reserve_id "1"
+POST logout ?
+POST login ? username "cool_man" password "1234"
+POST reserve ? restaurant_name "hani" table_id "1" start_time "18" end_time "21" foods "joojeh,joojeh,cholo morgh"
+GET reserves ? restaurant_name "hani" reserve_id "7"
+GET reserves ? restaurant_name "hani" reserve_id "1"
+POST logout ?
+POST login ? username "amir_akbar" password "1382"
+GET restaurant_detail ? restaurant_name "niko sefat"
+POST reserve ? restaurant_name "burger land" table_id "1" start_time "14" end_time "15"
+GET reserves ?
+GET reserves ? restaurant_name "sib"
+GET restaurant_detail ? restaurant_name "sib"
+PUT my_district ? district "Tajrish"
+GET restaurants ? food_name "pasta"
+GET restaurants ? food_name "mahi"
+GET districts ?
+POST logout ?

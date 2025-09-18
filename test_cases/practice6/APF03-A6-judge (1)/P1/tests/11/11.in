@@ -1,0 +1,6 @@
+pOST signup ? username "mehdi" password "mn1234"
+POST sign_up ? username "mehdi" password "mn1234"
+POST signup ? username "mehdi" password "mn1234"
+POST signup ? username "mehdi" password "alaki"
+POST login ? username "mehdi" password "mn1234"
+POST signup ? username "reza" password "meow"

@@ -1,0 +1,6 @@
+POST signup ? username "amir" password "rfz82"
+POST increase_budget ? amount 1000
+POST reserve ? restaurant_name "yas" table_id "3" start_time "13" end_time "15" foods "joojeh,kabab koobideh"
+DELETE reserve ? restaurant_name "yas" reserve_id "2"
+DELETE reserve ? restaurant_name "yas" reserve_id "1"
+GET show_budget ?

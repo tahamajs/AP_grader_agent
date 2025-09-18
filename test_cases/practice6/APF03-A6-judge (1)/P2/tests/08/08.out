@@ -1,0 +1,120 @@
+Permission Denied
+OK
+0
+Dowlat Abad: Payane Jonoub, Pirouzi
+Enghelab: Karegar, Payane Jonoub, Pirouzi
+Hossein Abad: Mirdamad, Tehranpars, Tajrish, Pirouzi
+Karegar: Enghelab, Meydan Sanat, Mirdamad
+Meydan Sanat: Karegar, Mirdamad, Tajrish
+Mirdamad: Hossein Abad, Tajrish, Meydan Sanat, Karegar
+Payane Jonoub: Dowlat Abad, Pirouzi, Enghelab
+Pirouzi: Tehranpars, Payane Jonoub, Dowlat Abad, Hossein Abad, Enghelab
+Tajrish: Mirdamad, Meydan Sanat, Hossein Abad
+Tehranpars: Hossein Abad, Pirouzi
+OK
+OK
+OK
+OK
+OK
+600
+Empty
+Reserve ID: 1
+Table 2 for 16 to 19 in sib
+Original Price: 560
+Order Amount Discount: 0
+Total ItemSpecific Discount: 275
+First Order Discount: 0
+Total Discount: 275
+Total Price: 285
+1: sib 2 16-19 burger(1) pitza(1) 560 285
+Dowlat Abad: Payane Jonoub, Pirouzi
+Enghelab: Karegar, Payane Jonoub, Pirouzi
+Hossein Abad: Mirdamad, Tehranpars, Tajrish, Pirouzi
+Karegar: Enghelab, Meydan Sanat, Mirdamad
+Meydan Sanat: Karegar, Mirdamad, Tajrish
+Mirdamad: Hossein Abad, Tajrish, Meydan Sanat, Karegar
+Payane Jonoub: Dowlat Abad, Pirouzi, Enghelab
+Pirouzi: Tehranpars, Payane Jonoub, Dowlat Abad, Hossein Abad, Enghelab
+Tajrish: Mirdamad, Meydan Sanat, Hossein Abad
+Tehranpars: Hossein Abad, Pirouzi
+OK
+OK
+OK
+OK
+OK
+Reserve ID: 2
+Table 2 for 19 to 21 in sib
+Original Price: 910
+Order Amount Discount: 138
+Total ItemSpecific Discount: 450
+First Order Discount: 0
+Total Discount: 588
+Total Price: 322
+Bad Request
+Permission Denied
+Not Found
+Not Found
+OK
+gardino (Pirouzi)
+burger land (Tehranpars)
+shila3 (Tehranpars)
+majid (Payane Jonoub)
+eram (Dowlat Abad)
+hossein garden (Hossein Abad)
+niko sefat (Enghelab)
+shila2 (Enghelab)
+shiraz (Enghelab)
+yas (Enghelab)
+hani (Mirdamad)
+tehroonchi (Mirdamad)
+khorsand (Tajrish)
+rouhi (Tajrish)
+shila1 (Tajrish)
+martin (Karegar)
+orkideh (Karegar)
+fish & chips (Meydan Sanat)
+lidoma (Meydan Sanat)
+sib (Meydan Sanat)
+OK
+OK
+OK
+Reserve ID: 1
+Table 1 for 18 to 21 in hani
+Original Price: 760
+Order Amount Discount: 204
+Total ItemSpecific Discount: 40
+First Order Discount: 40
+Total Discount: 284
+Total Price: 476
+1: hani 1 18-21 cholo morgh(1) joojeh(2) 760 476
+OK
+OK
+Reserve ID: 1
+Table 1 for 14 to 15 in burger land
+Original Price: 0
+Order Amount Discount: 0
+Total ItemSpecific Discount: 0
+First Order Discount: 0
+Total Discount: 0
+Total Price: 0
+1: burger land 1 14-15 0 0
+1: sib 2 16-19 burger(1) pitza(1) 560 285
+1: sib 2 16-19 burger(1) pitza(1) 560 285
+OK
+OK
+OK
+OK
+OK
+gardino (Pirouzi)
+burger land (Tehranpars)
+shila3 (Tehranpars)
+majid (Payane Jonoub)
+shila2 (Enghelab)
+shiraz (Enghelab)
+shila1 (Tajrish)
+martin (Karegar)
+sib (Meydan Sanat)
+Bad Request
+Bad Request
+0
+OK

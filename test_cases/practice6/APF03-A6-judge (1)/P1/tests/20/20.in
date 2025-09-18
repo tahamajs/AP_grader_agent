@@ -1,0 +1,13 @@
+POST signup ? username "mamad" password "wow"
+POST signup ? username "akbar" password "kart"
+POST login ? username "mamad" password "wow"
+POST reserve ? restaurant_name "sib" table_id "1" start_time "10" end_time "15" foods "hotdog"
+POST reserve ? restaurant_name "lidoma" table_id "2" start_time "15" end_time "17"
+GET reserves ?
+DELETE reserve ? restaurant_name "sib" reserve_id "2"
+DELETE reserve ? restaurant_name "sob" reserve_id "1"
+DELETE reserve ? restaurant_name "sib" reserve_id "1"
+GET reserves ?
+POST logout ?
+POST signup ? username "akbar" password "kart"
+DELETE reserve ? restaurant_name "lidoma" reserve_id "1"

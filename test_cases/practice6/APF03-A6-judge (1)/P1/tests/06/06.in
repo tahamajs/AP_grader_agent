@@ -1,0 +1,19 @@
+POST signup ? username "low_mist" password "meow"
+POST logout ?
+POST signup ? username "cool_man" password "1234"
+POST logout ?
+POST signup ? username "amir_akbar" password "1382"
+GET restaurant_detail ? restaurant_name "rouhi"
+POST logout ?
+POST login ? username "cool_man" password "1234"
+POST logout ?
+POST login ? username "low_mist" password "meow"
+GET restaurant_detail ? restaurant_name "Na Koja Abad"
+GET restaurant_detail ? restaurant_name "niko sefat"
+POST logout ?
+POST login ? username "cool_man" password "1234"
+GET restaurant_detail ? restaurant_name "sib"
+POST logout ?
+POST login ? username "amir_akbar" password "1382"
+GET restaurant_detail ? restaurant_name "niko sefat"
+POST logout ?

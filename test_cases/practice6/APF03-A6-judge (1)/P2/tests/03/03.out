@@ -1,0 +1,66 @@
+OK
+OK
+OK
+OK
+OK
+Name: rouhi
+District: Tajrish
+Time: 9-23
+Menu: berenj(120), cholo morgh(220), joojeh(250), kabab koobideh(270), shishlik(350)
+1:
+2:
+3:
+First Order Discount: percentage, 20
+OK
+OK
+OK
+OK
+Not Found
+Name: niko sefat
+District: Enghelab
+Time: 6-15
+Menu: ash(120), halim(130), kabab koobideh(200)
+1:
+2:
+3:
+4:
+5:
+6:
+Order Amount Discount: percentage, 300, 30
+Item Specific Discount: ash(amount: 10), halim(percentage: 10)
+First Order Discount: amount, 10
+OK
+OK
+Name: sib
+District: Meydan Sanat
+Time: 9-23
+Menu: burger(210), hotdog(205), pitza(350)
+1:
+2:
+Order Amount Discount: percentage, 300, 30
+Item Specific Discount: burger(amount: 100), pitza(percentage: 50)
+OK
+OK
+Name: niko sefat
+District: Enghelab
+Time: 6-15
+Menu: ash(120), halim(130), kabab koobideh(200)
+1:
+2:
+3:
+4:
+5:
+6:
+Order Amount Discount: percentage, 300, 30
+Item Specific Discount: ash(amount: 10), halim(percentage: 10)
+First Order Discount: amount, 10
+Name: shiraz
+District: Enghelab
+Time: 7-23
+Menu: burger(250), morgh sookhari(240), pitza(350)
+1:
+2:
+3:
+4:
+5:
+OK

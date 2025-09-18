@@ -1,0 +1,7 @@
+POST signup ? username "babak" password "kabab"
+POST login ? username "babak" password "kabab"
+GET restaurants ?
+GET restaurants ? food_name "Kabab Barg"
+PUT my_district ? district "Dowlat Abad"
+GET restaurants ?
+GET restaurants ? food_name "pitza"
