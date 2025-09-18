@@ -1,6 +1,8 @@
 # langchain_integration.py
 import os
 import json
+import logging
+from datetime import datetime
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 import google.generativeai as genai
@@ -9,6 +11,27 @@ load_dotenv()
 
 # Configure Gemini API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+# Setup logging
+def setup_logging():
+    """Setup logging configuration for the grading system."""
+    log_dir = os.path.join(os.getcwd(), "logs")
+    os.makedirs(log_dir, exist_ok=True)
+
+    log_file = os.path.join(log_dir, f"grading_{datetime.now().strftime('%Y%m%d')}.log")
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file, encoding='utf-8'),
+            logging.StreamHandler()
+        ]
+    )
+
+    return logging.getLogger(__name__)
+
+logger = setup_logging()
 
 
 # Define grading output structures for different assignments
@@ -463,205 +486,25 @@ def get_grading_model(assignment_type):
 
 
 def get_grading_prompt(
-    assignment_type, practice_description, test_results, static_analysis, source_code
+    assignment_type,
+    practice_description,
+    test_results,
+    static_analysis,
+    source_code,
 ):
     """Returns the appropriate grading prompt for the assignment type."""
 
-    base_prompt = f"""
-    You are an expert C++ Teaching Assistant with 10+ years of experience grading programming assignments.
+    # Import the prompts module
+    from prompts import get_grading_prompt as get_centralized_prompt
 
-    **ASSIGNMENT CONTEXT:**
-    {practice_description}
-
-    **GRADING TASK:**
-    Analyze the student's C++ code submission based on the assignment requirements above and the established coding standards.
-
-    **ANALYSIS INPUTS:**
-
-    **Test Results:**
-    {test_results}
-
-    **Static Analysis (cppcheck):**
-    {static_analysis}
-
-    **Source Code:**
-    {source_code}
-
-    **GRADING INSTRUCTIONS:**
-    1. Carefully analyze the code against the assignment requirements
-    2. Consider both functionality (tests) and code quality (static analysis)
-    3. Provide specific, actionable feedback in 2-3 sentences
-    4. Use evidence from the code to justify your scores
-    5. Be fair but thorough in your assessment
-    """
-
-    if assignment_type == "A1":
-        return (
-            base_prompt
-            + """
-
-    **A1 GRADING CRITERIA:**
-
-    1. **LOGIC - ITERATORS (0-1 point)**
-       - Award 1.0: Correct and appropriate use of STL iterators
-       - Award 0.5: Some iterator usage but with issues
-       - Award 0.0: No iterator usage or incorrect usage
-
-    2. **LOGIC - CONTAINERS (0-1 point)**
-       - Award 1.0: Good use of std::vector, std::map
-       - Award 0.5: Some container usage
-       - Award 0.0: No container usage
-
-    3. **DESIGN - I/O SEPARATION (0-2 points)**
-       - Award 2: Clean separation of I/O from logic
-       - Award 1: Some separation
-       - Award 0: I/O mixed throughout
-
-    4. **DESIGN - STRUCTS (0-1 point)**
-       - Award 1.0: Appropriate use of structs
-       - Award 0.5: Some struct usage
-       - Award 0.0: No structs used
-
-    5. **DESIGN - NO GOD MAIN (0-2 points)**
-       - Award 2: Main function is clean (< 20 lines)
-       - Award 1: Main is reasonable
-       - Award 0: Main is monolithic
-
-    6. **DESIGN - SMALL FUNCTIONS (0-3 points)**
-       - Award 3: Functions follow SRP (< 15 lines)
-       - Award 2: Functions are reasonable size
-       - Award 0-1: Large functions
-
-    7-12. **CLEAN CODING (0-1 point each)**
-       - Award 1.0: Excellent practice
-       - Award 0.5: Good with minor issues
-       - Award 0.0: Poor practice
-    """
-        )
-
-    elif assignment_type == "A2":
-        return (
-            base_prompt
-            + """
-
-    **A2 GRADING CRITERIA (Data Handling and Design):**
-
-    **Data Handling (15 points):**
-    - Reading Input (5pts): Proper input reading techniques, error handling for invalid input
-    - Storing Information & Data Structures (10pts): Appropriate use of data structures, efficient storage
-
-    **Design (28 points):**
-    - Separate I/O from Logic (8pts): Clean separation of input/output from business logic
-    - No Godly Main (10pts): Main function should be clean and delegate to other functions
-    - Small Functions and Single Responsibility (10pts): Functions should be focused and not too long
-
-    **Clean Coding (28 points):**
-    - No Duplication (7pts): Avoid code duplication through proper abstraction
-    - Magic Values / No Global Variables (7pts): Use constants instead of magic numbers, avoid global variables
-    - Naming (7pts): Clear, descriptive variable and function names
-    - Consistency (7pts): Consistent coding style and formatting
-
-    **Git (7 points):**
-    - Commit Messages (4pts): Clear, descriptive commit messages
-    - Standard Commits (3pts): Follow conventional commit format
-
-    **Correctness (30 points):**
-    - Test Cases (20pts): Comprehensive test coverage, edge cases handled properly
-    """
-        )
-        return (
-            base_prompt
-            + """
-
-    **A3 GRADING CRITERIA:**
-
-    **Questions 1-4 (71 points total):**
-    - Each question has: Recursive Logic (2pts), Test Cases (15pts for Q1-3, 10pts for Q4), Upload Testcases (2pts)
-    - Award full points for correct recursive/backtracking implementation
-    - Award proportional points for partial implementation
-
-    **Design (20 points):**
-    - I/O Separation (1pt), Data Structures (3pts), No God Main (1pt), Small Functions (2pts)
-    - No Duplication (1pt), Indentation (1pt), Magic Values (1pt), Naming (1pt), Consistency (1pt)
-
-    **Git (6 points):**
-    - Commit Messages (1pt), Standard Commits (1pt)
-    - Award for proper commit message format and conventional commits
-    """
-        )
-
-    elif assignment_type == "A4":
-        return (
-            base_prompt
-            + """
-
-    **A4 GRADING CRITERIA:**
-
-    **Object Oriented Design (53 points):**
-    - Break into Classes (5pts), Responsibility Assignment (5pts), Field Assignment (5pts)
-    - Public/Private Access Modifiers (3pts), No Logic in Main (3pts), Small Functions (2pts)
-
-    **Clean Coding (10 points):**
-    - No Duplication, Indentation, Magic Values, Naming, Consistency (1pt each)
-
-    **Multifile (10 points):**
-    - Break into Files, Header Guards, Makefile (1pt each)
-
-    **Git (5 points):**
-    - Commit Messages, Standard Commits (1pt each)
-    """
-        )
-
-    elif assignment_type == "A5":
-        return (
-            base_prompt
-            + """
-
-    **A5 GRADING CRITERIA (Tower Defense Game):**
-
-    **Design (56 points):**
-    - Attack Wave (6pts), Normal Tower (5pts), Ice Tower (7pts), Bomb Tower (7pts)
-    - Tower Domain Visibility (5pts), Normal Balloon (5pts), Pregnant Balloon (7pts)
-    - Panel (4pts), Launch Control (5pts), Players Health Panel (2pts)
-    - Music (2pts), Game End (1pt)
-
-    **Object Oriented Design (14 points):**
-    - Break into Classes (5pts), Encapsulation (5pts), Small Functions (2pts)
-    - No Duplication (1pt), Indentation (1pt)
-
-    **Clean Coding & Git (21 points):**
-    - Clean: Magic Values, Naming, Consistency (1pt each)
-    - Git: Break Files, Header Guards, Makefile, Commit Messages, Standard Commits (1pt each)
-    """
-        )
-
-    elif assignment_type == "A6":
-        return (
-            base_prompt
-            + """
-
-    **A6 GRADING CRITERIA (Event Management System - Multi-Phase):**
-
-    **Phase 1 - Core Features (91 points):**
-    - Login/SignUp (2pts), Normal Event (2pts), Periodic Event (2pts), Task (2pts)
-    - Object Oriented Design (2pts), No God Class (1pt), Polymorphism (2pts), No Downcast (1pt)
-    - Encapsulation (2pts), Separate I/O (1pt), Exception Handling (2pts), No Duplication (2pts)
-    - Indentation (1pt), Magic Values (1pt), Naming (3pts), Consistency (3pts)
-    - Break into Files (1pt), Makefile (1pt), Test Cases (30pts)
-
-    **Phase 2 - Feature Addition (100 points):**
-    - Add Joint Event (2pts), See Joint Event Requests (2pts), Reject/Confirm Joint Event (2pts)
-    - Change Report Cmd (2pts), Polymorphism (2pts), No Downcast (1pt), No Duplication (2pts)
-    - Indentation (2pts), Naming (2pts), Consistency (2pts), Test Cases (15pts)
-
-    **Phase 3 - Web Interface (110 points):**
-    - Signup/Login/Home/Logout Pages (2pts each), Task operations (2pts each)
-    - Event operations (2pts each), Report (3pts), HTML Render (3pts), Handlers (3pts)
-    - CSS (2pts), JS (1pt), Makefile (2pts), Clean Coding (30pts), Bonus (10pts), Multifile (5pts)
-    """
-        )
-
-    return base_prompt
+    # Use the centralized prompt function
+    return get_centralized_prompt(
+        assignment_type,
+        practice_description,
+        test_results,
+        static_analysis,
+        source_code,
+    )
 
 
 def grade_student_project(
@@ -670,8 +513,14 @@ def grade_student_project(
     source_code: str,
     practice_description: str,
     assignment_type: str = "A1",
+    student_id: str = None,
+    save_outputs: bool = True,
 ) -> BaseModel:
     """Grades a student project using Gemini API with assignment-specific criteria."""
+
+    import os
+    import json
+    from datetime import datetime
 
     # Get the appropriate model and prompt
     grading_model = get_grading_model(assignment_type)
@@ -695,18 +544,8 @@ def grade_student_project(
     )
 
     # Format instructions for the specific model
-    format_instructions = f"""
-    CRITICAL: Respond ONLY with a valid JSON object. No markdown, no explanations, no additional text.
-
-    Required JSON format for {assignment_type}:
-    {grading_model.model_json_schema()}
-
-    Scoring Guidelines:
-    - Use decimal scores (e.g., 3.5, 7.2) for partial credit
-    - Be precise and consistent in scoring
-    - Base scores on evidence from the code
-    - For multi-phase assignments (A6), evaluate each phase separately
-    """
+    from prompts import get_format_instructions
+    format_instructions = get_format_instructions(assignment_type, grading_model)
 
     full_prompt = prompt + format_instructions
 
@@ -714,6 +553,8 @@ def grade_student_project(
     max_retries = 3
     for attempt in range(max_retries):
         try:
+            logger.info(f"Starting grading attempt {attempt + 1} for student {student_id}, assignment {assignment_type}")
+
             response = model.generate_content(full_prompt)
 
             # Clean the response text
@@ -729,27 +570,65 @@ def grade_student_project(
             # Parse the JSON response
             result_dict = json.loads(response_text)
             grading_output = grading_model(**result_dict)
+
+            logger.info(f"Successfully graded student {student_id} for {assignment_type}")
+
+            # Save outputs if requested
+            if save_outputs and student_id:
+                saved_path = save_grading_output(grading_output, assignment_type, student_id, result_dict)
+                logger.info(f"Grading output saved to {saved_path}")
+
             return grading_output
 
         except json.JSONDecodeError as e:
+            logger.warning(f"JSON parsing failed (attempt {attempt + 1}) for student {student_id}: {e}")
             if attempt == max_retries - 1:
+                logger.error(f"Failed to parse JSON after {max_retries} attempts for student {student_id}: {e}. Response: {response_text}")
                 raise ValueError(
                     f"Failed to parse JSON after {max_retries} attempts: {e}. Response: {response_text}"
                 )
-            print(f"JSON parsing failed (attempt {attempt + 1}), retrying...")
             continue
         except Exception as e:
+            logger.error(f"API call failed (attempt {attempt + 1}) for student {student_id}: {e}")
             if attempt == max_retries - 1:
+                logger.error(f"Error processing response after {max_retries} attempts for student {student_id}: {e}")
                 raise ValueError(
                     f"Error processing response after {max_retries} attempts: {e}"
                 )
-            print(f"API call failed (attempt {attempt + 1}), retrying...")
             continue
 
     # This should never be reached, but just in case
+    logger.error(f"Unexpected error in grading function for student {student_id}")
     raise ValueError("Unexpected error in grading function")
 
 
-def get_grading_chain():
-    """Returns the grading function for compatibility."""
-    return grade_student_project
+def save_grading_output(grading_output: BaseModel, assignment_type: str, student_id: str, raw_dict: dict):
+    """Save grading output as JSON file with timestamp."""
+    import os
+    from datetime import datetime
+
+    # Create outputs directory if it doesn't exist
+    outputs_dir = os.path.join(os.getcwd(), "grading_outputs")
+    os.makedirs(outputs_dir, exist_ok=True)
+
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{student_id}_{assignment_type}_{timestamp}.json"
+    filepath = os.path.join(outputs_dir, filename)
+
+    # Prepare output data
+    output_data = {
+        "student_id": student_id,
+        "assignment_type": assignment_type,
+        "timestamp": datetime.now().isoformat(),
+        "grading_output": raw_dict,
+        "model_used": "gemini-pro",
+        "structured_output": grading_output.model_dump() if hasattr(grading_output, 'model_dump') else grading_output.dict()
+    }
+
+    # Save to JSON file
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(output_data, f, indent=2, ensure_ascii=False)
+
+    print(f"✅ Grading output saved to: {filepath}")
+    return filepath

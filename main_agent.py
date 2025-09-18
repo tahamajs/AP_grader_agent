@@ -425,6 +425,7 @@ CODE ANALYSIS SUMMARY:
                 source_code=source_code,
                 practice_description=enhanced_desc,
                 assignment_type=assignment_type,
+                student_id=student_id,
             )
 
             # Step I: Calculate final scores

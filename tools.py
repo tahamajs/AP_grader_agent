@@ -2,10 +2,16 @@
 import os
 import subprocess
 import xml.etree.ElementTree as ET
+import logging
+import json
+from datetime import datetime
 from git import Repo, GitCommandError
 import config
 import fitz  # PyMuPDF for PDF reading
 import time
+
+# Setup logging for tools
+logger = logging.getLogger(__name__)
 
 
 def clone_student_repo(
@@ -430,15 +436,36 @@ def _make_testcase_pair(test_dir: str, index: int, input_text: str, output_text:
         f.write(output_text)
 
 
-def generate_testcases_from_description(assignment: str, num_cases: int = 3) -> str:
-    """Generates simple testcase skeletons for an assignment based on its description.
+def generate_testcases_from_description(assignment: str, num_cases: int = 3, use_llm: bool = False) -> str:
+    """Generates testcase skeletons for an assignment based on its description.
 
     - assignment: assignment name or key, e.g., 'A1' or 'APS04-A1-Description'
     - num_cases: number of test pairs to generate
+    - use_llm: whether to use LLM for better test case generation
 
     Returns the path to the created test directory.
     This function creates files under `config.TEST_CASES_DIR/<assignment>/tests/`.
     """
+    logger.info(f"Starting test case generation for assignment {assignment}, num_cases={num_cases}, use_llm={use_llm}")
+
+    # Create logs directory for comprehensive logging
+    logs_dir = os.path.join(os.getcwd(), "test_generation_logs")
+    os.makedirs(logs_dir, exist_ok=True)
+
+    # Log generation session start
+    session_log = {
+        "session_id": datetime.now().strftime("%Y%m%d_%H%M%S"),
+        "assignment": assignment,
+        "num_cases_requested": num_cases,
+        "use_llm": use_llm,
+        "start_time": datetime.now().isoformat(),
+        "status": "in_progress"
+    }
+
+    session_log_file = os.path.join(logs_dir, f"session_{session_log['session_id']}.json")
+    with open(session_log_file, 'w', encoding='utf-8') as f:
+        json.dump(session_log, f, indent=2, ensure_ascii=False)
+
     descriptions = get_practice_descriptions(config.PRACTICES_DIR)
     # Try exact key, then look for key-containing entry
     text = descriptions.get(assignment)
@@ -450,15 +477,88 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3) -> 
                 break
 
     if not text:
-        raise FileNotFoundError(
-            f"No practice description found for assignment '{assignment}'"
-        )
+        error_msg = f"No practice description found for assignment '{assignment}'"
+        logger.error(error_msg)
+
+        # Update session log with error
+        session_log["status"] = "failed"
+        session_log["error"] = error_msg
+        session_log["end_time"] = datetime.now().isoformat()
+        with open(session_log_file, 'w', encoding='utf-8') as f:
+            json.dump(session_log, f, indent=2, ensure_ascii=False)
+
+        raise FileNotFoundError(error_msg)
 
     reqs = extract_practice_requirements(text)
 
     # Create test directory
     target_dir = os.path.join(config.TEST_CASES_DIR, assignment)
     tests_dir = os.path.join(target_dir, "tests")
+
+    # Log requirements extraction
+    reqs_log = {
+        "assignment": assignment,
+        "description_length": len(text),
+        "extracted_requirements": reqs,
+        "timestamp": datetime.now().isoformat()
+    }
+    reqs_file = os.path.join(logs_dir, f"requirements_{assignment}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    with open(reqs_file, 'w', encoding='utf-8') as f:
+        json.dump(reqs_log, f, indent=2, ensure_ascii=False)
+
+    if use_llm:
+        # Use LLM for better test case generation
+        test_cases = generate_testcases_with_llm(text, reqs, num_cases)
+    else:
+        # Use heuristic approach
+        test_cases = generate_testcases_heuristic(reqs, num_cases)
+
+    # Save test cases to files
+    saved_files = []
+    for i, (input_text, output_text) in enumerate(test_cases, 1):
+        file_path = _make_testcase_pair(tests_dir, i, input_text, output_text)
+        saved_files.append(file_path)
+
+    # Save comprehensive metadata about generation
+    metadata = {
+        "assignment": assignment,
+        "num_cases": num_cases,
+        "use_llm": use_llm,
+        "timestamp": datetime.now().isoformat(),
+        "session_id": session_log["session_id"],
+        "requirements": reqs,
+        "description_summary": summarize_text(text, 200),
+        "generated_test_cases": len(test_cases),
+        "saved_files": saved_files,
+        "test_directory": tests_dir,
+        "logs_directory": logs_dir,
+        "generation_method": "llm" if use_llm else "heuristic",
+        "requirements_file": reqs_file
+    }
+
+    metadata_path = os.path.join(target_dir, "generation_metadata.json")
+    with open(metadata_path, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
+
+    # Update session log with success
+    session_log["status"] = "completed"
+    session_log["end_time"] = datetime.now().isoformat()
+    session_log["generated_cases"] = len(test_cases)
+    session_log["metadata_file"] = metadata_path
+    session_log["test_directory"] = tests_dir
+    with open(session_log_file, 'w', encoding='utf-8') as f:
+        json.dump(session_log, f, indent=2, ensure_ascii=False)
+
+    logger.info(f"Successfully generated {num_cases} testcases for {assignment} in {tests_dir}")
+    logger.info(f"Comprehensive logs saved to: {logs_dir}")
+    print(f"Generated {num_cases} testcases for {assignment} in {tests_dir}")
+    print(f"Logs and metadata saved to: {logs_dir}")
+    return tests_dir
+
+
+def generate_testcases_heuristic(reqs: dict, num_cases: int) -> list:
+    """Generate test cases using heuristic approach based on requirements."""
+    test_cases = []
 
     # Simple heuristic to produce input/output based on required features or objectives
     features = reqs.get("required_features", []) or reqs.get("objectives", [])
@@ -485,22 +585,135 @@ def generate_testcases_from_description(assignment: str, num_cases: int = 3) -> 
             inp = f"{i}\n{ ' '.join(str(x) for x in range(1, i+2)) }\n"
             out = str(sum(range(1, i + 2))) + "\n"
 
-        _make_testcase_pair(tests_dir, i, inp, out)
+        test_cases.append((inp, out))
 
-    print(f"Generated {num_cases} testcases for {assignment} in {tests_dir}")
-    return tests_dir
+    return test_cases
 
 
-def generate_all_testcases():
-    """Generates test cases for all assignments in the practices directory."""
-    descriptions = get_practice_descriptions(config.PRACTICES_DIR)
-    for assignment in descriptions.keys():
+def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) -> list:
+    """Generate test cases using LLM for better quality and relevance."""
+    try:
+        # Import here to avoid circular imports
+        import google.generativeai as genai
+        from dotenv import load_dotenv
+        from prompts import get_test_generation_prompt
+
+        load_dotenv()
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+        # Get the prompt from the centralized prompts module
+        prompt = get_test_generation_prompt(description, reqs, num_cases)
+
+        logger.info(f"Generating {num_cases} test cases using LLM for assignment with requirements: {list(reqs.keys())}")
+
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(prompt)
+
+        # Enhanced JSON parsing with better error handling
+        response_text = response.text.strip()
+
+        # Remove markdown code blocks if present
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+
+        response_text = response_text.strip()
+
+        # Log the raw response for debugging
+        logger.debug(f"LLM raw response: {response_text[:500]}...")
+
         try:
-            generate_testcases_from_description(assignment)
-        except Exception as e:
-            print(f"Failed to generate test cases for {assignment}: {e}")
+            # Parse the JSON response
+            parsed_data = json.loads(response_text)
 
-    print("Test case generation completed for all assignments.")
+            # Validate structure
+            if not isinstance(parsed_data, dict) or "test_cases" not in parsed_data:
+                raise ValueError("Invalid response structure: missing 'test_cases' key")
+
+            test_cases_data = parsed_data["test_cases"]
+            if not isinstance(test_cases_data, list):
+                raise ValueError("Invalid response structure: 'test_cases' must be a list")
+
+            if len(test_cases_data) != num_cases:
+                logger.warning(f"LLM generated {len(test_cases_data)} test cases, expected {num_cases}")
+
+            # Convert to (input, output) tuples and validate each test case
+            test_cases = []
+            for i, tc in enumerate(test_cases_data):
+                if not isinstance(tc, dict):
+                    logger.warning(f"Test case {i+1} is not a dictionary, skipping")
+                    continue
+
+                # Validate required fields
+                required_fields = ["input", "expected_output"]
+                if not all(field in tc for field in required_fields):
+                    logger.warning(f"Test case {i+1} missing required fields, skipping")
+                    continue
+
+                input_data = str(tc["input"])
+                expected_output = str(tc["expected_output"])
+
+                # Log test case details
+                description = tc.get("description", f"Test case {i+1}")
+                category = tc.get("category", "unknown")
+                logger.info(f"Generated test case {i+1}: {description} (category: {category})")
+
+                test_cases.append((input_data, expected_output))
+
+            if not test_cases:
+                raise ValueError("No valid test cases generated")
+
+            # Save generation metadata
+            metadata = {
+                "timestamp": datetime.now().isoformat(),
+                "assignment_description": description[:200] + "..." if len(description) > 200 else description,
+                "requirements": reqs,
+                "requested_cases": num_cases,
+                "generated_cases": len(test_cases),
+                "llm_response_metadata": parsed_data.get("metadata", {}),
+                "raw_response_length": len(response_text)
+            }
+
+            # Save metadata to file
+            metadata_dir = os.path.join(os.getcwd(), "test_generation_logs")
+            os.makedirs(metadata_dir, exist_ok=True)
+            metadata_file = os.path.join(metadata_dir, f"llm_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+
+            with open(metadata_file, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+
+            logger.info(f"Successfully generated {len(test_cases)} test cases using LLM. Metadata saved to: {metadata_file}")
+            return test_cases
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse LLM response as JSON: {e}")
+            logger.error(f"Raw response: {response_text[:1000]}")
+            raise ValueError(f"LLM response is not valid JSON: {e}")
+
+    except Exception as e:
+        logger.error(f"Failed to generate test cases with LLM: {e}")
+        # Save error information for debugging
+        error_metadata = {
+            "timestamp": datetime.now().isoformat(),
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "assignment_description": description[:200] + "..." if len(description) > 200 else description,
+            "requirements": reqs,
+            "requested_cases": num_cases
+        }
+
+        error_dir = os.path.join(os.getcwd(), "test_generation_logs")
+        os.makedirs(error_dir, exist_ok=True)
+        error_file = os.path.join(error_dir, f"llm_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+
+        with open(error_file, 'w', encoding='utf-8') as f:
+            json.dump(error_metadata, f, indent=2, ensure_ascii=False)
+
+        logger.info(f"Error metadata saved to: {error_file}")
+        return generate_testcases_heuristic(reqs, num_cases)
 
 
 def run_static_analysis(project_path: str) -> str:
@@ -606,21 +819,30 @@ def run_static_analysis(project_path: str) -> str:
 def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
     """Builds the project and runs it against test cases using the judge.sh system."""
 
+    logger.info(f"Starting build and test process for practice {practice_name} in {project_path}")
+
     # Try to use judge.sh for all practices
     judge_results = run_judge_tests(project_path, practice_name)
     if (
         judge_results["total_tests"] > 0
         or "Judge folder not found" not in judge_results["execution_summary"]
     ):
+        logger.info(f"Using judge.sh system for {practice_name}, results: {judge_results['passed_tests']}/{judge_results['total_tests']} tests passed")
+        save_test_results(judge_results, practice_name, "judge")
         return judge_results
 
     # Fallback to original test system if judge.sh is not available
+    logger.info(f"Falling back to standard test system for {practice_name}")
     practice_config = config.PRACTICE_CONFIGS.get(practice_name, {})
-    return run_standard_tests(project_path, practice_name, practice_config)
+    standard_results = run_standard_tests(project_path, practice_name, practice_config)
+    save_test_results(standard_results, practice_name, "standard")
+    return standard_results
 
 
 def run_judge_tests(project_path: str, practice_name: str) -> dict:
     """Runs tests using the judge.sh system for any practice assignment."""
+    logger.info(f"Attempting to run judge tests for practice {practice_name} in {project_path}")
+
     results = {
         "build_successful": False,
         "passed_tests": 0,
@@ -641,26 +863,32 @@ def run_judge_tests(project_path: str, practice_name: str) -> dict:
 
     if not judge_dir:
         results["execution_summary"] = f"❌ Judge folder not found for {practice_name}"
+        logger.warning(f"Judge folder not found for practice {practice_name}")
         return results
 
     judge_script = os.path.join(judge_dir, "judge.sh")
 
     if not os.path.exists(judge_script):
         results["execution_summary"] = "❌ judge.sh not found in judge directory"
+        logger.error(f"judge.sh not found in {judge_dir}")
         return results
 
     try:
+        logger.info(f"Found judge.sh at {judge_script}, determining if multi-phase")
+
         # Check if this is a multi-phase assignment (like A6)
         is_multi_phase = practice_name == "A6" or os.path.exists(
             os.path.join(judge_dir, "P1")
         )
 
         if is_multi_phase:
+            logger.info(f"Running multi-phase judge tests for {practice_name}")
             # Handle multi-phase assignment
             return run_judge_tests_multi_phase(
                 project_path, practice_name, judge_dir, judge_script
             )
         else:
+            logger.info(f"Running single-phase judge tests for {practice_name}")
             # Handle single-phase assignment
             return run_judge_tests_single_phase(
                 project_path, practice_name, judge_dir, judge_script
@@ -668,6 +896,7 @@ def run_judge_tests(project_path: str, practice_name: str) -> dict:
 
     except Exception as e:
         results["execution_summary"] = f"❌ Error running judge.sh: {str(e)}"
+        logger.error(f"Error running judge.sh for {practice_name}: {str(e)}")
         return results
 
 
@@ -675,6 +904,8 @@ def run_judge_tests_single_phase(
     project_path: str, practice_name: str, judge_dir: str, judge_script: str
 ) -> dict:
     """Runs tests for single-phase assignments using judge.sh scripts."""
+    logger.info(f"Running single-phase judge tests for {practice_name}")
+
     results = {
         "build_successful": False,
         "passed_tests": 0,
@@ -705,6 +936,8 @@ def run_judge_tests_single_phase(
                     import shutil
 
                     shutil.copy2(src_path, dst_path)
+
+        logger.info(f"Copied {len([f for f in os.listdir(temp_run_dir) if f.endswith(('.cpp', '.h', '.hpp'))])} source files to judge directory")
 
         # Run the judge.sh test command
         judge_command = [judge_script, "-t"]
@@ -748,13 +981,16 @@ def run_judge_tests_single_phase(
                     "execution_summary"
                 ] += "\n⚠️ Could not parse test results, but compilation was successful."
 
+        logger.info(f"Single-phase judge test results for {practice_name}: {results['passed_tests']}/{results['total_tests']} tests passed")
         return results
 
     except subprocess.TimeoutExpired:
         results["execution_summary"] = "❌ Testing timed out after 5 minutes."
+        logger.error(f"Judge testing timed out for {practice_name}")
         return results
     except Exception as e:
         results["execution_summary"] = f"❌ Error running judge.sh: {str(e)}"
+        logger.error(f"Error in single-phase judge testing for {practice_name}: {str(e)}")
         return results
 
 
@@ -877,9 +1113,36 @@ def run_judge_tests_multi_phase(
         return results
 
 
-def run_standard_tests(
-    project_path: str, practice_name: str, practice_config: dict
-) -> dict:
+def save_test_results(test_results: dict, practice_name: str, test_type: str, student_id: str = None):
+    """Save test results as JSON file with timestamp."""
+    # Create test results directory if it doesn't exist
+    results_dir = os.path.join(os.getcwd(), "test_results")
+    os.makedirs(results_dir, exist_ok=True)
+
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    student_part = f"{student_id}_" if student_id else ""
+    filename = f"{student_part}{practice_name}_{test_type}_{timestamp}.json"
+    filepath = os.path.join(results_dir, filename)
+
+    # Prepare output data
+    output_data = {
+        "practice_name": practice_name,
+        "test_type": test_type,
+        "student_id": student_id,
+        "timestamp": datetime.now().isoformat(),
+        "test_results": test_results
+    }
+
+    # Save to JSON file
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(output_data, f, indent=2, ensure_ascii=False)
+
+    logger.info(f"Test results saved to: {filepath}")
+    return filepath
+
+
+def run_standard_tests(project_path: str, practice_name: str, practice_config: dict) -> dict:
     """Runs tests using the standard test system for assignments."""
     results = {
         "build_successful": False,
