@@ -14,6 +14,8 @@ This agent automates the grading of C++ programming assignments for an Advanced 
 - **AI-Powered Evaluation**: Uses Gemini API for qualitative code assessment
 - **Google Sheets Integration**: Automatically updates grades in spreadsheets for all assignments
 - **SSH Git Integration**: Secure repository cloning with AP-F03 configuration
+- **Structured Output & Prompts**: All LLM-based outputs (test case generation, grading) use a strict JSON format for easy parsing and downstream automation. Prompts and format instructions are centralized in `prompts.py` for maintainability.
+- **Robust Parsing & Validation**: The agent uses shared helpers to parse and validate LLM responses, saving raw outputs and errors for debugging. This ensures reliable integration and easier troubleshooting.
 
 ## Directory Structure
 
@@ -125,6 +127,34 @@ Create a `.env` file:
 ```
 GOOGLE_API_KEY=your_gemini_api_key_here
 ```
+
+### Structured Output Format
+
+All LLM-generated outputs (test cases, grading) are returned in strict JSON format. Example for test case generation:
+
+```json
+{
+  "test_cases": [
+    {
+      "input": "5\n1 2 3 4 5\n",
+      "expected_output": "15\n",
+      "description": "Sum of numbers",
+      "category": "basic"
+    },
+    ...
+  ]
+}
+```
+
+Grading outputs follow assignment-specific schemas (see `langchain_integration.py` for Pydantic models).
+
+### Centralized Prompt Helpers
+
+All prompt templates, format instructions, and parsing helpers are located in `prompts.py`. To change the output format or prompt wording, edit this file.
+
+### Robust LLM Output Parsing
+
+The agent uses shared helpers to parse and validate LLM responses. Raw responses and errors are saved to `test_generation_logs/` for debugging. If parsing fails, the system falls back to heuristic generation or reports the error with full context.
 
 ## Usage
 
@@ -367,6 +397,14 @@ The agent provides comprehensive output:
 ### Customizing Grading Criteria
 
 Modify the prompts in `langchain_integration.py` to adjust grading criteria for specific assignments.
+
+### Editing Prompts and Output Format
+
+To change the LLM prompt wording or output format, edit `grading_agent/prompts.py`. All format instructions and parsing helpers are centralized there for easy maintenance.
+
+### Validating Structured Outputs
+
+Use the shared parser in `prompts.py` to validate and load LLM responses. If you encounter parsing errors, check the logs in `test_generation_logs/` for the raw output and error details.
 
 ## Dependencies
 
