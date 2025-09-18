@@ -4,6 +4,98 @@ import sheets_updater
 import langchain_integration
 import config
 
+import argparse
+import os
+import csv
+import json
+from datetime import datetime
+
+
+def _ensure_dir(path: str):
+    os.makedirs(path, exist_ok=True)
+
+
+def save_full_feedback(
+    student_id: str,
+    assignment_type: str,
+    final_grade_data: dict,
+    llm_structured: dict,
+    test_results: dict,
+    analysis_report: str,
+    source_code: str,
+):
+    """Save full feedback as CSV row and a detailed markdown document."""
+    outputs_dir = os.path.join(os.getcwd(), "feedback_outputs")
+    _ensure_dir(outputs_dir)
+
+    # CSV summary (append)
+    csv_path = os.path.join(outputs_dir, "feedback_summary.csv")
+    csv_exists = os.path.exists(csv_path)
+    with open(csv_path, "a", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        if not csv_exists:
+            writer.writerow(
+                [
+                    "timestamp",
+                    "student_id",
+                    "assignment_type",
+                    "raw_score",
+                    "final_score",
+                    "passed_tests",
+                    "total_tests",
+                    "details_path",
+                ]
+            )
+
+        details_fname = f"feedback_{student_id}_{assignment_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+        details_path = os.path.join(outputs_dir, details_fname)
+
+        writer.writerow(
+            [
+                datetime.now().isoformat(),
+                student_id,
+                assignment_type,
+                final_grade_data.get("raw_score", ""),
+                final_grade_data.get("final_score", ""),
+                test_results.get("passed_tests", 0),
+                test_results.get("total_tests", 0),
+                details_path,
+            ]
+        )
+
+    # Detailed markdown document
+    with open(details_path, "w", encoding="utf-8") as f:
+        f.write(f"# Feedback for {student_id} - {assignment_type}\n\n")
+        f.write(f"Generated: {datetime.now().isoformat()}\n\n")
+
+        f.write("## Final Grades\n")
+        for k, v in final_grade_data.items():
+            f.write(f"- **{k}**: {v}\n")
+        f.write("\n")
+
+        f.write("## LLM Structured Output\n")
+        try:
+            f.write(json.dumps(llm_structured, indent=2, ensure_ascii=False))
+        except Exception:
+            f.write(str(llm_structured))
+        f.write("\n\n")
+
+        f.write("## Test Results\n")
+        try:
+            f.write(json.dumps(test_results, indent=2, ensure_ascii=False))
+        except Exception:
+            f.write(str(test_results))
+        f.write("\n\n")
+
+        f.write("## Static Analysis\n")
+        f.write(analysis_report if analysis_report else "No analysis available")
+        f.write("\n\n")
+
+        f.write("## Source Code (truncated)\n")
+        f.write(source_code[:20000] if source_code else "")
+
+    return csv_path, details_path
+
 
 def calculate_scores(llm_grades, test_results, assignment_type):
     """Calculates raw and final scores based on assignment type and all inputs."""
@@ -337,71 +429,25 @@ def calculate_a6_scores(llm_grades, test_results):
     return phase_grades
 
 
-def main():
-    """Main function to run the grading agent."""
-    # 1. Load practice descriptions
-    practice_descriptions = tools.get_practice_descriptions(config.PRACTICES_DIR)
-    if not practice_descriptions:
-        print(
-            "Warning: No practice descriptions found. Please add PDF files to the practice_descriptions directory."
-        )
 
-    # 2. Get the grading function
-    grading_function = langchain_integration.get_grading_chain()
+def _grade_student_flow(student_id, repo_url, assignment_type):
+    """Run full grading pipeline for a single student and return summary paths."""
+    print(f"\n--- Processing Student: {student_id} (Assignment: {assignment_type}) ---")
 
-    # 3. Get the list of students from the sheet
-    sheet = sheets_updater.get_sheet()
-    # Assuming column 1 is Student Number, column 4 is GitHub URL, column 5 is Assignment Type
-    student_ids = sheet.col_values(1)[1:]  # Skip header
-    github_urls = sheet.col_values(4)[1:]  # GitHub URL
-    assignment_types = sheet.col_values(5)[1:]  # Assignment Type (A1, A3, A4, A5, A6)
+    project_path = tools.clone_student_repo(repo_url, student_id)
+    if not project_path:
+        return None
 
-    # 4. Process each student
-    for student_id, repo_url, assignment_type in zip(
-        student_ids, github_urls, assignment_types
-    ):
-        if not repo_url or not assignment_type:
-            print(
-                f"Skipping student {student_id}: Missing repository URL or assignment type."
-            )
-            continue
+    test_results = tools.build_and_run_tests(project_path, assignment_type)
+    analysis_report = tools.run_static_analysis(project_path)
+    source_code = tools.read_project_files(project_path)
+    code_analysis = tools.analyze_code_quality(source_code)
 
-        if assignment_type not in config.PRACTICE_CONFIGS:
-            print(
-                f"Skipping student {student_id}: Assignment type '{assignment_type}' not configured."
-            )
-            continue
+    assignment_config = config.PRACTICE_CONFIGS[assignment_type]
+    assignment_desc = assignment_config.get("name", f"Assignment {assignment_type}")
 
-        print(
-            f"\n--- Processing Student: {student_id} (Assignment: {assignment_type}) ---"
-        )
-
-        try:
-            # Step A: Clone the repo
-            project_path = tools.clone_student_repo(repo_url, student_id)
-            if not project_path:
-                continue
-
-            # Step B: Run build and tests
-            test_results = tools.build_and_run_tests(project_path, assignment_type)
-
-            # Step C: Run static analysis
-            analysis_report = tools.run_static_analysis(project_path)
-
-            # Step D: Read all source code
-            source_code = tools.read_project_files(project_path)
-
-            # Step E: Perform basic code quality analysis
-            code_analysis = tools.analyze_code_quality(source_code)
-
-            # Step F: Get assignment description and extract requirements
-            assignment_config = config.PRACTICE_CONFIGS[assignment_type]
-            assignment_desc = assignment_config.get(
-                "name", f"Assignment {assignment_type}"
-            )
-
-            # Step G: Enhance assignment description with extracted requirements
-            enhanced_desc = f"""
+    enhanced_desc = (
+        f"""
 ASSIGNMENT DESCRIPTION:
 {assignment_desc}
 
@@ -416,64 +462,84 @@ CODE ANALYSIS SUMMARY:
 - Magic Numbers Detected: {code_analysis['magic_numbers']}
 - Comment Lines: {code_analysis['comment_lines']}
 """
+    )
 
-            # Step H: Invoke the LLM for qualitative grading
-            print("Invoking AI for qualitative grading...")
-            llm_response = grading_function(
-                test_results=test_results["execution_summary"],
-                static_analysis=analysis_report,
-                source_code=source_code,
-                practice_description=enhanced_desc,
-                assignment_type=assignment_type,
-                student_id=student_id,
-            )
+    print("Invoking AI for qualitative grading...")
+    grading_function = langchain_integration.get_grading_chain()
+    llm_response = grading_function(
+        test_results=test_results["execution_summary"],
+        static_analysis=analysis_report,
+        source_code=source_code,
+        practice_description=enhanced_desc,
+        assignment_type=assignment_type,
+        student_id=student_id,
+    )
 
-            # Step I: Calculate final scores
-            if assignment_type == "A6":
-                final_grade_data = calculate_a6_scores(
-                    llm_response.model_dump(), test_results
-                )
-                # Update multi-phase grades
-                sheets_updater.update_multi_phase_grades(
-                    student_id, final_grade_data, assignment_type
-                )
-            else:
-                final_grade_data = calculate_scores(
-                    llm_response.model_dump(), test_results, assignment_type
-                )
-                # Update single-phase grades
-                sheets_updater.update_student_grade(
-                    student_id, final_grade_data, assignment_type
-                )
+    if assignment_type == "A6":
+        final_grade_data = calculate_a6_scores(llm_response.model_dump(), test_results)
+        sheets_updater.update_multi_phase_grades(student_id, final_grade_data, assignment_type)
+    else:
+        final_grade_data = calculate_scores(llm_response.model_dump(), test_results, assignment_type)
+        sheets_updater.update_student_grade(student_id, final_grade_data, assignment_type)
 
-            # Print summary for this student
-            print(f"✅ Student {student_id} processed successfully!")
-            if assignment_type == "A6":
-                print(
-                    f"   Phase 1 Score: {final_grade_data.get('phase1', {}).get('p1_final_score', 0)}"
-                )
-                print(
-                    f"   Phase 2 Score: {final_grade_data.get('phase2', {}).get('p2_final_score', 0)}"
-                )
-                print(
-                    f"   Phase 3 Score: {final_grade_data.get('phase3', {}).get('p3_final_score', 0)}"
-                )
-                print(
-                    f"   Total Score: {final_grade_data.get('phase3', {}).get('final_score', 0)}"
-                )
-            else:
-                print(f"   Raw Score: {final_grade_data.get('raw_score', 0)}")
-                print(f"   Final Score: {final_grade_data.get('final_score', 0)}")
-            print(
-                f"   Tests Passed: {test_results.get('passed_tests', 0)}/{test_results.get('total_tests', 0)}"
-            )
+    # Save full feedback
+    csv_path, details_path = save_full_feedback(
+        student_id,
+        assignment_type,
+        final_grade_data,
+        llm_response.model_dump(),
+        test_results,
+        analysis_report,
+        source_code,
+    )
 
-        except Exception as e:
-            print(f"❌ Critical error processing {student_id}: {e}")
-            import traceback
+    print(f"✅ Student {student_id} processed successfully! Saved feedback to: {details_path}")
+    return {"csv": csv_path, "details": details_path}
 
-            traceback.print_exc()
+
+def run_cli():
+    parser = argparse.ArgumentParser(description="AP Grader Agent - CLI")
+    sub = parser.add_subparsers(dest="mode", required=True)
+
+    # Generate-only mode
+    g = sub.add_parser("generate", help="Generate test cases from assignment description")
+    g.add_argument("assignment", help="Assignment key (e.g., A1)")
+    g.add_argument("--num", type=int, default=3, help="Number of test cases to generate")
+    g.add_argument("--llm", action="store_true", help="Use LLM for generation")
+
+    # Grade mode
+    r = sub.add_parser("grade", help="Run grading for students (single or batch)")
+    r.add_argument("--student", help="Student ID (single) or 'all' for sheet batch")
+    r.add_argument("--repo", help="Repository URL for single student")
+    r.add_argument("--assignment", help="Assignment type for single student (A1..A6)")
+
+    args = parser.parse_args()
+
+    if args.mode == "generate":
+        # Generate testcases
+        tests_dir = tools.generate_testcases_from_description(args.assignment, args.num, args.llm)
+        print(f"Generated test cases at: {tests_dir}")
+
+    elif args.mode == "grade":
+        if args.student == "all":
+            # Batch from sheet
+            sheet = sheets_updater.get_sheet()
+            student_ids = sheet.col_values(1)[1:]
+            github_urls = sheet.col_values(4)[1:]
+            assignment_types = sheet.col_values(5)[1:]
+
+            for student_id, repo_url, assignment_type in zip(student_ids, github_urls, assignment_types):
+                if not repo_url or not assignment_type:
+                    print(f"Skipping {student_id}: missing data")
+                    continue
+                _grade_student_flow(student_id, repo_url, assignment_type)
+        else:
+            # Single student
+            if not args.student or not args.repo or not args.assignment:
+                print("For single student grading provide --student, --repo and --assignment")
+                return
+            _grade_student_flow(args.student, args.repo, args.assignment)
 
 
 if __name__ == "__main__":
-    main()
+    run_cli()
