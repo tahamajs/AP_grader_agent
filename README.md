@@ -21,6 +21,8 @@ This agent automates the grading of C++ programming assignments for an Advanced 
 
 ```
 grading_agent/
+├── .gitignore                  # Git ignore rules for logs, credentials, etc.
+├── .gitattributes             # Git attributes for line endings and binary files
 ├── config.py                    # Configuration settings
 ├── main_agent.py               # Main grading workflow
 ├── langchain_integration.py    # Gemini API integration
