@@ -429,7 +429,6 @@ def calculate_a6_scores(llm_grades, test_results):
     return phase_grades
 
 
-
 def _grade_student_flow(student_id, repo_url, assignment_type):
     """Run full grading pipeline for a single student and return summary paths."""
     print(f"\n--- Processing Student: {student_id} (Assignment: {assignment_type}) ---")
@@ -446,8 +445,7 @@ def _grade_student_flow(student_id, repo_url, assignment_type):
     assignment_config = config.PRACTICE_CONFIGS[assignment_type]
     assignment_desc = assignment_config.get("name", f"Assignment {assignment_type}")
 
-    enhanced_desc = (
-        f"""
+    enhanced_desc = f"""
 ASSIGNMENT DESCRIPTION:
 {assignment_desc}
 
@@ -462,7 +460,6 @@ CODE ANALYSIS SUMMARY:
 - Magic Numbers Detected: {code_analysis['magic_numbers']}
 - Comment Lines: {code_analysis['comment_lines']}
 """
-    )
 
     print("Invoking AI for qualitative grading...")
     grading_function = langchain_integration.get_grading_chain()
@@ -477,10 +474,16 @@ CODE ANALYSIS SUMMARY:
 
     if assignment_type == "A6":
         final_grade_data = calculate_a6_scores(llm_response.model_dump(), test_results)
-        sheets_updater.update_multi_phase_grades(student_id, final_grade_data, assignment_type)
+        sheets_updater.update_multi_phase_grades(
+            student_id, final_grade_data, assignment_type
+        )
     else:
-        final_grade_data = calculate_scores(llm_response.model_dump(), test_results, assignment_type)
-        sheets_updater.update_student_grade(student_id, final_grade_data, assignment_type)
+        final_grade_data = calculate_scores(
+            llm_response.model_dump(), test_results, assignment_type
+        )
+        sheets_updater.update_student_grade(
+            student_id, final_grade_data, assignment_type
+        )
 
     # Save full feedback
     csv_path, details_path = save_full_feedback(
@@ -493,7 +496,9 @@ CODE ANALYSIS SUMMARY:
         source_code,
     )
 
-    print(f"✅ Student {student_id} processed successfully! Saved feedback to: {details_path}")
+    print(
+        f"✅ Student {student_id} processed successfully! Saved feedback to: {details_path}"
+    )
     return {"csv": csv_path, "details": details_path}
 
 
@@ -502,9 +507,13 @@ def run_cli():
     sub = parser.add_subparsers(dest="mode", required=True)
 
     # Generate-only mode
-    g = sub.add_parser("generate", help="Generate test cases from assignment description")
+    g = sub.add_parser(
+        "generate", help="Generate test cases from assignment description"
+    )
     g.add_argument("assignment", help="Assignment key (e.g., A1)")
-    g.add_argument("--num", type=int, default=3, help="Number of test cases to generate")
+    g.add_argument(
+        "--num", type=int, default=3, help="Number of test cases to generate"
+    )
     g.add_argument("--llm", action="store_true", help="Use LLM for generation")
 
     # Grade mode
@@ -517,7 +526,9 @@ def run_cli():
 
     if args.mode == "generate":
         # Generate testcases
-        tests_dir = tools.generate_testcases_from_description(args.assignment, args.num, args.llm)
+        tests_dir = tools.generate_testcases_from_description(
+            args.assignment, args.num, args.llm
+        )
         print(f"Generated test cases at: {tests_dir}")
 
     elif args.mode == "grade":
@@ -528,7 +539,9 @@ def run_cli():
             github_urls = sheet.col_values(4)[1:]
             assignment_types = sheet.col_values(5)[1:]
 
-            for student_id, repo_url, assignment_type in zip(student_ids, github_urls, assignment_types):
+            for student_id, repo_url, assignment_type in zip(
+                student_ids, github_urls, assignment_types
+            ):
                 if not repo_url or not assignment_type:
                     print(f"Skipping {student_id}: missing data")
                     continue
@@ -536,7 +549,9 @@ def run_cli():
         else:
             # Single student
             if not args.student or not args.repo or not args.assignment:
-                print("For single student grading provide --student, --repo and --assignment")
+                print(
+                    "For single student grading provide --student, --repo and --assignment"
+                )
                 return
             _grade_student_flow(args.student, args.repo, args.assignment)
 

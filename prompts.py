@@ -4,8 +4,119 @@ Centralized prompt management for the grading agent system.
 All LLM prompts are defined here for easy modification and maintenance.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Callable, Optional
 import json
+import re
+import os
+import logging
+
+# Setup logging for prompts module
+logger = logging.getLogger(__name__)
+
+
+# -----------------------------
+# LLM RESPONSE PARSING HELPERS
+# -----------------------------
+
+
+def _normalize_llm_output(text: str) -> str:
+    """Strip common markdown/code fences and whitespace from LLM output."""
+    if not isinstance(text, str):
+        return text
+
+    t = text.strip()
+    # Remove triple backtick code fences with optional language
+    t = re.sub(r"^```[a-zA-Z0-9]*\n", "", t)
+    t = re.sub(r"\n```$", "", t)
+
+    # Remove leading and trailing single backticks
+    t = t.strip('`')
+
+    return t.strip()
+
+
+def _attempt_json_fixup(text: str) -> Optional[dict]:
+    """Try some heuristics to recover JSON from common LLM formatting issues.
+
+    Returns parsed dict on success or None on failure.
+    """
+    # Fast try
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+
+    # Heuristic: extract the largest {...} block
+    brace_matches = list(re.finditer(r"\{", text))
+    if not brace_matches:
+        return None
+
+    # find last closing brace
+    last_close = text.rfind("}")
+    first_open = brace_matches[0].start()
+    candidate = text[first_open : last_close + 1]
+
+    # Remove trailing commas before } or ]
+    candidate = re.sub(r",\s*(\}|\])", r"\1", candidate)
+
+    try:
+        return json.loads(candidate)
+    except Exception:
+        return None
+
+
+def parse_and_validate_response(
+    response_text: str,
+    validator: Optional[Callable[[dict], Any]] = None,
+    description: Optional[str] = None,
+    save_raw_to: Optional[str] = None,
+) -> dict:
+    """Robustly parse JSON from an LLM response and optionally validate it.
+
+    Args:
+        response_text: Raw text from the LLM.
+        validator: Optional callable that receives the parsed dict and
+            should raise an exception if validation fails (e.g. Pydantic model).
+        description: Short description used in error messages for context.
+        save_raw_to: Optional file path to save the raw response for debugging.
+
+    Returns:
+        Parsed JSON as Python dict.
+
+    Raises:
+        ValueError with helpful diagnostic information when parsing or validation fails.
+    """
+    txt = _normalize_llm_output(response_text)
+
+    # Save raw response if requested
+    if save_raw_to:
+        try:
+            os.makedirs(os.path.dirname(save_raw_to), exist_ok=True)
+            with open(save_raw_to, "w", encoding="utf-8") as f:
+                f.write(response_text)
+        except Exception as save_err:
+            logger.warning(f"Failed to save raw response to {save_raw_to}: {save_err}")
+
+    # Try direct parse
+    try:
+        parsed = json.loads(txt)
+    except Exception as e1:
+        # Try heuristics/fixup
+        parsed = _attempt_json_fixup(txt)
+        if parsed is None:
+            ctx = f" for {description}" if description else ""
+            raise ValueError(f"Failed to parse JSON response{ctx}: {e1}\nRaw: {txt[:1000]}")
+
+    # Optionally validate using provided callable
+    if validator:
+        try:
+            validator(parsed)
+        except Exception as ve:
+            ctx = f" for {description}" if description else ""
+            raise ValueError(f"Validation failed{ctx}: {ve}\nParsed: {json.dumps(parsed)[:1000]}")
+
+    return parsed
+
 
 
 # =============================================================================

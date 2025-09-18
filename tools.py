@@ -622,102 +622,85 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
         model = genai.GenerativeModel("gemini-pro")
         response = model.generate_content(prompt)
 
-        # Enhanced JSON parsing with better error handling
-        response_text = response.text.strip()
+        # Use centralized parser/validator from prompts.py
+        from prompts import parse_and_validate_response
 
-        # Remove markdown code blocks if present
-        if response_text.startswith("```json"):
-            response_text = response_text[7:]
-        if response_text.startswith("```"):
-            response_text = response_text[3:]
-        if response_text.endswith("```"):
-            response_text = response_text[:-3]
+        response_text = response.text
+        logger.debug(f"LLM raw response: {response_text[:800]}...")
 
-        response_text = response_text.strip()
+        # Save raw response for debugging
+        raw_dir = os.path.join(os.getcwd(), "test_generation_logs")
+        os.makedirs(raw_dir, exist_ok=True)
+        raw_file = os.path.join(
+            raw_dir, f"llm_raw_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        )
+        with open(raw_file, "w", encoding="utf-8") as f:
+            f.write(response_text)
 
-        # Log the raw response for debugging
-        logger.debug(f"LLM raw response: {response_text[:500]}...")
+        # Parse and validate
+        def _validator(d: dict):
+            if not isinstance(d, dict) or "test_cases" not in d:
+                raise ValueError("Missing 'test_cases' key or invalid top-level structure")
+            if not isinstance(d["test_cases"], list):
+                raise ValueError("'test_cases' must be a list")
 
-        try:
-            # Parse the JSON response
-            parsed_data = json.loads(response_text)
+        parsed = parse_and_validate_response(
+            response_text,
+            validator=_validator,
+            description=(f"test generation for description (truncated): {description[:80]}"),
+            save_raw_to=raw_file,
+        )
 
-            # Validate structure
-            if not isinstance(parsed_data, dict) or "test_cases" not in parsed_data:
-                raise ValueError("Invalid response structure: missing 'test_cases' key")
+        test_cases_data = parsed["test_cases"]
+        if len(test_cases_data) != num_cases:
+            logger.warning(f"LLM generated {len(test_cases_data)} test cases, expected {num_cases}")
 
-            test_cases_data = parsed_data["test_cases"]
-            if not isinstance(test_cases_data, list):
-                raise ValueError(
-                    "Invalid response structure: 'test_cases' must be a list"
-                )
+        test_cases = []
+        for i, tc in enumerate(test_cases_data):
+            if not isinstance(tc, dict):
+                logger.warning(f"Test case {i+1} is not a dictionary, skipping")
+                continue
 
-            if len(test_cases_data) != num_cases:
-                logger.warning(
-                    f"LLM generated {len(test_cases_data)} test cases, expected {num_cases}"
-                )
+            # Validate required fields
+            required_fields = ["input", "expected_output"]
+            if not all(field in tc for field in required_fields):
+                logger.warning(f"Test case {i+1} missing required fields, skipping")
+                continue
 
-            # Convert to (input, output) tuples and validate each test case
-            test_cases = []
-            for i, tc in enumerate(test_cases_data):
-                if not isinstance(tc, dict):
-                    logger.warning(f"Test case {i+1} is not a dictionary, skipping")
-                    continue
+            input_data = str(tc["input"])
+            expected_output = str(tc["expected_output"])
 
-                # Validate required fields
-                required_fields = ["input", "expected_output"]
-                if not all(field in tc for field in required_fields):
-                    logger.warning(f"Test case {i+1} missing required fields, skipping")
-                    continue
+            description_field = tc.get("description", f"Test case {i+1}")
+            category = tc.get("category", "unknown")
+            logger.info(f"Generated test case {i+1}: {description_field} (category: {category})")
 
-                input_data = str(tc["input"])
-                expected_output = str(tc["expected_output"])
+            test_cases.append((input_data, expected_output))
 
-                # Log test case details
-                description = tc.get("description", f"Test case {i+1}")
-                category = tc.get("category", "unknown")
-                logger.info(
-                    f"Generated test case {i+1}: {description} (category: {category})"
-                )
+        # Save parsed metadata
+        metadata = {
+            "timestamp": datetime.now().isoformat(),
+            "assignment_description": (
+                description[:200] + "..." if len(description) > 200 else description
+            ),
+            "requirements": reqs,
+            "requested_cases": num_cases,
+            "generated_cases": len(test_cases),
+            "llm_raw_file": raw_file,
+            "parsed_preview": {"test_cases_count": len(test_cases_data)},
+        }
 
-                test_cases.append((input_data, expected_output))
+        metadata_dir = os.path.join(os.getcwd(), "test_generation_logs")
+        os.makedirs(metadata_dir, exist_ok=True)
+        metadata_file = os.path.join(
+            metadata_dir, f"llm_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
+        with open(metadata_file, "w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2, ensure_ascii=False)
 
-            if not test_cases:
-                raise ValueError("No valid test cases generated")
-
-            # Save generation metadata
-            metadata = {
-                "timestamp": datetime.now().isoformat(),
-                "assignment_description": (
-                    description[:200] + "..." if len(description) > 200 else description
-                ),
-                "requirements": reqs,
-                "requested_cases": num_cases,
-                "generated_cases": len(test_cases),
-                "llm_response_metadata": parsed_data.get("metadata", {}),
-                "raw_response_length": len(response_text),
-            }
-
-            # Save metadata to file
-            metadata_dir = os.path.join(os.getcwd(), "test_generation_logs")
-            os.makedirs(metadata_dir, exist_ok=True)
-            metadata_file = os.path.join(
-                metadata_dir,
-                f"llm_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-            )
-
-            with open(metadata_file, "w", encoding="utf-8") as f:
-                json.dump(metadata, f, indent=2, ensure_ascii=False)
-
-            logger.info(
-                f"Successfully generated {len(test_cases)} test cases using LLM. Metadata saved to: {metadata_file}"
-            )
-            return test_cases
-
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse LLM response as JSON: {e}")
-            logger.error(f"Raw response: {response_text[:1000]}")
-            raise ValueError(f"LLM response is not valid JSON: {e}")
+        logger.info(
+            f"Successfully generated {len(test_cases)} test cases using LLM. Metadata saved to: {metadata_file}"
+        )
+        return test_cases
 
     except Exception as e:
         logger.error(f"Failed to generate test cases with LLM: {e}")

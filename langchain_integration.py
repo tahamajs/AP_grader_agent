@@ -562,18 +562,23 @@ def grade_student_project(
 
             response = model.generate_content(full_prompt)
 
-            # Clean the response text
-            response_text = response.text.strip()
+            # Use centralized parser/validator
+            from prompts import parse_and_validate_response
 
-            # Remove potential markdown formatting
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]
-            response_text = response_text.strip()
+            response_text = response.text
 
-            # Parse the JSON response
-            result_dict = json.loads(response_text)
+            def _validator(d: dict):
+                # let Pydantic validate types/required fields
+                grading_model(**d)
+
+            parsed = parse_and_validate_response(
+                response_text,
+                validator=_validator,
+                description=f"grading for {student_id} {assignment_type}",
+                save_raw_to=os.path.join(os.getcwd(), "grading_outputs", f"raw_{student_id}_{assignment_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"),
+            )
+
+            result_dict = parsed
             grading_output = grading_model(**result_dict)
 
             logger.info(
