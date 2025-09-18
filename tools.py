@@ -30,6 +30,7 @@ def clone_student_repo(
         # Clean up any existing directory
         if os.path.exists(clone_path):
             import shutil
+
             shutil.rmtree(clone_path)
 
         os.makedirs(clone_path, exist_ok=True)

@@ -109,14 +109,14 @@ dmypy.json
 .pyre/
 
 # Project specific
-student_projects/
-test_generation_logs/
-grading_outputs/
-feedback_outputs/
-test_results/
-grading_outputs/
-logs/
-*.log
+# student_projects/
+# test_generation_logs/
+# grading_outputs/
+# feedback_outputs/
+# test_results/
+# grading_outputs/
+# logs/
+# *.log
 
 # Credentials
 credentials.json
