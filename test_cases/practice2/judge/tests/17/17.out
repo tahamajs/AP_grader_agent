@@ -1,0 +1,46 @@
+Amin sits at table 6
+Bob sits at table 6
+Narges sits at table 6
+Melika enters the waiting queue of table 6
+Erfan enters the waiting queue of table 6
+Table 1: 4 0
+Table 2: 4 0
+Table 5: 3 0
+Table 6: 0 2
+Table 3: 2 0
+Table 4: 2 0
+Table ID: 6
+People at the table: Amin, Bob, Narges
+Table remaining capacity: 0
+Waiting queue length: 2
+Amin exits!
+Table ID: 6
+People at the table: Bob, Melika, Narges
+Table remaining capacity: 0
+Waiting queue length: 1
+Narges exits!
+Table ID: 6
+People at the table: Bob, Erfan, Melika
+Table remaining capacity: 0
+Waiting queue length: 0
+Melika exits!
+Table ID: 6
+People at the table: Bob, Erfan
+Table remaining capacity: 1
+Waiting queue length: 0
+Bob exits!
+Table ID: 6
+People at the table: Erfan
+Table remaining capacity: 2
+Waiting queue length: 0
+Erfan exits!
+Table ID: 6
+People at the table:
+Table remaining capacity: 3
+Waiting queue length: 0
+Table 1: 4 0
+Table 2: 4 0
+Table 5: 3 0
+Table 6: 3 0
+Table 3: 2 0
+Table 4: 2 0

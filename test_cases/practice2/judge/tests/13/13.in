@@ -1,0 +1,16 @@
+reserve_table 9 1
+reserve_table 10 1
+reserve_table 3 2
+switch 9
+switch 9
+switch 9
+show_table_info 1
+switch 10
+show_table_info 2
+switch 10
+show_table_info 2
+switch 10
+switch 3
+switch 9
+show_table_info 2
+show_table_info 1

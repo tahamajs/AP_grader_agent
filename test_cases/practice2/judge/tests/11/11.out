@@ -1,0 +1,26 @@
+Paria sits at table 1
+Amir Hossein sits at table 1
+Parsa sits at table 1
+Mehrad sits at table 1
+Fereshte sits at table 2
+Amir Akbar sits at table 2
+Mahdi sits at table 2
+Taha sits at table 2
+Sadegh sits at table 3
+Hamid sits at table 3
+Shaghayegh sits at table 4
+Bob sits at table 4
+Ted sits at table 5
+Babak sits at table 5
+Table ID: 1
+People at the table: Amir Hossein, Mehrad, Paria, Parsa
+Table remaining capacity: 0
+Waiting queue length: 0
+Table ID: 5
+People at the table: Babak, Ted
+Table remaining capacity: 1
+Waiting queue length: 0
+Table ID: 6
+People at the table:
+Table remaining capacity: 3
+Waiting queue length: 0

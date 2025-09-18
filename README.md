@@ -277,6 +277,46 @@ test_cases/A1/tests/
 └── ...
 ```
 
+## Judge Script Integration
+
+The system now integrates with judge scripts located in each practice's `judge/` folder to run authentic tests and get accurate scores.
+
+### Automatic Judge Detection
+
+```python
+# The system automatically detects and uses judge scripts
+test_results = tools.build_and_run_tests(project_path, "A1")
+# This will use test_cases/practice1/judge/judge.sh if available
+```
+
+### Supported Judge Scripts
+
+Each practice folder contains:
+
+- **judge.sh**: Main testing script with compilation and test execution
+- **config.sh**: Configuration file for test parameters  
+- **clone.sh**: Repository cloning and commit analysis
+- **repos.json**: Student repository mappings for each phase (A6)
+
+### A6 Multi-Phase Testing
+
+For A6 assignments, the system automatically runs tests for all three phases:
+
+```bash
+# Automatically runs Phase 1, 2, and 3 tests
+./judge.sh -p 1 && ./judge.sh -t
+./judge.sh -p 2 && ./judge.sh -t  
+./judge.sh -p 3 && ./judge.sh -t
+```
+
+### Judge Script Features
+
+- **Compilation Testing**: Tests if code compiles successfully
+- **Test Execution**: Runs test cases against student code
+- **Output Validation**: Compares student output with expected results
+- **Scoring**: Provides pass/fail counts and detailed feedback
+- **Multi-Phase Support**: Handles A6's three-phase structure
+
 ## Troubleshooting
 
 ### Common Issues

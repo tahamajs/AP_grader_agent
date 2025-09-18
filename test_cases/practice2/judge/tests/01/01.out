@@ -1,0 +1,38 @@
+Table ID: 3
+People at the table:
+Table remaining capacity: 2
+Waiting queue length: 0
+Sadegh sits at table 3
+Table ID: 3
+People at the table: Sadegh
+Table remaining capacity: 1
+Waiting queue length: 0
+Mehrad sits at table 3
+Table ID: 3
+People at the table: Mehrad, Sadegh
+Table remaining capacity: 0
+Waiting queue length: 0
+Mahdi enters the waiting queue of table 3
+Table ID: 3
+People at the table: Mehrad, Sadegh
+Table remaining capacity: 0
+Waiting queue length: 1
+Sadegh exits!
+Table ID: 3
+People at the table: Mahdi, Mehrad
+Table remaining capacity: 0
+Waiting queue length: 0
+Mahdi exits!
+Table ID: 3
+People at the table: Mehrad
+Table remaining capacity: 1
+Waiting queue length: 0
+Table ID: 6
+People at the table:
+Table remaining capacity: 3
+Waiting queue length: 0
+Mehrad exits!
+Table ID: 3
+People at the table:
+Table remaining capacity: 2
+Waiting queue length: 0

@@ -218,6 +218,9 @@ def calculate_a6_scores(llm_grades, test_results):
     """Calculate scores for A6 multi-phase assignment."""
     phase_grades = {}
 
+    # Get phase-specific test results from judge output
+    phase_results = test_results.get("phase_results", {})
+
     # Phase 1 (91 points total)
     p1_score = 0
     p1_features = [
@@ -244,6 +247,12 @@ def calculate_a6_scores(llm_grades, test_results):
     for feature in p1_features:
         p1_score += llm_grades.get(feature, 0)
 
+    # Add test correctness score for Phase 1
+    p1_test_result = phase_results.get("phase1", {})
+    if p1_test_result:
+        p1_correctness = (p1_test_result.get("passed", 0) / max(p1_test_result.get("total", 1), 1)) * 20
+        p1_score += p1_correctness
+
     phase_grades["phase1"] = {
         "p1_raw_score": round(p1_score, 2),
         "p1_final_score": round(p1_score, 2),  # Add penalty logic if needed
@@ -266,6 +275,12 @@ def calculate_a6_scores(llm_grades, test_results):
     ]
     for feature in p2_features:
         p2_score += llm_grades.get(feature, 0)
+
+    # Add test correctness score for Phase 2
+    p2_test_result = phase_results.get("phase2", {})
+    if p2_test_result:
+        p2_correctness = (p2_test_result.get("passed", 0) / max(p2_test_result.get("total", 1), 1)) * 30
+        p2_score += p2_correctness
 
     phase_grades["phase2"] = {
         "p2_raw_score": round(p2_score, 2),
@@ -297,6 +312,12 @@ def calculate_a6_scores(llm_grades, test_results):
     ]
     for feature in p3_features:
         p3_score += llm_grades.get(feature, 0)
+
+    # Add test correctness score for Phase 3
+    p3_test_result = phase_results.get("phase3", {})
+    if p3_test_result:
+        p3_correctness = (p3_test_result.get("passed", 0) / max(p3_test_result.get("total", 1), 1)) * 25
+        p3_score += p3_correctness
 
     total_score = p1_score + p2_score + p3_score
     phase_grades["phase3"] = {

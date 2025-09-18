@@ -1,0 +1,101 @@
+Table 1: 4 0
+Table 2: 4 0
+Table 5: 3 0
+Table 6: 3 0
+Table 3: 2 0
+Table 4: 2 0
+Paria sits at table 1
+Table 1: 3 0
+Table 2: 4 0
+Table 5: 3 0
+Table 6: 3 0
+Table 3: 2 0
+Table 4: 2 0
+Amir Hossein sits at table 1
+Table ID: 1
+People at the table: Amir Hossein, Paria
+Table remaining capacity: 2
+Waiting queue length: 0
+Table 1: 2 0
+Table 2: 4 0
+Table 5: 3 0
+Table 6: 3 0
+Table 3: 2 0
+Table 4: 2 0
+Parsa sits at table 2
+Mehrad sits at table 1
+Table 1: 1 0
+Table 2: 3 0
+Table 5: 3 0
+Table 3: 2 0
+Table 6: 3 0
+Table 4: 2 0
+Fereshte sits at table 1
+Amir Akbar sits at table 5
+Table ID: 5
+People at the table: Amir Akbar
+Table remaining capacity: 2
+Waiting queue length: 0
+Mahdi enters the waiting queue of table 1
+Table 1: 0 1
+Table 2: 3 0
+Table 5: 2 0
+Table 3: 2 0
+Table 6: 3 0
+Table 4: 2 0
+Taha sits at table 2
+Mehrad switches seats with Taha!
+Paria exits!
+Table ID: 1
+People at the table: Amir Hossein, Fereshte, Mahdi, Taha
+Table remaining capacity: 0
+Waiting queue length: 0
+Sadegh enters the waiting queue of table 1
+Table 2: 2 0
+Table 1: 0 1
+Table 6: 3 0
+Table 4: 2 0
+Table 5: 2 0
+Table 3: 2 0
+Hamid enters the waiting queue of table 1
+Amir Hossein exits!
+Table ID: 2
+People at the table: Mehrad, Parsa
+Table remaining capacity: 2
+Waiting queue length: 0
+Shaghayegh enters the waiting queue of table 1
+Bob sits at table 3
+Mehrad exits!
+Table ID: 1
+People at the table: Fereshte, Mahdi, Sadegh, Taha
+Table remaining capacity: 0
+Waiting queue length: 2
+Ted sits at table 2
+Table 1: 0 2
+Table 2: 2 0
+Table 5: 2 0
+Table 3: 1 0
+Table 6: 3 0
+Table 4: 2 0
+Babak enters the waiting queue of table 1
+Erfan enters the waiting queue of table 1
+Mahdi exits!
+Table ID: 1
+People at the table: Fereshte, Hamid, Sadegh, Taha
+Table remaining capacity: 0
+Waiting queue length: 3
+Alex enters the waiting queue of table 1
+Hamid switches seats with Parsa!
+Sipamo sits at table 2
+Table 2: 1 0
+Table 6: 3 0
+Table 1: 0 4
+Table 5: 2 0
+Table 4: 2 0
+Table 3: 1 0
+Amin sits at table 2
+Hamid exits!
+Table ID: 2
+People at the table: Amin, Sipamo, Ted
+Table remaining capacity: 1
+Waiting queue length: 0

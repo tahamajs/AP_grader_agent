@@ -1,0 +1,34 @@
+reserve_table 5 2
+reserve_table 21 2
+reserve_table 28 4
+reserve_table 3 3
+reserve_table 32 2
+reserve_table 2
+reserve_table 9
+reserve_table 29 5
+reserve_table 30 6
+switch 30
+reserve_table 27 3
+reserve_table 26 2
+switch 29
+reserve_table 7
+reserve_table 15
+reserve_table 17 2
+reserve_table 10 4
+reserve_table 16
+reserve_table 50 1
+reserve_table 1 3
+switch 50
+reserve_table 41 5
+reserve_table 45 6
+reserve_table 14 1
+reserve_table 23
+reserve_table 49 2
+reserve_table 25 5
+reserve_table 47
+reserve_table 18
+switch 25
+reserve_table 38 4
+reserve_table 11
+switch 41
+reserve_table 46

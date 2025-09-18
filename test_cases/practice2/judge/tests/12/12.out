@@ -1,0 +1,41 @@
+Paria sits at table 6
+Amir Hossein sits at table 6
+Parsa sits at table 6
+Mehrad enters the waiting queue of table 6
+Fereshte enters the waiting queue of table 6
+Amir Akbar enters the waiting queue of table 6
+Mahdi enters the waiting queue of table 6
+Taha enters the waiting queue of table 6
+Sadegh enters the waiting queue of table 6
+Hamid enters the waiting queue of table 6
+Paria exits!
+Amir Hossein exits!
+Table ID: 6
+People at the table: Mahdi, Mehrad, Parsa
+Table remaining capacity: 0
+Waiting queue length: 5
+Parsa exits!
+Mehrad exits!
+Table ID: 6
+People at the table: Mahdi, Sadegh, Taha
+Table remaining capacity: 0
+Waiting queue length: 3
+Amir Hossein enters the waiting queue of table 6
+Taha exits!
+Table ID: 6
+People at the table: Amir Hossein, Mahdi, Sadegh
+Table remaining capacity: 0
+Waiting queue length: 3
+Paria enters the waiting queue of table 6
+Sadegh exits!
+Table ID: 6
+People at the table: Amir Hossein, Hamid, Mahdi
+Table remaining capacity: 0
+Waiting queue length: 3
+Amir Hossein exits!
+Mahdi exits!
+Hamid exits!
+Table ID: 6
+People at the table: Amir Akbar, Fereshte, Paria
+Table remaining capacity: 0
+Waiting queue length: 0

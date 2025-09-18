@@ -1,0 +1,44 @@
+enter 1
+reserve_table 1
+reserve_table 2 2
+reserve_table 3 2
+reserve_table 4 2
+show_table_info 2
+reserve_table 5 2
+reserve_table 6 2
+reserve_table 8 2
+reserve_table 7 2
+show_table_info 2
+reserve_table 9 2
+reserve_table 10 2
+show_table_info 2
+exit 2
+show_table_info 2
+exit 5
+show_table_info 2
+exit 6
+show_table_info 2
+exit 3
+show_table_info 2
+enter 18
+exit 8
+enter 18
+reserve_table 18 4
+show_table_info 2
+switch 7
+show_table_info 2
+exit 4
+exit 9
+exit 18
+show_table_info 2
+reserve_table 18 4
+reserve_table 4 3
+reserve_table 30 3
+reserve_table 43 4
+show_table_info 4
+show_table_info 3
+enter 29
+exit 1
+exit 4
+reserve_table 22
+exit 18

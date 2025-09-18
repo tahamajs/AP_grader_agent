@@ -1,0 +1,118 @@
+Table ID: 6
+People at the table:
+Table remaining capacity: 3
+Waiting queue length: 0
+Table 1: 4 0
+Table 2: 4 0
+Table 5: 3 0
+Table 6: 3 0
+Table 3: 2 0
+Table 4: 2 0
+Mike sits at table 6
+Table ID: 6
+People at the table: Mike
+Table remaining capacity: 2
+Waiting queue length: 0
+Sadegh sits at table 1
+Walter sits at table 2
+Amir Hossein sits at table 1
+Table ID: 1
+People at the table: Amir Hossein, Sadegh
+Table remaining capacity: 2
+Waiting queue length: 0
+Gustavo sits at table 5
+Table ID: 5
+People at the table: Gustavo
+Table remaining capacity: 2
+Waiting queue length: 0
+Mike switches seats with Gustavo!
+Table ID: 5
+People at the table: Mike
+Table remaining capacity: 2
+Waiting queue length: 0
+Table ID: 6
+People at the table: Gustavo
+Table remaining capacity: 2
+Waiting queue length: 0
+Gustavo switches seats with Mike!
+Table ID: 5
+People at the table: Gustavo
+Table remaining capacity: 2
+Waiting queue length: 0
+Table ID: 6
+People at the table: Mike
+Table remaining capacity: 2
+Waiting queue length: 0
+Mike exits!
+Table ID: 6
+People at the table:
+Table remaining capacity: 3
+Waiting queue length: 0
+Jesse sits at table 3
+Hasti sits at table 2
+Fereshte sits at table 2
+Table 1: 2 0
+Table 2: 1 0
+Table 5: 2 0
+Table 6: 3 0
+Table 3: 1 0
+Table 4: 2 0
+Tommy sits at table 2
+Hank sits at table 4
+Parsa sits at table 3
+Mahdi enters the waiting queue of table 2
+Erfan enters the waiting queue of table 2
+Alex sits at table 1
+Hamid sits at table 4
+Hank exits!
+Sipamo enters the waiting queue of table 2
+Sobhan sits at table 1
+Paria enters the waiting queue of table 3
+Melika sits at table 5
+Table ID: 1
+People at the table: Alex, Amir Hossein, Sadegh, Sobhan
+Table remaining capacity: 0
+Waiting queue length: 0
+Alex exits!
+Table ID: 1
+People at the table: Amir Hossein, Sadegh, Sobhan
+Table remaining capacity: 1
+Waiting queue length: 0
+Marry sits at table 6
+Parham enters the waiting queue of table 2
+Babak sits at table 1
+Marry exits!
+Peyman enters the waiting queue of table 1
+Shahin enters the waiting queue of table 2
+Amin enters the waiting queue of table 1
+Sina enters the waiting queue of table 1
+Sobhan switches seats with Fereshte!
+Taha enters the waiting queue of table 1
+Reza enters the waiting queue of table 1
+Aryan sits at table 4
+Melika exits!
+Shaghayegh enters the waiting queue of table 1
+Narges enters the waiting queue of table 1
+Asghar sits at table 5
+Saeed enters the waiting queue of table 1
+Saman sits at table 5
+Sadegh exits!
+Walter exits!
+Melika sits at table 6
+Table ID: 1
+People at the table: Amir Hossein, Babak, Fereshte, Peyman
+Table remaining capacity: 0
+Waiting queue length: 7
+Table ID: 5
+People at the table: Asghar, Gustavo, Saman
+Table remaining capacity: 0
+Waiting queue length: 0
+Saman switches seats with Amir Hossein!
+Table ID: 1
+People at the table: Babak, Fereshte, Peyman, Saman
+Table remaining capacity: 0
+Waiting queue length: 7
+Table ID: 5
+People at the table: Amir Hossein, Asghar, Gustavo
+Table remaining capacity: 0
+Waiting queue length: 0

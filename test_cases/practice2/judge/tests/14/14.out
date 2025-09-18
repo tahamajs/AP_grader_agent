@@ -1,0 +1,48 @@
+Paria sits at table 1
+Amir Hossein sits at table 1
+Fereshte sits at table 1
+Mahdi sits at table 1
+Taha sits at table 2
+Bob sits at table 2
+Babak sits at table 2
+Sipamo sits at table 3
+Kiana sits at table 3
+Narges sits at table 5
+Sobhan sits at table 5
+Amir Hossein switches seats with Mahdi!
+Fereshte switches seats with Paria!
+Table ID: 1
+People at the table: Amir Hossein, Fereshte, Mahdi, Paria
+Table remaining capacity: 0
+Waiting queue length: 0
+Babak switches seats with Mahdi!
+Sipamo switches seats with Amir Hossein!
+Kiana switches seats with Paria!
+Sobhan switches seats with Fereshte!
+Taha switches seats with Amir Hossein!
+Narges switches seats with Paria!
+Kiana switches seats with Paria!
+Fereshte switches seats with Paria!
+Taha switches seats with Amir Hossein!
+Amir Hossein switches seats with Mahdi!
+Paria switches seats with Bob!
+Table ID: 2
+People at the table: Amir Hossein, Paria, Taha
+Table remaining capacity: 1
+Waiting queue length: 0
+Table ID: 3
+People at the table: Mahdi, Narges
+Table remaining capacity: 0
+Waiting queue length: 0
+Table ID: 4
+People at the table:
+Table remaining capacity: 2
+Waiting queue length: 0
+Table ID: 5
+People at the table: Bob, Kiana
+Table remaining capacity: 1
+Waiting queue length: 0
+Table ID: 6
+People at the table:
+Table remaining capacity: 3
+Waiting queue length: 0

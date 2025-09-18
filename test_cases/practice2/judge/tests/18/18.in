@@ -1,0 +1,14 @@
+reserve_table 4 1
+reserve_table 1 4
+enter 24
+reserve_table 24
+exit 1
+exit 4
+exit 24
+reserve_table 5 1
+reserve_table 1 6
+enter 32
+reserve_table 32
+exit 1
+exit 5
+exit 32

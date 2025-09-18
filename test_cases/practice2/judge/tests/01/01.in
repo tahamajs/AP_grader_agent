@@ -1,0 +1,14 @@
+show_table_info 3
+reserve_table 9 3
+show_table_info 3
+reserve_table 4 3
+show_table_info 3
+reserve_table 7 3
+show_table_info 3
+exit 9
+show_table_info 3
+exit 7
+show_table_info 3
+show_table_info 6
+exit 4
+show_table_info 3

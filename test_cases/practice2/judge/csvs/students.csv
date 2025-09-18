@@ -1,0 +1,51 @@
+id,name,friend_id,enemy_id
+1,Paria,12,24
+2,Amir Hossein,7,14
+3,Parsa,9,13
+4,Mehrad,8,14
+5,Fereshte,1,22
+6,Amir Akbar,11,22
+7,Mahdi,18,29
+8,Taha,2,29
+9,Sadegh,10,29
+10,Hamid,3,30
+11,Shaghayegh,2,22
+12,Bob,14,13
+13,Ted,14,12
+14,Babak,7,2
+15,Erfan,7,29
+16,Alex,14,13
+17,Sipamo,2,19
+18,Amin,4,8
+19,Sina,7,11
+20,Reza,9,29
+21,Tommy,10,7
+22,Kiana,1,30
+23,Narges,1,4
+24,Sara,1,4
+25,Saman,2,6
+26,Walter,27,29
+27,Jesse,26,28
+28,Hank,7,26
+29,Gustavo,30,26
+30,Mike,29,26
+31,Navid,17,9
+32,Hasti,1,5
+33,Amir Reza,8,7
+34,Albert,4,35
+35,Adolf,3,2
+36,Saeed,2,10
+37,Arya,2,1
+38,Aryan,5,4
+39,Asghar,7,11
+40,Hamid Reza,8,7
+41,Melika,9,38
+42,Shafagh,10,39
+43,Mohsen,10,40
+44,Noah,9,26
+45,Marry,7,29
+46,Shahin,26,3
+47,Peyman,29,15
+48,Arman,7,17
+49,Parham,6,19
+50,Sobhan,5,25

@@ -1,0 +1,31 @@
+Sadegh sits at table 1
+Hamid sits at table 1
+Parsa sits at table 2
+Sadegh switches seats with Hamid!
+Sadegh switches seats with Hamid!
+Sadegh switches seats with Hamid!
+Table ID: 1
+People at the table: Hamid, Sadegh
+Table remaining capacity: 2
+Waiting queue length: 0
+Hamid switches seats with Parsa!
+Table ID: 2
+People at the table: Hamid
+Table remaining capacity: 3
+Waiting queue length: 0
+Hamid switches seats with Parsa!
+Table ID: 2
+People at the table: Parsa
+Table remaining capacity: 3
+Waiting queue length: 0
+Hamid switches seats with Parsa!
+Parsa switches seats with Sadegh!
+Sadegh switches seats with Hamid!
+Table ID: 2
+People at the table: Sadegh
+Table remaining capacity: 3
+Waiting queue length: 0
+Table ID: 1
+People at the table: Hamid, Parsa
+Table remaining capacity: 2
+Waiting queue length: 0

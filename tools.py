@@ -605,36 +605,18 @@ def run_static_analysis(project_path: str) -> str:
 
 def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
     """Builds the project and runs it against test cases using the judge.sh system."""
-    # Get practice-specific configuration
-    practice_config = config.PRACTICE_CONFIGS.get(
-        practice_name,
-        {
-            "build_command": config.BUILD_COMMAND,
-            "executable_name": config.EXECUTABLE_NAME,
-            "test_cases_dir": config.TEST_CASES_DIR,
-        },
-    )
 
-    results = {
-        "build_successful": False,
-        "passed_tests": 0,
-        "total_tests": 0,
-        "failed_tests": [],
-        "execution_summary": "",
-        "build_output": "",
-        "test_details": [],
-    }
+    # Special handling for A6 multi-phase
+    if practice_name == "A6":
+        return run_judge_tests_a6(project_path, practice_name)
 
-    # Check if we have the judge.sh system available
-    judge_script_path = os.path.join(
-        config.TEST_CASES_DIR, "practice6", "APF03-A6-judge (1)", "judge.sh"
-    )
-    if os.path.exists(judge_script_path):
-        # Use the judge.sh system for A6 assignments
-        return run_judge_tests(project_path, practice_name, judge_script_path)
+    # Try to use judge.sh for other practices
+    judge_results = run_judge_tests(project_path, practice_name)
+    if judge_results["total_tests"] > 0 or "Judge folder not found" not in judge_results["execution_summary"]:
+        return judge_results
 
-    # Fallback to original test system for other assignments
-    return run_standard_tests(project_path, practice_name, practice_config)
+    # Fallback to original test system if judge.sh is not available
+    return run_standard_tests(project_path, practice_name)
 
 
 def run_judge_tests(
@@ -699,17 +681,16 @@ def run_judge_tests(
                         total = int(parts[4])
                         results["passed_tests"] = passed
                         results["total_tests"] = total
+                        results["failed_tests"] = list(range(passed + 1, total + 1))
                         results["build_successful"] = True
                     except ValueError:
                         pass
 
         if results["total_tests"] == 0:
             # If parsing failed, assume build was successful if no clear errors
-            if "Compiled Successfully" in process.stdout:
+            if "Compiled Successfully" in process.stdout or "Compiled successfully" in process.stdout:
                 results["build_successful"] = True
-                results[
-                    "execution_summary"
-                ] += "\n⚠️ Could not parse test results, but compilation was successful."
+                results["execution_summary"] += "\n⚠️ Could not parse test results, but compilation was successful."
 
         return results
 
@@ -876,3 +857,125 @@ def run_standard_tests(
         ] += f"❌ Failed tests: {', '.join(results['failed_tests'])}\n"
 
     return results
+
+
+def run_judge_tests_a6(project_path: str, practice_name: str) -> dict:
+    """Runs tests for A6 multi-phase assignment using judge.sh scripts."""
+    results = {
+        "build_successful": False,
+        "passed_tests": 0,
+        "total_tests": 0,
+        "failed_tests": [],
+        "execution_summary": "",
+        "build_output": "",
+        "test_details": [],
+        "phase_results": {}
+    }
+
+    # Find the judge folder for A6
+    judge_dir = None
+    test_cases_dir = os.path.join(config.TEST_CASES_DIR, "practice6")
+    if os.path.exists(test_cases_dir):
+        judge_path = os.path.join(test_cases_dir, "judge")
+        if os.path.exists(judge_path):
+            judge_dir = judge_path
+
+    if not judge_dir:
+        results["execution_summary"] = "❌ Judge folder not found for A6"
+        return results
+
+    judge_script = os.path.join(judge_dir, "judge.sh")
+
+    if not os.path.exists(judge_script):
+        results["execution_summary"] = "❌ judge.sh not found in judge directory"
+        return results
+
+    try:
+        # Copy student's code to judge directory
+        temp_run_dir = os.path.join(judge_dir, "temp-P3")  # Use P3 as default
+        if os.path.exists(temp_run_dir):
+            import shutil
+            shutil.rmtree(temp_run_dir)
+        os.makedirs(temp_run_dir)
+
+        # Copy all source files from student's project
+        for root, _, files in os.walk(project_path):
+            for file in files:
+                if file.endswith((".cpp", ".h", ".hpp", "Makefile", "makefile")):
+                    src_path = os.path.join(root, file)
+                    dst_path = os.path.join(temp_run_dir, file)
+                    import shutil
+                    shutil.copy2(src_path, dst_path)
+
+        # Run tests for all phases
+        phase_results = {}
+        total_passed = 0
+        total_tests = 0
+
+        for phase in [1, 2, 3]:
+            print(f"Running Phase {phase} tests...")
+
+            # Change to the specific phase
+            change_command = [judge_script, "-p", str(phase)]
+            subprocess.run(change_command, cwd=judge_dir, capture_output=True, text=True)
+
+            # Run tests for this phase
+            test_command = [judge_script, "-t"]
+            process = subprocess.run(
+                test_command,
+                cwd=judge_dir,
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
+
+            phase_output = process.stdout
+            if process.stderr:
+                phase_output += f"\nSTDERR:\n{process.stderr}"
+
+            # Parse results for this phase
+            passed = 0
+            total = 0
+            output_lines = phase_output.split("\n")
+            for line in output_lines:
+                if "Passed:" in line and "Failed:" in line:
+                    parts = line.split()
+                    if len(parts) >= 5:
+                        try:
+                            passed = int(parts[1])
+                            total = int(parts[4])
+                            break
+                        except ValueError:
+                            pass
+
+            phase_results[f"phase{phase}"] = {
+                "passed": passed,
+                "total": total,
+                "output": phase_output
+            }
+
+            total_passed += passed
+            total_tests += total
+
+        results["passed_tests"] = total_passed
+        results["total_tests"] = total_tests
+        results["phase_results"] = phase_results
+        results["build_successful"] = True
+
+        # Combine all phase outputs
+        combined_output = ""
+        for phase, phase_data in phase_results.items():
+            combined_output += f"\n=== PHASE {phase.upper()} ===\n"
+            combined_output += phase_data["output"]
+            combined_output += f"\nPhase {phase}: {phase_data['passed']}/{phase_data['total']} tests passed\n"
+
+        results["execution_summary"] = combined_output
+
+        return results
+
+    except subprocess.TimeoutExpired:
+        results["execution_summary"] = "❌ Testing timed out after 5 minutes."
+        return results
+    except Exception as e:
+        results["execution_summary"] = f"❌ Error running A6 judge.sh: {str(e)}"
+        return results

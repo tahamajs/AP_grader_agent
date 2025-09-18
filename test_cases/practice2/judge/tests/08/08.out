@@ -1,0 +1,100 @@
+Table 1: 4 0
+Table 2: 4 0
+Table 5: 3 0
+Table 6: 3 0
+Table 3: 2 0
+Table 4: 2 0
+Paria sits at table 1
+Amir Hossein sits at table 2
+Parsa sits at table 2
+Mehrad sits at table 2
+Table ID: 2
+People at the table: Amir Hossein, Mehrad, Parsa
+Table remaining capacity: 1
+Waiting queue length: 0
+Fereshte sits at table 2
+Amir Akbar enters the waiting queue of table 2
+Taha enters the waiting queue of table 2
+Mahdi enters the waiting queue of table 2
+Table ID: 2
+People at the table: Amir Hossein, Fereshte, Mehrad, Parsa
+Table remaining capacity: 0
+Waiting queue length: 3
+Sadegh enters the waiting queue of table 2
+Hamid enters the waiting queue of table 2
+Table ID: 2
+People at the table: Amir Hossein, Fereshte, Mehrad, Parsa
+Table remaining capacity: 0
+Waiting queue length: 5
+Amir Hossein exits!
+Table ID: 2
+People at the table: Fereshte, Mahdi, Mehrad, Parsa
+Table remaining capacity: 0
+Waiting queue length: 4
+Fereshte exits!
+Table ID: 2
+People at the table: Amir Akbar, Mahdi, Mehrad, Parsa
+Table remaining capacity: 0
+Waiting queue length: 3
+Amir Akbar exits!
+Table ID: 2
+People at the table: Mahdi, Mehrad, Parsa, Taha
+Table remaining capacity: 0
+Waiting queue length: 2
+Parsa exits!
+Table ID: 2
+People at the table: Mahdi, Mehrad, Sadegh, Taha
+Table remaining capacity: 0
+Waiting queue length: 1
+Table 1: 3 0
+Table 2: 0 1
+Table 5: 3 0
+Table 6: 3 0
+Table 3: 2 0
+Table 4: 2 0
+Taha exits!
+Table 2: 0 0
+Table 1: 3 0
+Table 6: 3 0
+Table 4: 2 0
+Table 5: 3 0
+Table 3: 2 0
+Amin sits at table 4
+Table ID: 2
+People at the table: Hamid, Mahdi, Mehrad, Sadegh
+Table remaining capacity: 0
+Waiting queue length: 0
+Mahdi switches seats with Amin!
+Table ID: 2
+People at the table: Amin, Hamid, Mehrad, Sadegh
+Table remaining capacity: 0
+Waiting queue length: 0
+Mehrad exits!
+Sadegh exits!
+Amin exits!
+Table ID: 2
+People at the table: Hamid
+Table remaining capacity: 3
+Waiting queue length: 0
+Amin sits at table 4
+Mehrad sits at table 3
+Mike sits at table 3
+Mohsen enters the waiting queue of table 4
+Table ID: 4
+People at the table: Amin, Mahdi
+Table remaining capacity: 0
+Waiting queue length: 1
+Table ID: 3
+People at the table: Mehrad, Mike
+Table remaining capacity: 0
+Waiting queue length: 0
+Table 1: 3 0
+Table 2: 3 0
+Table 5: 3 0
+Table 3: 0 0
+Table 6: 3 0
+Table 4: 0 1
+Paria exits!
+Mehrad exits!
+Kiana sits at table 2
+Amin exits!
