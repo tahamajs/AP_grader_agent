@@ -29,10 +29,7 @@ PRACTICE_CONFIGS = {
         "grading_criteria": {
             "logic": {
                 "weight": 5,
-                "sub_criteria": {
-                    "using_iterators": 1,
-                    "using_containers": 1
-                }
+                "sub_criteria": {"using_iterators": 1, "using_containers": 1},
             },
             "design": {
                 "weight": 35,
@@ -40,8 +37,8 @@ PRACTICE_CONFIGS = {
                     "separate_io_from_logic": 2,
                     "using_structs": 1,
                     "no_godly_main": 2,
-                    "small_functions_single_responsibility": 3
-                }
+                    "small_functions_single_responsibility": 3,
+                },
             },
             "clean_coding": {
                 "weight": 25,
@@ -51,15 +48,10 @@ PRACTICE_CONFIGS = {
                     "indentation": 1,
                     "magic_values_no_global_vars": 1,
                     "naming": 1,
-                    "consistency": 1
-                }
+                    "consistency": 1,
+                },
             },
-            "correctness": {
-                "weight": 30,
-                "sub_criteria": {
-                    "test_cases": 20
-                }
-            }
+            "correctness": {"weight": 30, "sub_criteria": {"test_cases": 20}},
         },
         "penalties": {
             "using_goto": -5,
@@ -67,8 +59,8 @@ PRACTICE_CONFIGS = {
             "raw_late": 4,
             "final_late": 0.2,
             "upload_structure": 4,
-            "penalty": 0.15
-        }
+            "penalty": 0.15,
+        },
     },
     "A3": {
         "name": "Assignment 3 - Algorithms and Data Structures",
@@ -81,32 +73,32 @@ PRACTICE_CONFIGS = {
                 "sub_criteria": {
                     "recursive_logic": 2,
                     "test_cases": 15,
-                    "upload_two_testcases": 2
-                }
+                    "upload_two_testcases": 2,
+                },
             },
             "q2_household": {
                 "weight": 18,
                 "sub_criteria": {
                     "recursive_logic": 2,
                     "test_cases": 15,
-                    "upload_two_testcases": 2
-                }
+                    "upload_two_testcases": 2,
+                },
             },
             "q3_foodro": {
                 "weight": 20,
                 "sub_criteria": {
                     "backtracking": 2,
                     "test_cases": 15,
-                    "upload_two_testcases": 2
-                }
+                    "upload_two_testcases": 2,
+                },
             },
             "q4_unknown": {
                 "weight": 15,
                 "sub_criteria": {
                     "backtracking": 2,
                     "test_cases": 10,
-                    "upload_two_testcases": 2
-                }
+                    "upload_two_testcases": 2,
+                },
             },
             "design": {
                 "weight": 20,
@@ -119,22 +111,14 @@ PRACTICE_CONFIGS = {
                     "indentation": 1,
                     "magic_values_no_global_vars": 1,
                     "naming": 1,
-                    "consistency": 1
-                }
+                    "consistency": 1,
+                },
             },
             "git": {
                 "weight": 6,
-                "sub_criteria": {
-                    "commit_messages": 1,
-                    "standard_commits": 1
-                }
+                "sub_criteria": {"commit_messages": 1, "standard_commits": 1},
             },
-            "correctness": {
-                "weight": 49,
-                "sub_criteria": {
-                    "test_cases": 60
-                }
-            }
+            "correctness": {"weight": 49, "sub_criteria": {"test_cases": 60}},
         },
         "penalties": {
             "clean_code": -2,
@@ -142,8 +126,8 @@ PRACTICE_CONFIGS = {
             "raw_late": 4,
             "final_late": 0.2,
             "upload_structure": 4,
-            "penalty": 0.15
-        }
+            "penalty": 0.15,
+        },
     },
     "A4": {
         "name": "Assignment 4 - Object Oriented Programming",
@@ -159,8 +143,8 @@ PRACTICE_CONFIGS = {
                     "field_assignment": 5,
                     "public_private_access_modifiers": 3,
                     "no_logic_in_main": 3,
-                    "small_functions": 2
-                }
+                    "small_functions": 2,
+                },
             },
             "clean_coding": {
                 "weight": 10,
@@ -169,38 +153,30 @@ PRACTICE_CONFIGS = {
                     "indentation": 1,
                     "magic_values_no_global_vars": 1,
                     "naming": 1,
-                    "consistency": 1
-                }
+                    "consistency": 1,
+                },
             },
             "multifile": {
                 "weight": 10,
                 "sub_criteria": {
                     "break_into_files": 1,
                     "header_guards": 1,
-                    "makefile": 1
-                }
+                    "makefile": 1,
+                },
             },
             "git": {
                 "weight": 5,
-                "sub_criteria": {
-                    "commit_messages": 1,
-                    "standard_commits": 1
-                }
+                "sub_criteria": {"commit_messages": 1, "standard_commits": 1},
             },
-            "correctness": {
-                "weight": 22,
-                "sub_criteria": {
-                    "test_cases": 10
-                }
-            }
+            "correctness": {"weight": 22, "sub_criteria": {"test_cases": 10}},
         },
         "penalties": {
             "late_delivery": -10,
             "raw_late": 4,
             "final_late": 0.1,
             "upload_structure": 4,
-            "penalty": 0.05
-        }
+            "penalty": 0.05,
+        },
     },
     "A5": {
         "name": "Assignment 5 - Tower Defense Game",
@@ -222,8 +198,8 @@ PRACTICE_CONFIGS = {
                     "launch_control": 5,
                     "players_health_panel": 2,
                     "music": 2,
-                    "game_end": 1
-                }
+                    "game_end": 1,
+                },
             },
             "object_oriented_design": {
                 "weight": 14,
@@ -232,16 +208,16 @@ PRACTICE_CONFIGS = {
                     "encapsulation": 5,
                     "small_functions": 2,
                     "no_duplication": 1,
-                    "indentation": 1
-                }
+                    "indentation": 1,
+                },
             },
             "clean_coding": {
                 "weight": 10,
                 "sub_criteria": {
                     "magic_values_no_global_vars": 1,
                     "naming": 1,
-                    "consistency": 1
-                }
+                    "consistency": 1,
+                },
             },
             "git": {
                 "weight": 10,
@@ -250,23 +226,18 @@ PRACTICE_CONFIGS = {
                     "header_guards": 1,
                     "makefile": 1,
                     "commit_messages": 1,
-                    "standard_commits": 1
-                }
+                    "standard_commits": 1,
+                },
             },
-            "correctness": {
-                "weight": 22,
-                "sub_criteria": {
-                    "test_cases": 10
-                }
-            }
+            "correctness": {"weight": 22, "sub_criteria": {"test_cases": 10}},
         },
         "penalties": {
             "late_delivery": -10,
             "raw_late": 4,
             "final_late": 0.2,
             "upload_structure": 4,
-            "penalty": 0.15
-        }
+            "penalty": 0.15,
+        },
     },
     "A6": {
         "name": "Assignment 6 - Event Management System",
@@ -298,14 +269,14 @@ PRACTICE_CONFIGS = {
                             "consistency": 3,
                             "break_into_files": 1,
                             "makefile": 1,
-                            "test_cases": 30
-                        }
+                            "test_cases": 30,
+                        },
                     },
                     "design": {"weight": 39},
                     "clean_coding": {"weight": 10},
                     "multifile": {"weight": 9},
-                    "correctness": {"weight": 30}
-                }
+                    "correctness": {"weight": 30},
+                },
             },
             "phase2": {
                 "name": "Phase 2 - Feature Addition",
@@ -323,13 +294,13 @@ PRACTICE_CONFIGS = {
                             "indentation": 2,
                             "naming": 2,
                             "consistency": 2,
-                            "test_cases": 15
-                        }
+                            "test_cases": 15,
+                        },
                     },
                     "design": {"weight": 18},
                     "clean_coding": {"weight": 12},
-                    "correctness": {"weight": 30}
-                }
+                    "correctness": {"weight": 30},
+                },
             },
             "phase3": {
                 "name": "Phase 3 - Web Interface",
@@ -352,14 +323,14 @@ PRACTICE_CONFIGS = {
                             "handlers": 3,
                             "css": 2,
                             "js": 1,
-                            "makefile": 2
-                        }
+                            "makefile": 2,
+                        },
                     },
                     "clean_coding": {"weight": 30},
                     "bonus": {"weight": 10},
-                    "multifile": {"weight": 5}
-                }
-            }
+                    "multifile": {"weight": 5},
+                },
+            },
         },
         "penalties": {
             "grace": 1,
@@ -367,7 +338,7 @@ PRACTICE_CONFIGS = {
             "raw_late": 4,
             "final_late": 0.2,
             "upload_structure": 4,
-            "penalty": 0.15
-        }
-    }
+            "penalty": 0.15,
+        },
+    },
 }

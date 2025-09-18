@@ -65,7 +65,7 @@ def grade_student_project(
             top_p=0.8,
             top_k=40,
             max_output_tokens=2048,
-        )
+        ),
     )
 
     # Enhanced format instructions with validation
@@ -211,12 +211,16 @@ def grade_student_project(
 
         except json.JSONDecodeError as e:
             if attempt == max_retries - 1:
-                raise ValueError(f"Failed to parse JSON after {max_retries} attempts: {e}. Response: {response_text}")
+                raise ValueError(
+                    f"Failed to parse JSON after {max_retries} attempts: {e}. Response: {response_text}"
+                )
             print(f"JSON parsing failed (attempt {attempt + 1}), retrying...")
             continue
         except Exception as e:
             if attempt == max_retries - 1:
-                raise ValueError(f"Error processing response after {max_retries} attempts: {e}")
+                raise ValueError(
+                    f"Error processing response after {max_retries} attempts: {e}"
+                )
             print(f"API call failed (attempt {attempt + 1}), retrying...")
             continue
 

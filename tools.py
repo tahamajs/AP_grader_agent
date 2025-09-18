@@ -34,7 +34,7 @@ def read_project_files(project_path: str) -> str:
         "cpp_files": 0,
         "header_files": 0,
         "largest_file": "",
-        "max_lines": 0
+        "max_lines": 0,
     }
 
     for root, _, files in os.walk(project_path):
@@ -51,7 +51,7 @@ def read_project_files(project_path: str) -> str:
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         content = f.read()
-                        lines = content.count('\n') + 1
+                        lines = content.count("\n") + 1
                         code_metrics["total_lines"] += lines
 
                         if lines > code_metrics["max_lines"]:
@@ -92,10 +92,10 @@ def analyze_code_quality(source_code: str) -> dict:
         "global_variables": 0,
         "magic_numbers": 0,
         "comment_lines": 0,
-        "total_lines": 0
+        "total_lines": 0,
     }
 
-    lines = source_code.split('\n')
+    lines = source_code.split("\n")
     analysis["total_lines"] = len(lines)
 
     in_main = False
@@ -107,39 +107,63 @@ def analyze_code_quality(source_code: str) -> dict:
         stripped = line.strip()
 
         # Count comments
-        if stripped.startswith('//') or stripped.startswith('/*'):
+        if stripped.startswith("//") or stripped.startswith("/*"):
             analysis["comment_lines"] += 1
             continue
 
         # Check for iterators
-        if 'iterator' in stripped.lower() or '->begin()' in stripped or '->end()' in stripped:
+        if (
+            "iterator" in stripped.lower()
+            or "->begin()" in stripped
+            or "->end()" in stripped
+        ):
             analysis["uses_iterators"] = True
 
         # Check for containers
-        if any(container in stripped for container in ['std::vector', 'std::map', 'std::set']):
+        if any(
+            container in stripped
+            for container in ["std::vector", "std::map", "std::set"]
+        ):
             analysis["uses_containers"] = True
 
         # Check for structs
-        if stripped.startswith('struct ') or 'struct ' in stripped:
+        if stripped.startswith("struct ") or "struct " in stripped:
             analysis["uses_structs"] = True
 
         # Check for global variables (simplified)
-        if not in_main and '=' in stripped and not stripped.startswith(' ') and not stripped.startswith('\t'):
-            if not any(keyword in stripped for keyword in ['int main', 'void', 'int ', 'float ', 'double ', 'char ', 'bool ']):
+        if (
+            not in_main
+            and "=" in stripped
+            and not stripped.startswith(" ")
+            and not stripped.startswith("\t")
+        ):
+            if not any(
+                keyword in stripped
+                for keyword in [
+                    "int main",
+                    "void",
+                    "int ",
+                    "float ",
+                    "double ",
+                    "char ",
+                    "bool ",
+                ]
+            ):
                 analysis["global_variables"] += 1
 
         # Check for magic numbers (simplified)
         import re
-        magic_nums = re.findall(r'\b\d+\b', stripped)
+
+        magic_nums = re.findall(r"\b\d+\b", stripped)
         for num in magic_nums:
-            if num not in ['0', '1', '2', '10', '100']:  # Common acceptable numbers
+            if num not in ["0", "1", "2", "10", "100"]:  # Common acceptable numbers
                 analysis["magic_numbers"] += 1
 
         # Track main function
-        if 'int main(' in stripped or 'void main(' in stripped:
+        if "int main(" in stripped or "void main(" in stripped:
             in_main = True
             analysis["function_count"] += 1
-        elif in_main and stripped == '}':
+        elif in_main and stripped == "}":
             in_main = False
             analysis["main_function_lines"] = main_lines
             main_lines = 0
@@ -147,7 +171,13 @@ def analyze_code_quality(source_code: str) -> dict:
             main_lines += 1
 
         # Track other functions
-        if any(keyword in stripped for keyword in ['int ', 'void ', 'float ', 'double ', 'char ', 'bool ']) and '(' in stripped:
+        if (
+            any(
+                keyword in stripped
+                for keyword in ["int ", "void ", "float ", "double ", "char ", "bool "]
+            )
+            and "(" in stripped
+        ):
             if not in_main:
                 analysis["function_count"] += 1
                 if current_function_lines > 0:
@@ -157,7 +187,7 @@ def analyze_code_quality(source_code: str) -> dict:
                 current_function_lines += 1
         elif current_function_lines > 0:
             current_function_lines += 1
-            if stripped == '}':
+            if stripped == "}":
                 functions.append(current_function_lines)
                 current_function_lines = 0
 
@@ -181,8 +211,8 @@ def read_practice_description(pdf_path: str) -> str:
             page_text = page.get_text()
 
             # Clean up common PDF extraction issues
-            page_text = page_text.replace('\n\n', '\n')  # Remove excessive newlines
-            page_text = page_text.replace('  ', ' ')     # Remove double spaces
+            page_text = page_text.replace("\n\n", "\n")  # Remove excessive newlines
+            page_text = page_text.replace("  ", " ")  # Remove double spaces
 
             # Add page separator for multi-page documents
             if page_num > 0:
@@ -192,7 +222,7 @@ def read_practice_description(pdf_path: str) -> str:
 
         doc.close()
 
-        full_text = ''.join(text_content)
+        full_text = "".join(text_content)
 
         # Final cleanup
         full_text = full_text.strip()
@@ -213,37 +243,58 @@ def extract_practice_requirements(pdf_text: str) -> dict:
         "constraints": [],
         "required_features": [],
         "grading_criteria": [],
-        "bonus_features": []
+        "bonus_features": [],
     }
 
     # Simple keyword-based extraction (can be enhanced with NLP if needed)
-    lines = pdf_text.split('\n')
+    lines = pdf_text.split("\n")
 
     for line in lines:
         line_lower = line.lower().strip()
 
         # Extract objectives
-        if any(keyword in line_lower for keyword in ['objective', 'goal', 'purpose', 'task']):
+        if any(
+            keyword in line_lower
+            for keyword in ["objective", "goal", "purpose", "task"]
+        ):
             if len(line.strip()) > 10:  # Avoid very short lines
                 requirements["objectives"].append(line.strip())
 
         # Extract constraints
-        elif any(keyword in line_lower for keyword in ['constraint', 'limitation', 'restriction', 'must not', 'cannot']):
+        elif any(
+            keyword in line_lower
+            for keyword in [
+                "constraint",
+                "limitation",
+                "restriction",
+                "must not",
+                "cannot",
+            ]
+        ):
             if len(line.strip()) > 10:
                 requirements["constraints"].append(line.strip())
 
         # Extract required features
-        elif any(keyword in line_lower for keyword in ['required', 'implement', 'create', 'write']):
+        elif any(
+            keyword in line_lower
+            for keyword in ["required", "implement", "create", "write"]
+        ):
             if len(line.strip()) > 10:
                 requirements["required_features"].append(line.strip())
 
         # Extract grading criteria
-        elif any(keyword in line_lower for keyword in ['grade', 'point', 'score', 'criteria', 'evaluation']):
+        elif any(
+            keyword in line_lower
+            for keyword in ["grade", "point", "score", "criteria", "evaluation"]
+        ):
             if len(line.strip()) > 10:
                 requirements["grading_criteria"].append(line.strip())
 
         # Extract bonus features
-        elif any(keyword in line_lower for keyword in ['bonus', 'extra', 'additional', 'optional']):
+        elif any(
+            keyword in line_lower
+            for keyword in ["bonus", "extra", "additional", "optional"]
+        ):
             if len(line.strip()) > 10:
                 requirements["bonus_features"].append(line.strip())
 
@@ -298,7 +349,13 @@ def run_static_analysis(project_path: str) -> str:
             return "✅ Cppcheck Static Analysis: No issues found. Code appears clean."
 
         # Categorize errors by severity
-        severity_counts = {"error": 0, "warning": 0, "style": 0, "performance": 0, "information": 0}
+        severity_counts = {
+            "error": 0,
+            "warning": 0,
+            "style": 0,
+            "performance": 0,
+            "information": 0,
+        }
         error_details = []
 
         for error in errors:
@@ -313,7 +370,9 @@ def run_static_analysis(project_path: str) -> str:
                 severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
                 # Format error details
-                error_details.append(f"[{severity.upper()}] {file}:{line} - {msg} (ID: {error_id})")
+                error_details.append(
+                    f"[{severity.upper()}] {file}:{line} - {msg} (ID: {error_id})"
+                )
 
         # Create summary report
         summary = "📊 Cppcheck Static Analysis Report:\n\n"
@@ -341,7 +400,9 @@ def run_static_analysis(project_path: str) -> str:
         if severity_counts["warning"] > 0:
             summary += "\n⚠️  WARNING: Review warning-level issues - potential runtime or logic errors.\n"
         if severity_counts["performance"] > 0:
-            summary += "\n💡 PERFORMANCE: Consider optimization opportunities identified.\n"
+            summary += (
+                "\n💡 PERFORMANCE: Consider optimization opportunities identified.\n"
+            )
         if severity_counts["style"] > 0:
             summary += "\n📝 STYLE: Code style improvements suggested for better readability.\n"
 
@@ -376,7 +437,7 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
         "failed_tests": [],
         "execution_summary": "",
         "build_output": "",
-        "test_details": []
+        "test_details": [],
     }
 
     # 1. Build the code with better error capture
@@ -387,7 +448,7 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
             check=True,
             capture_output=True,
             text=True,
-            timeout=120  # 2-minute timeout for build
+            timeout=120,  # 2-minute timeout for build
         )
         results["build_successful"] = True
         results["build_output"] = "✅ Build successful"
@@ -404,13 +465,17 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
     # 2. Check if executable exists
     executable_path = os.path.join(project_path, practice_config["executable_name"])
     if not os.path.exists(executable_path):
-        results["execution_summary"] += f"❌ Executable '{practice_config['executable_name']}' not found after build.\n"
+        results[
+            "execution_summary"
+        ] += f"❌ Executable '{practice_config['executable_name']}' not found after build.\n"
         return results
 
     # 3. Run test cases with detailed reporting
     test_cases_dir = practice_config["test_cases_dir"]
     if not os.path.exists(test_cases_dir):
-        results["execution_summary"] += f"❌ Test cases directory '{test_cases_dir}' not found.\n"
+        results[
+            "execution_summary"
+        ] += f"❌ Test cases directory '{test_cases_dir}' not found.\n"
         return results
 
     test_files = [f for f in os.listdir(test_cases_dir) if f.endswith(".in")]
@@ -420,7 +485,9 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
         results["execution_summary"] += "⚠️  No test cases found in the directory.\n"
         return results
 
-    results["execution_summary"] += f"🧪 Running {results['total_tests']} test cases...\n\n"
+    results[
+        "execution_summary"
+    ] += f"🧪 Running {results['total_tests']} test cases...\n\n"
 
     for i, test_file in enumerate(test_files, 1):
         input_path = os.path.join(test_cases_dir, test_file)
@@ -432,7 +499,7 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
             "execution_time": 0,
             "error": None,
             "expected_output": "",
-            "actual_output": ""
+            "actual_output": "",
         }
 
         try:
@@ -447,7 +514,7 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
                 stdin=open(input_path, "r"),
                 capture_output=True,
                 text=True,
-                timeout=10  # 10-second timeout per test
+                timeout=10,  # 10-second timeout per test
             )
             execution_time = time.time() - start_time
 
@@ -457,13 +524,21 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
             if actual_output == expected_output:
                 results["passed_tests"] += 1
                 test_result["passed"] = True
-                results["execution_summary"] += f"✅ Test {i}/{results['total_tests']}: {test_file} - PASSED\n"
+                results[
+                    "execution_summary"
+                ] += f"✅ Test {i}/{results['total_tests']}: {test_file} - PASSED\n"
             else:
                 results["failed_tests"].append(test_file)
                 test_result["passed"] = False
-                results["execution_summary"] += f"❌ Test {i}/{results['total_tests']}: {test_file} - FAILED\n"
-                results["execution_summary"] += f"   Expected: {expected_output[:100]}{'...' if len(expected_output) > 100 else ''}\n"
-                results["execution_summary"] += f"   Got:      {actual_output[:100]}{'...' if len(actual_output) > 100 else ''}\n"
+                results[
+                    "execution_summary"
+                ] += f"❌ Test {i}/{results['total_tests']}: {test_file} - FAILED\n"
+                results[
+                    "execution_summary"
+                ] += f"   Expected: {expected_output[:100]}{'...' if len(expected_output) > 100 else ''}\n"
+                results[
+                    "execution_summary"
+                ] += f"   Got:      {actual_output[:100]}{'...' if len(actual_output) > 100 else ''}\n"
 
             test_result["execution_time"] = round(execution_time, 3)
             test_result["expected_output"] = expected_output
@@ -472,23 +547,37 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
         except subprocess.TimeoutExpired:
             results["failed_tests"].append(test_file)
             test_result["error"] = "Timeout (10s)"
-            results["execution_summary"] += f"⏰ Test {i}/{results['total_tests']}: {test_file} - TIMEOUT\n"
+            results[
+                "execution_summary"
+            ] += f"⏰ Test {i}/{results['total_tests']}: {test_file} - TIMEOUT\n"
         except FileNotFoundError:
             results["failed_tests"].append(test_file)
             test_result["error"] = "Expected output file missing"
-            results["execution_summary"] += f"📁 Test {i}/{results['total_tests']}: {test_file} - MISSING OUTPUT FILE\n"
+            results[
+                "execution_summary"
+            ] += f"📁 Test {i}/{results['total_tests']}: {test_file} - MISSING OUTPUT FILE\n"
         except Exception as e:
             results["failed_tests"].append(test_file)
             test_result["error"] = str(e)
-            results["execution_summary"] += f"💥 Test {i}/{results['total_tests']}: {test_file} - ERROR: {e}\n"
+            results[
+                "execution_summary"
+            ] += f"💥 Test {i}/{results['total_tests']}: {test_file} - ERROR: {e}\n"
 
         results["test_details"].append(test_result)
 
     # Add summary statistics
-    pass_rate = (results["passed_tests"] / results["total_tests"]) * 100 if results["total_tests"] > 0 else 0
-    results["execution_summary"] += f"\n📊 Test Summary: {results['passed_tests']}/{results['total_tests']} passed ({pass_rate:.1f}%)\n"
+    pass_rate = (
+        (results["passed_tests"] / results["total_tests"]) * 100
+        if results["total_tests"] > 0
+        else 0
+    )
+    results[
+        "execution_summary"
+    ] += f"\n📊 Test Summary: {results['passed_tests']}/{results['total_tests']} passed ({pass_rate:.1f}%)\n"
 
     if results["failed_tests"]:
-        results["execution_summary"] += f"❌ Failed tests: {', '.join(results['failed_tests'])}\n"
+        results[
+            "execution_summary"
+        ] += f"❌ Failed tests: {', '.join(results['failed_tests'])}\n"
 
     return results
