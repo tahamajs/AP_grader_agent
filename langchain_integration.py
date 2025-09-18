@@ -575,7 +575,11 @@ def grade_student_project(
                 response_text,
                 validator=_validator,
                 description=f"grading for {student_id} {assignment_type}",
-                save_raw_to=os.path.join(os.getcwd(), "grading_outputs", f"raw_{student_id}_{assignment_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"),
+                save_raw_to=os.path.join(
+                    os.getcwd(),
+                    "grading_outputs",
+                    f"raw_{student_id}_{assignment_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                ),
             )
 
             result_dict = parsed

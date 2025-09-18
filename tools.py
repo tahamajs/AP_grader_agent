@@ -640,20 +640,26 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
         # Parse and validate
         def _validator(d: dict):
             if not isinstance(d, dict) or "test_cases" not in d:
-                raise ValueError("Missing 'test_cases' key or invalid top-level structure")
+                raise ValueError(
+                    "Missing 'test_cases' key or invalid top-level structure"
+                )
             if not isinstance(d["test_cases"], list):
                 raise ValueError("'test_cases' must be a list")
 
         parsed = parse_and_validate_response(
             response_text,
             validator=_validator,
-            description=(f"test generation for description (truncated): {description[:80]}"),
+            description=(
+                f"test generation for description (truncated): {description[:80]}"
+            ),
             save_raw_to=raw_file,
         )
 
         test_cases_data = parsed["test_cases"]
         if len(test_cases_data) != num_cases:
-            logger.warning(f"LLM generated {len(test_cases_data)} test cases, expected {num_cases}")
+            logger.warning(
+                f"LLM generated {len(test_cases_data)} test cases, expected {num_cases}"
+            )
 
         test_cases = []
         for i, tc in enumerate(test_cases_data):
@@ -672,7 +678,9 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
 
             description_field = tc.get("description", f"Test case {i+1}")
             category = tc.get("category", "unknown")
-            logger.info(f"Generated test case {i+1}: {description_field} (category: {category})")
+            logger.info(
+                f"Generated test case {i+1}: {description_field} (category: {category})"
+            )
 
             test_cases.append((input_data, expected_output))
 
@@ -692,7 +700,8 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
         metadata_dir = os.path.join(os.getcwd(), "test_generation_logs")
         os.makedirs(metadata_dir, exist_ok=True)
         metadata_file = os.path.join(
-            metadata_dir, f"llm_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            metadata_dir,
+            f"llm_generation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
         )
         with open(metadata_file, "w", encoding="utf-8") as f:
             json.dump(metadata, f, indent=2, ensure_ascii=False)

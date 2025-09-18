@@ -30,7 +30,7 @@ def _normalize_llm_output(text: str) -> str:
     t = re.sub(r"\n```$", "", t)
 
     # Remove leading and trailing single backticks
-    t = t.strip('`')
+    t = t.strip("`")
 
     return t.strip()
 
@@ -105,7 +105,9 @@ def parse_and_validate_response(
         parsed = _attempt_json_fixup(txt)
         if parsed is None:
             ctx = f" for {description}" if description else ""
-            raise ValueError(f"Failed to parse JSON response{ctx}: {e1}\nRaw: {txt[:1000]}")
+            raise ValueError(
+                f"Failed to parse JSON response{ctx}: {e1}\nRaw: {txt[:1000]}"
+            )
 
     # Optionally validate using provided callable
     if validator:
@@ -113,10 +115,11 @@ def parse_and_validate_response(
             validator(parsed)
         except Exception as ve:
             ctx = f" for {description}" if description else ""
-            raise ValueError(f"Validation failed{ctx}: {ve}\nParsed: {json.dumps(parsed)[:1000]}")
+            raise ValueError(
+                f"Validation failed{ctx}: {ve}\nParsed: {json.dumps(parsed)[:1000]}"
+            )
 
     return parsed
-
 
 
 # =============================================================================
