@@ -8,21 +8,104 @@ import fitz  # PyMuPDF for PDF reading
 import time
 
 
-def clone_student_repo(repo_url: str, student_id: str) -> str:
-    """Clones or pulls the latest from a student's Git repository."""
-    local_path = os.path.join(config.PROJECTS_DIR, str(student_id))
+def clone_student_repo(repo_url: str, commit_sha: str = None, student_id: str = None) -> str:
+    """Clones a student's repository using SSH with AP-F03 configuration."""
     try:
-        if os.path.exists(local_path):
-            repo = Repo(local_path)
-            repo.remotes.origin.pull()
-            print(f"Pulled latest changes for {student_id}")
+        # Create a unique directory for this student
+        if student_id:
+            repo_name = f"student_{student_id}"
         else:
-            Repo.clone_from(repo_url, local_path)
-            print(f"Cloned repo for {student_id}")
-        return local_path
-    except GitCommandError as e:
-        print(f"Error with Git for {student_id}: {e}")
-        return None
+            repo_name = f"repo_{hash(repo_url) % 10000}"
+
+        clone_path = os.path.join(config.CLONE_DIR, repo_name)
+
+        # Clean up any existing directory
+        if os.path.exists(clone_path):
+            import shutil
+            shutil.rmtree(clone_path)
+
+        os.makedirs(clone_path, exist_ok=True)
+
+        # Configure SSH for AP-F03 if not already configured
+        ssh_config_path = os.path.expanduser("~/.ssh/config")
+        apf03_config = """
+# AP-F03 GitHub configuration
+Host AP-F03
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/AP-F03
+    IdentitiesOnly yes
+"""
+
+        # Check if AP-F03 config already exists
+        if os.path.exists(ssh_config_path):
+            with open(ssh_config_path, 'r') as f:
+                ssh_config_content = f.read()
+            if "Host AP-F03" not in ssh_config_content:
+                with open(ssh_config_path, 'a') as f:
+                    f.write(apf03_config)
+        else:
+            # Create SSH config directory if it doesn't exist
+            os.makedirs(os.path.dirname(ssh_config_path), exist_ok=True)
+            with open(ssh_config_path, 'w') as f:
+                f.write(apf03_config)
+
+        # Set proper permissions on SSH config
+        os.chmod(ssh_config_path, 0o600)
+
+        # Copy the SSH private key if it exists in the test cases directory
+        ssh_key_source = os.path.join(config.TEST_CASES_DIR, "practice6", "AP-F03-git-ssh", "ssh.txt")
+        ssh_key_dest = os.path.expanduser("~/.ssh/AP-F03")
+
+        if os.path.exists(ssh_key_source):
+            import shutil
+            os.makedirs(os.path.dirname(ssh_key_dest), exist_ok=True)
+            shutil.copy2(ssh_key_source, ssh_key_dest)
+            os.chmod(ssh_key_dest, 0o600)
+
+        # Convert HTTPS URL to SSH URL using AP-F03 host
+        if repo_url.startswith("https://github.com/"):
+            # Extract owner/repo from HTTPS URL
+            parts = repo_url.replace("https://github.com/", "").split("/")
+            if len(parts) >= 2:
+                owner = parts[0]
+                repo = parts[1].replace(".git", "")
+                ssh_url = f"git@AP-F03:{owner}/{repo}.git"
+            else:
+                ssh_url = repo_url  # fallback
+        else:
+            ssh_url = repo_url  # already SSH or other format
+
+        # Clone the repository
+        clone_command = ["git", "clone", "--depth", "1", ssh_url, clone_path]
+        process = subprocess.run(
+            clone_command,
+            capture_output=True,
+            text=True,
+            timeout=120  # 2-minute timeout
+        )
+
+        if process.returncode != 0:
+            raise Exception(f"Git clone failed: {process.stderr}")
+
+        # If commit SHA is specified, checkout that specific commit
+        if commit_sha:
+            checkout_command = ["git", "checkout", commit_sha]
+            process = subprocess.run(
+                checkout_command,
+                cwd=clone_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+
+            if process.returncode != 0:
+                raise Exception(f"Git checkout failed: {process.stderr}")
+
+        return clone_path
+
+    except Exception as e:
+        raise Exception(f"Failed to clone repository {repo_url}: {str(e)}")
 
 
 def read_project_files(project_path: str) -> str:
@@ -419,7 +502,7 @@ def run_static_analysis(project_path: str) -> str:
 
 
 def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
-    """Builds the project and runs it against test cases."""
+    """Builds the project and runs it against test cases using the judge.sh system."""
     # Get practice-specific configuration
     practice_config = config.PRACTICE_CONFIGS.get(
         practice_name,
@@ -430,6 +513,106 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
         },
     )
 
+    results = {
+        "build_successful": False,
+        "passed_tests": 0,
+        "total_tests": 0,
+        "failed_tests": [],
+        "execution_summary": "",
+        "build_output": "",
+        "test_details": [],
+    }
+
+    # Check if we have the judge.sh system available
+    judge_script_path = os.path.join(config.TEST_CASES_DIR, "practice6", "APF03-A6-judge (1)", "judge.sh")
+    if os.path.exists(judge_script_path):
+        # Use the judge.sh system for A6 assignments
+        return run_judge_tests(project_path, practice_name, judge_script_path)
+
+    # Fallback to original test system for other assignments
+    return run_standard_tests(project_path, practice_name, practice_config)
+
+
+def run_judge_tests(project_path: str, practice_name: str, judge_script_path: str) -> dict:
+    """Runs tests using the judge.sh system for A6 assignments."""
+    results = {
+        "build_successful": False,
+        "passed_tests": 0,
+        "total_tests": 0,
+        "failed_tests": [],
+        "execution_summary": "",
+        "build_output": "",
+        "test_details": [],
+    }
+
+    try:
+        # Copy student's code to the judge directory
+        judge_dir = os.path.dirname(judge_script_path)
+        temp_run_dir = os.path.join(judge_dir, "temp-run")
+
+        # Clean and create temp directory
+        if os.path.exists(temp_run_dir):
+            import shutil
+            shutil.rmtree(temp_run_dir)
+        os.makedirs(temp_run_dir)
+
+        # Copy all source files from student's project
+        for root, _, files in os.walk(project_path):
+            for file in files:
+                if file.endswith(('.cpp', '.h', '.hpp', 'Makefile', 'makefile')):
+                    src_path = os.path.join(root, file)
+                    dst_path = os.path.join(temp_run_dir, file)
+                    import shutil
+                    shutil.copy2(src_path, dst_path)
+
+        # Run the judge.sh test command
+        judge_command = [judge_script_path, "-t"]
+        process = subprocess.run(
+            judge_command,
+            cwd=judge_dir,
+            capture_output=True,
+            text=True,
+            timeout=300  # 5-minute timeout
+        )
+
+        results["execution_summary"] = process.stdout
+        if process.stderr:
+            results["execution_summary"] += f"\nSTDERR:\n{process.stderr}"
+
+        # Parse the output to extract test results
+        output_lines = process.stdout.split('\n')
+        for line in output_lines:
+            if "Passed:" in line and "Failed:" in line:
+                # Parse summary line like "Passed: 3 out of 5"
+                parts = line.split()
+                if len(parts) >= 5:
+                    try:
+                        passed = int(parts[1])
+                        total = int(parts[4])
+                        results["passed_tests"] = passed
+                        results["total_tests"] = total
+                        results["build_successful"] = True
+                    except ValueError:
+                        pass
+
+        if results["total_tests"] == 0:
+            # If parsing failed, assume build was successful if no clear errors
+            if "Compiled Successfully" in process.stdout:
+                results["build_successful"] = True
+                results["execution_summary"] += "\n⚠️ Could not parse test results, but compilation was successful."
+
+        return results
+
+    except subprocess.TimeoutExpired:
+        results["execution_summary"] = "❌ Testing timed out after 5 minutes."
+        return results
+    except Exception as e:
+        results["execution_summary"] = f"❌ Error running judge.sh: {str(e)}"
+        return results
+
+
+def run_standard_tests(project_path: str, practice_name: str, practice_config: dict) -> dict:
+    """Runs tests using the standard test system for non-A6 assignments."""
     results = {
         "build_successful": False,
         "passed_tests": 0,

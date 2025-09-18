@@ -8,10 +8,13 @@ CREDENTIALS_FILE = "credentials.json"
 PROJECTS_DIR = "student_projects"
 
 # Path to your test cases directory (organized by practice)
-TEST_CASES_DIR = "test_cases"
+TEST_CASES_DIR = "/Users/tahamajs/Documents/uni/LLM/Files/CAs/CA4"
 
 # Path to practice description PDFs
 PRACTICES_DIR = "practice_descriptions"
+
+# Clone directory for student repositories
+CLONE_DIR = "cloned_repos"
 
 # The command to build a student's project (e.g., 'make', 'cmake . && make')
 BUILD_COMMAND = "make"

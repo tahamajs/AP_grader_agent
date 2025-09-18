@@ -416,8 +416,22 @@ CODE ANALYSIS SUMMARY:
                     student_id, final_grade_data, assignment_type
                 )
 
+            # Print summary for this student
+            print(f"✅ Student {student_id} processed successfully!")
+            if assignment_type == "A6":
+                print(f"   Phase 1 Score: {final_grade_data.get('phase1', {}).get('p1_final_score', 0)}")
+                print(f"   Phase 2 Score: {final_grade_data.get('phase2', {}).get('p2_final_score', 0)}")
+                print(f"   Phase 3 Score: {final_grade_data.get('phase3', {}).get('p3_final_score', 0)}")
+                print(f"   Total Score: {final_grade_data.get('phase3', {}).get('final_score', 0)}")
+            else:
+                print(f"   Raw Score: {final_grade_data.get('raw_score', 0)}")
+                print(f"   Final Score: {final_grade_data.get('final_score', 0)}")
+            print(f"   Tests Passed: {test_results.get('passed_tests', 0)}/{test_results.get('total_tests', 0)}")
+
         except Exception as e:
-            print(f"A critical error occurred while processing {student_id}: {e}")
+            print(f"❌ Critical error processing {student_id}: {e}")
+            import traceback
+            traceback.print_exc()
 
 
 if __name__ == "__main__":
