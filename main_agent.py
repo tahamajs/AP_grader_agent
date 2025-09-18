@@ -67,6 +67,8 @@ def calculate_scores(llm_grades, test_results, assignment_type):
         passed_tests = test_results.get("passed_tests", 0)
         correctness_score = (passed_tests / total_tests) * 30 if total_tests > 0 else 0
         raw_score += correctness_score
+
+    elif assignment_type == "A3":
         # A3: Q1-Q4 (71) + Design (20) + Git (6) + Correctness (49) = 146 total
         raw_score = 0
 

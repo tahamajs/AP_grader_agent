@@ -148,6 +148,71 @@ class A2GradingOutput(BaseModel):
     generated_comment: str = Field(description="Constructive feedback comment")
 
 
+class A3GradingOutput(BaseModel):
+    # Questions 1-4 (71 points total)
+    q1_recursive_logic: float = Field(
+        description="Q1 recursive logic (0 to 2)", ge=0, le=2
+    )
+    q1_test_cases: float = Field(description="Q1 test cases (0 to 15)", ge=0, le=15)
+    q1_upload_testcases: float = Field(
+        description="Q1 upload testcases (0 to 2)", ge=0, le=2
+    )
+    q2_recursive_logic: float = Field(
+        description="Q2 recursive logic (0 to 2)", ge=0, le=2
+    )
+    q2_test_cases: float = Field(description="Q2 test cases (0 to 15)", ge=0, le=15)
+    q2_upload_testcases: float = Field(
+        description="Q2 upload testcases (0 to 2)", ge=0, le=2
+    )
+    q3_backtracking: float = Field(description="Q3 backtracking (0 to 2)", ge=0, le=2)
+    q3_test_cases: float = Field(description="Q3 test cases (0 to 15)", ge=0, le=15)
+    q3_upload_testcases: float = Field(
+        description="Q3 upload testcases (0 to 2)", ge=0, le=2
+    )
+    q4_backtracking: float = Field(description="Q4 backtracking (0 to 2)", ge=0, le=2)
+    q4_test_cases: float = Field(description="Q4 test cases (0 to 10)", ge=0, le=10)
+    q4_upload_testcases: float = Field(
+        description="Q4 upload testcases (0 to 2)", ge=0, le=2
+    )
+
+    # Design (20 points)
+    design_io_separation: float = Field(
+        description="Design I/O separation (0 to 1)", ge=0, le=1
+    )
+    design_data_structures: float = Field(
+        description="Design data structures (0 to 3)", ge=0, le=3
+    )
+    design_no_god_main: float = Field(
+        description="Design no god main (0 to 1)", ge=0, le=1
+    )
+    design_small_functions: float = Field(
+        description="Design small functions (0 to 2)", ge=0, le=2
+    )
+    design_no_duplication: float = Field(
+        description="Design no duplication (0 to 1)", ge=0, le=1
+    )
+    design_indentation: float = Field(
+        description="Design indentation (0 to 1)", ge=0, le=1
+    )
+    design_magic_values: float = Field(
+        description="Design magic values (0 to 1)", ge=0, le=1
+    )
+    design_naming: float = Field(description="Design naming (0 to 1)", ge=0, le=1)
+    design_consistency: float = Field(
+        description="Design consistency (0 to 1)", ge=0, le=1
+    )
+
+    # Git (6 points)
+    git_commit_messages: float = Field(
+        description="Git commit messages (0 to 1)", ge=0, le=1
+    )
+    git_standard_commits: float = Field(
+        description="Git standard commits (0 to 1)", ge=0, le=1
+    )
+
+    generated_comment: str = Field(description="Constructive feedback comment")
+
+
 class A4GradingOutput(BaseModel):
     oop_break_classes: float = Field(
         description="OOP break into classes (0 to 5)", ge=0, le=5
