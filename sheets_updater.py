@@ -70,6 +70,8 @@ def get_column_mapping(assignment_type, phase=None):
             "plagiarism": "X",  # Plagiarism
             "final_score": "Y",  # Final Score
         }
+
+    elif assignment_type == "A3":
         return {
             "q1_recursive_logic": "E",  # Q1 - Recursive Logic
             "q1_test_cases": "F",  # Q1 - Test Cases

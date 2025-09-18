@@ -1,16 +1,19 @@
 # Advanced Programming Course Grading Agent
 
-This agent automates the grading of C++ programming assignments for an Advanced Programming course. It can handle multiple practices with different requirements and test cases.
+This agent automates the grading of C++ programming assignments for an Advanced Programming course. It can handle multiple practices (A1-A6) with different requirements and test cases, automatically generating test cases from PDF descriptions.
 
 ## Features
 
-- **Multi-Practice Support**: Handles 7+ different programming practices
-- **PDF Description Reading**: Extracts requirements from PDF assignment descriptions
+- **Complete Assignment Support**: Handles all 6 programming practices (A1-A6)
+- **PDF Description Processing**: Automatically reads and summarizes PDF assignment descriptions from subdirectories
+- **Automated Test Case Generation**: Creates test cases based on extracted requirements from descriptions
 - **Practice-Specific Grading**: Grades code based on specific practice requirements
+- **Multi-Phase Support**: Handles A6's three-phase structure
 - **Automated Testing**: Runs test cases and builds projects
 - **Static Analysis**: Uses cppcheck for code quality analysis
 - **AI-Powered Evaluation**: Uses Gemini API for qualitative code assessment
-- **Google Sheets Integration**: Automatically updates grades in spreadsheets
+- **Google Sheets Integration**: Automatically updates grades in spreadsheets for all assignments
+- **SSH Git Integration**: Secure repository cloning with AP-F03 configuration
 
 ## Directory Structure
 
@@ -19,26 +22,39 @@ grading_agent/
 ├── config.py                    # Configuration settings
 ├── main_agent.py               # Main grading workflow
 ├── langchain_integration.py    # Gemini API integration
-├── sheets_updater.py          # Google Sheets integration
-├── tools.py                   # Utility functions
+├── sheets_updater.py          # Google Sheets integration (supports A1-A6)
+├── tools.py                   # Utility functions for PDF reading, test generation
 ├── requirements.txt           # Python dependencies
-├── practice_descriptions/     # PDF files for each practice
-│   ├── practice1.pdf
-│   ├── practice2.pdf
-│   └── ...
-├── test_cases/               # Test cases organized by practice
-│   ├── practice1/
-│   │   ├── test1.in
-│   │   ├── test1.out
-│   │   └── ...
-│   ├── practice2/
-│   │   ├── test1.in
-│   │   └── ...
-│   └── ...
+├── description/               # PDF assignment descriptions organized by assignment
+│   ├── A1/
+│   │   └── APS04-A1-Description.pdf
+│   ├── A2/
+│   │   └── APS04-A2-Description.pdf
+│   ├── A3/
+│   │   └── APS04-A3-Description.pdf
+│   ├── A4/
+│   │   └── APS04-A4-Description.pdf
+│   ├── A5/
+│   │   └── APS04-A5-Description.pdf
+│   └── A6/
+│       ├── APS04-A6.1-Description-1.pdf
+│       ├── APS04-A6.2-Description.pdf
+│       └── APS04-A6.3-Description.pdf
+├── test_cases/               # Test cases organized by assignment
+│   ├── A1/
+│   │   └── tests/
+│   │       ├── 01.in
+│   │       ├── 01.out
+│   │       └── ...
+│   ├── A2/
+│   ├── A3/
+│   ├── A4/
+│   ├── A5/
+│   └── A6/
 └── student_projects/         # Cloned student repositories
 ```
 
-## Setup Instructions
+## Quick Start
 
 ### 1. Install Dependencies
 
@@ -46,7 +62,7 @@ grading_agent/
 pip install -r requirements.txt
 ```
 
-### 2. Install cppcheck
+### 2. Install Required Tools
 
 **macOS:**
 
@@ -61,60 +77,48 @@ sudo apt-get install cppcheck
 ```
 
 **Windows:**
-Download from https://cppcheck.sourceforge.io/
+Download cppcheck from https://cppcheck.sourceforge.io/
 
-### 3. Set up Practice Descriptions
+### 3. Set up Assignment Descriptions
 
-1. Create a `practice_descriptions/` directory
-2. Add PDF files for each practice (e.g., `practice1.pdf`, `practice2.pdf`)
-3. The PDF should contain the assignment requirements and specifications
+The `description/` folder should contain subdirectories for each assignment (A1-A6) with their respective PDF files:
 
-### 4. Set up Test Cases
-
-1. Create a `test_cases/` directory
-2. For each practice, create a subdirectory (e.g., `test_cases/practice1/`)
-3. Add test case files:
-   - `test1.in` - Input for test case 1
-   - `test1.out` - Expected output for test case 1
-   - `test2.in`, `test2.out`, etc.
-
-### 5. Configure Practice Settings
-
-Edit `config.py` and update the `PRACTICE_CONFIGS` dictionary:
-
-```python
-PRACTICE_CONFIGS = {
-    'practice1': {
-        'build_command': 'make',
-        'executable_name': 'student_program',
-        'test_cases_dir': 'test_cases/practice1'
-    },
-    'practice2': {
-        'build_command': 'cmake . && make',
-        'executable_name': 'main',
-        'test_cases_dir': 'test_cases/practice2'
-    },
-    # Add configurations for all 7 practices
-}
+```
+description/
+├── A1/APS04-A1-Description.pdf
+├── A2/APS04-A2-Description.pdf
+├── A3/APS04-A3-Description.pdf
+├── A4/APS04-A4-Description.pdf
+├── A5/APS04-A5-Description.pdf
+└── A6/
+    ├── APS04-A6.1-Description-1.pdf
+    ├── APS04-A6.2-Description.pdf
+    └── APS04-A6.3-Description.pdf
 ```
 
-### 6. Set up Google Sheets
+### 4. Generate Test Cases
 
-1. Create a Google Sheet with the following columns:
+Automatically generate test cases from descriptions:
 
-   - A: Student Number
-   - B: Name
-   - C: Family Name
-   - D: TA
-   - E: Practice Name (e.g., "practice1", "practice2")
-   - F: GitHub URL
-   - G+: Grading columns (as per your rubric)
+```python
+from tools import generate_all_testcases
+generate_all_testcases()
+```
 
-2. Create a service account and download `credentials.json`
-3. Share the Google Sheet with the service account email
-4. Update `config.py` with your sheet name and credentials file path
+Or generate for specific assignments:
 
-### 7. Set up Environment Variables
+```python
+from tools import generate_testcases_from_description
+generate_testcases_from_description("A1")
+```
+
+### 5. Configure Google Sheets
+
+1. Create separate sheets for each assignment (A1, A2, A3, A4, A5, A6)
+2. Set up service account credentials
+3. Update `config.py` with your sheet names and credentials
+
+### 6. Set up Environment Variables
 
 Create a `.env` file:
 
@@ -124,68 +128,215 @@ GOOGLE_API_KEY=your_gemini_api_key_here
 
 ## Usage
 
-1. **Prepare Student Data:**
+### Basic Grading
 
-   - Fill your Google Sheet with student information
-   - Ensure each row has: Student Number, Practice Name, GitHub URL
+```python
+from main_agent import grade_student
 
-2. **Run the Grading Agent:**
+# Grade a student for A1
+result = grade_student("student_id", "A1", "https://github.com/student/repo")
+```
 
-   ```bash
-   python main_agent.py
-   ```
+### Batch Grading
 
-3. **Monitor Progress:**
-   - The agent will process each student
-   - Clone their repositories
-   - Run builds and tests
-   - Analyze code quality
-   - Update grades in the spreadsheet
+```python
+from main_agent import batch_grade_assignments
+
+# Grade all students for A1
+results = batch_grade_assignments("A1")
+```
+
+### Google Sheets Integration
+
+```python
+from sheets_updater import update_student_grade
+
+# Update grades for different assignments
+update_student_grade(student_id, grade_data, "A1")
+update_student_grade(student_id, grade_data, "A3")
+update_student_grade(student_id, grade_data, "A6", "phase1")
+```
 
 ## Grading Process
 
 For each student, the agent:
 
-1. **Loads Practice Description**: Reads the relevant PDF for the assigned practice
-2. **Clones Repository**: Downloads the student's code from GitHub
-3. **Builds Project**: Compiles the code using practice-specific build commands
-4. **Runs Tests**: Executes test cases and compares outputs
-5. **Static Analysis**: Runs cppcheck for code quality issues
-6. **AI Evaluation**: Uses Gemini API to assess code quality based on:
-   - Logic (iterators, containers)
-   - Design (I/O separation, structs, function organization)
-   - Clean coding (comments, duplication, indentation, naming)
-7. **Calculates Scores**: Combines test results with qualitative assessment
-8. **Updates Sheet**: Writes all scores and feedback to Google Sheets
+1. **Loads Assignment Description**: Reads and summarizes PDF descriptions from `description/` subdirectories
+2. **Generates Test Cases**: Creates relevant test cases based on extracted requirements
+3. **Clones Repository**: Downloads student code using SSH with AP-F03 configuration
+4. **Builds Project**: Compiles code using assignment-specific build commands
+5. **Runs Tests**: Executes generated test cases and compares outputs
+6. **Static Analysis**: Runs cppcheck for code quality assessment
+7. **AI Evaluation**: Uses Gemini API to assess code quality based on:
+   - **A1**: Logic (iterators, containers), Design (I/O separation, structs)
+   - **A2**: Data handling, I/O separation, Git practices
+   - **A3**: Recursive logic, backtracking algorithms
+   - **A4**: Object-oriented design, multifile organization
+   - **A5**: Game development, OOP principles
+   - **A6**: Multi-phase project with web development (Phases 1-3)
+8. **Calculates Scores**: Combines test results with qualitative assessment
+9. **Updates Sheets**: Writes all scores and feedback to Google Sheets
 
-## Customization
+## Assignment-Specific Features
 
-### Adding New Practices
+### A1 - Basic C++ Programming
 
-1. Add PDF description to `practice_descriptions/`
-2. Create test cases in `test_cases/practice_name/`
-3. Add configuration to `PRACTICE_CONFIGS` in `config.py`
-4. Update Google Sheet column mappings if needed
+- Focus: Iterators, containers, structs
+- Test cases: Basic data structure operations
 
-### Modifying Grading Criteria
+### A2 - Data Handling
 
-Edit the `GradingOutput` class in `langchain_integration.py` and update the prompt accordingly.
+- Focus: Input reading, data storage, I/O separation
+- Includes: Git commit message quality
+
+### A3 - Algorithms
+
+- Focus: Recursive functions, backtracking
+- Test cases: Algorithm correctness for Q1-Q4
+
+### A4 - Object-Oriented Programming
+
+- Focus: Classes, encapsulation, inheritance
+- Includes: Multifile organization, header guards
+
+### A5 - Game Development
+
+- Focus: OOP in game context, design patterns
+- Includes: Tower defense game mechanics
+
+### A6 - Multi-Phase Project
+
+- **Phase 1**: Core functionality, OOP design
+- **Phase 2**: Joint events, polymorphism
+- **Phase 3**: Web interface, full-stack development
+- Separate grading for each phase
+
+## Configuration
+
+### config.py Settings
+
+```python
+# Directory paths
+PRACTICES_DIR = "description/"
+TEST_CASES_DIR = "test_cases/"
+CLONE_DIR = "student_projects/"
+
+# Google Sheets
+SHEET_NAME = "AP-Grades-2025"
+CREDENTIALS_FILE = "credentials.json"
+
+# Build commands for each assignment
+PRACTICE_CONFIGS = {
+    'A1': {
+        'build_command': ['g++', 'main.cpp', '-o', 'main'],
+        'executable_name': 'main',
+        'test_cases_dir': 'test_cases/A1/tests'
+    },
+    # ... configurations for A2-A6
+}
+```
+
+### Google Sheets Column Mappings
+
+The `sheets_updater.py` includes column mappings for all assignments:
+
+- **A1**: Logic, Design, Clean Coding, Correctness
+- **A2**: Data handling, Design, Git practices
+- **A3**: Q1-Q4 algorithms, Design, Clean coding
+- **A4**: OOP design, Multifile, Clean coding
+- **A5**: Game design, OOP, Clean coding
+- **A6**: Phase-specific grading (Phase 1, 2, 3)
+
+## Test Case Generation
+
+### Automatic Generation
+
+The system can automatically generate test cases from PDF descriptions:
+
+```python
+from tools import generate_testcases_from_description
+
+# Generate test cases for A1
+generate_testcases_from_description("A1", num_cases=5)
+
+# Generate for all assignments
+from tools import generate_all_testcases
+generate_all_testcases()
+```
+
+### Manual Test Case Structure
+
+Test cases follow the format:
+
+```
+test_cases/A1/tests/
+├── 01.in   # Input for test case 1
+├── 01.out  # Expected output for test case 1
+├── 02.in
+├── 02.out
+└── ...
+```
 
 ## Troubleshooting
 
-- **PDF Reading Issues**: Ensure PDFs are text-based (not image scans)
-- **Build Failures**: Check that build commands match student project structure
-- **Test Case Issues**: Verify input/output file formats
-- **API Errors**: Check your Gemini API key and quota
-- **Sheet Access**: Ensure service account has edit permissions
+### Common Issues
 
-## Output
+- **PDF Reading Errors**: Ensure PDFs contain extractable text (not image scans)
+- **Build Failures**: Verify build commands match student project structure
+- **SSH Clone Issues**: Check AP-F03 SSH key configuration
+- **Test Case Generation**: Ensure description PDFs are properly formatted
+- **Google Sheets Access**: Verify service account permissions
 
-The agent provides:
+### Debug Commands
 
-- **Quantitative Scores**: Test pass rates, build success
-- **Qualitative Assessment**: Code quality scores based on rubric
-- **Detailed Feedback**: AI-generated comments for improvement
-- **Final Grades**: Calculated based on your weighting system
+```python
+# Test PDF reading
+from tools import get_practice_descriptions
+descriptions = get_practice_descriptions("description/")
+print(descriptions.keys())
 
-All results are automatically uploaded to your Google Sheet for easy review and distribution.
+# Test test case generation
+from tools import generate_testcases_from_description
+generate_testcases_from_description("A1")
+
+# Test sheet connection
+from sheets_updater import get_sheet
+sheet = get_sheet()
+print("Connected to sheet:", sheet.title)
+```
+
+## Output and Reporting
+
+The agent provides comprehensive output:
+
+- **Quantitative Scores**: Test pass rates, build success rates
+- **Qualitative Assessment**: AI-generated feedback based on assignment criteria
+- **Detailed Reports**: Code quality analysis, static analysis results
+- **Final Grades**: Calculated scores for each assignment component
+- **Google Sheets Integration**: Automatic updates for all assignments A1-A6
+
+## Development and Extension
+
+### Adding New Assignments
+
+1. Add PDF description to `description/A7/`
+2. Update `sheets_updater.py` with column mapping
+3. Add configuration to `config.py`
+4. Update grading logic in `main_agent.py`
+
+### Customizing Grading Criteria
+
+Modify the prompts in `langchain_integration.py` to adjust grading criteria for specific assignments.
+
+## Dependencies
+
+- Python 3.8+
+- cppcheck (static analysis)
+- PyMuPDF (PDF reading)
+- gspread (Google Sheets)
+- langchain (AI evaluation)
+- GitPython (repository cloning)
+
+## License
+
+This project is part of the Advanced Programming course grading system.
