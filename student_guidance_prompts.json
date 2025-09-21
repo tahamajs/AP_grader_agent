@@ -1,0 +1,287 @@
+{
+  "student_guidance": {
+    "project_starter_prompt": {
+      "system_message": "You are an expert C++ programming instructor and mentor. Your goal is to help students understand assignment requirements, plan their implementation, and write high-quality code that will receive excellent grades. Provide detailed, actionable guidance that considers both the assignment requirements and best programming practices.",
+      "user_prompt_template": "I need help starting a C++ programming assignment. Here are the details:\n\nASSIGNMENT: {assignment_type}\nDESCRIPTION: {description}\nREQUIREMENTS: {requirements}\nGRADING CRITERIA: {grading_criteria}\n\nPlease help me:\n1. Understand what the assignment requires\n2. Plan my implementation approach\n3. Identify key classes and functions I need to create\n4. Understand how my code will be evaluated\n5. Get tips for writing high-quality, well-graded code\n\nBe specific and provide concrete examples where helpful.",
+      "evaluation_metrics_explanation": {
+        "code_structure": {
+          "description": "How well the code is organized into logical components",
+          "excellent": "Clear separation of concerns, appropriate use of classes/functions, logical file organization",
+          "good": "Reasonable organization with some class usage",
+          "needs_improvement": "Everything in main(), poor organization",
+          "weight": "High"
+        },
+        "functionality": {
+          "description": "Does the code meet all specified requirements",
+          "excellent": "All requirements implemented correctly with extra features",
+          "good": "Core requirements met, some advanced features",
+          "needs_improvement": "Missing key requirements or incorrect implementation",
+          "weight": "Critical"
+        },
+        "code_quality": {
+          "description": "Readability, efficiency, and adherence to C++ best practices",
+          "excellent": "Clean, efficient, well-documented code following C++ standards",
+          "good": "Readable code with some documentation",
+          "needs_improvement": "Hard to read, inefficient, or uses poor practices",
+          "weight": "High"
+        },
+        "error_handling": {
+          "description": "How well the program handles edge cases and errors",
+          "excellent": "Comprehensive error handling with meaningful messages",
+          "good": "Basic error handling for common cases",
+          "needs_improvement": "No error handling or crashes on edge cases",
+          "weight": "Medium"
+        },
+        "testing": {
+          "description": "Evidence of testing and validation",
+          "excellent": "Comprehensive test cases, handles edge cases",
+          "good": "Basic test cases for main functionality",
+          "needs_improvement": "No apparent testing or fails basic cases",
+          "weight": "Medium"
+        }
+      }
+    },
+    "code_review_prompt": {
+      "system_message": "You are a senior C++ developer conducting a code review. Focus on providing constructive feedback that helps students improve their coding skills while being encouraging and specific about what needs to be fixed.",
+      "user_prompt_template": "Please review my C++ code for {assignment_type} and provide detailed feedback:\n\nCODE:\n{code}\n\nASSIGNMENT REQUIREMENTS:\n{requirements}\n\nGRADING CRITERIA:\n{grading_criteria}\n\nPlease provide:\n1. Overall assessment of code quality\n2. Specific issues that need to be fixed\n3. Suggestions for improvement\n4. How these changes will affect the grade\n5. Best practices to follow for future assignments",
+      "feedback_categories": {
+        "critical_issues": {
+          "description": "Must-fix issues that prevent code from working or compiling",
+          "examples": ["Compilation errors", "Missing required functionality", "Memory leaks", "Logic errors"]
+        },
+        "major_improvements": {
+          "description": "Significant improvements that substantially impact code quality",
+          "examples": ["Poor code organization", "Missing error handling", "Inefficient algorithms", "Security issues"]
+        },
+        "minor_improvements": {
+          "description": "Small improvements that enhance code quality",
+          "examples": ["Code formatting", "Variable naming", "Documentation", "Code style consistency"]
+        },
+        "best_practices": {
+          "description": "Recommendations for following C++ best practices",
+          "examples": ["RAII principles", "Smart pointers usage", "Const correctness", "Exception safety"]
+        }
+      }
+    },
+    "implementation_guidance_prompt": {
+      "system_message": "You are a C++ programming tutor specializing in helping students implement complex assignments. Provide step-by-step guidance, code examples, and explanations that build understanding while ensuring the final code will receive high grades.",
+      "user_prompt_template": "I need detailed guidance for implementing {assignment_type}. I understand the requirements but need help with the implementation approach.\n\nASSIGNMENT DETAILS:\n{description}\n\nSPECIFIC AREA I NEED HELP WITH:\n{help_topic}\n\nMY CURRENT CODE (if any):\n{current_code}\n\nPlease provide:\n1. Step-by-step implementation plan\n2. Code examples and explanations\n3. Common pitfalls to avoid\n4. Testing strategies\n5. How to ensure high grades",
+      "implementation_phases": {
+        "planning": {
+          "description": "Analyze requirements and design solution architecture",
+          "steps": ["Read requirements carefully", "Identify key classes and functions", "Design data structures", "Plan error handling", "Consider edge cases"]
+        },
+        "implementation": {
+          "description": "Write the actual code following best practices",
+          "steps": ["Start with class declarations", "Implement basic functionality", "Add error handling", "Write comprehensive tests", "Refactor for clarity"]
+        },
+        "testing": {
+          "description": "Validate that code works correctly and meets requirements",
+          "steps": ["Test normal cases", "Test edge cases", "Test error conditions", "Validate against requirements", "Performance testing"]
+        },
+        "refinement": {
+          "description": "Improve code quality and documentation",
+          "steps": ["Code review", "Add documentation", "Optimize performance", "Clean up code", "Final validation"]
+        }
+      }
+    }
+  },
+  "evaluation_metrics": {
+    "grading_rubric": {
+      "A_range": {
+        "score_range": "90-100",
+        "description": "Excellent work that exceeds expectations",
+        "criteria": [
+          "All requirements implemented correctly",
+          "Excellent code organization and structure",
+          "Comprehensive error handling",
+          "Well-documented code with clear comments",
+          "Efficient algorithms and data structures",
+          "Creative solutions to problems",
+          "Thorough testing and validation"
+        ]
+      },
+      "B_range": {
+        "score_range": "80-89",
+        "description": "Good work that meets most expectations",
+        "criteria": [
+          "Most requirements implemented correctly",
+          "Good code organization",
+          "Basic error handling",
+          "Some documentation",
+          "Reasonable algorithms and data structures",
+          "Functional solution",
+          "Some testing present"
+        ]
+      },
+      "C_range": {
+        "score_range": "70-79",
+        "description": "Adequate work that meets basic requirements",
+        "criteria": [
+          "Basic requirements implemented",
+          "Functional code",
+          "Minimal error handling",
+          "Poor organization",
+          "Basic algorithms",
+          "Limited testing"
+        ]
+      },
+      "D_range": {
+        "score_range": "60-69",
+        "description": "Below average work with significant issues",
+        "criteria": [
+          "Missing some key requirements",
+          "Code works but has major issues",
+          "Poor code quality",
+          "No error handling",
+          "Inefficient solutions",
+          "No testing"
+        ]
+      },
+      "F_range": {
+        "score_range": "0-59",
+        "description": "Unsatisfactory work that doesn't meet requirements",
+        "criteria": [
+          "Major requirements missing",
+          "Code doesn't work properly",
+          "Poor understanding of concepts",
+          "No effort to follow best practices",
+          "Compilation errors",
+          "Doesn't meet assignment goals"
+        ]
+      }
+    },
+    "detailed_scoring_criteria": {
+      "functionality": {
+        "weight": 40,
+        "sub_criteria": {
+          "core_requirements": {"weight": 25, "description": "Basic assignment requirements"},
+          "advanced_features": {"weight": 10, "description": "Extra features beyond requirements"},
+          "edge_cases": {"weight": 5, "description": "Handling of edge cases and error conditions"}
+        }
+      },
+      "code_quality": {
+        "weight": 30,
+        "sub_criteria": {
+          "structure": {"weight": 10, "description": "Code organization and architecture"},
+          "readability": {"weight": 8, "description": "Clear, understandable code"},
+          "documentation": {"weight": 7, "description": "Comments and documentation"},
+          "naming": {"weight": 5, "description": "Meaningful variable and function names"}
+        }
+      },
+      "technical_skills": {
+        "weight": 20,
+        "sub_criteria": {
+          "cpp_features": {"weight": 8, "description": "Proper use of C++ language features"},
+          "algorithms": {"weight": 7, "description": "Appropriate algorithms and data structures"},
+          "efficiency": {"weight": 5, "description": "Code performance and resource usage"}
+        }
+      },
+      "testing_and_validation": {
+        "weight": 10,
+        "sub_criteria": {
+          "test_coverage": {"weight": 6, "description": "Coverage of different scenarios"},
+          "error_handling": {"weight": 4, "description": "Proper error handling and recovery"}
+        }
+      }
+    },
+    "common_deductions": {
+      "compilation_errors": {"deduction": "10-20 points", "description": "Code doesn't compile"},
+      "missing_requirements": {"deduction": "5-15 points per requirement", "description": "Key features not implemented"},
+      "poor_structure": {"deduction": "5-10 points", "description": "Everything in main() function"},
+      "no_comments": {"deduction": "3-5 points", "description": "Lack of code documentation"},
+      "memory_leaks": {"deduction": "5-10 points", "description": "Improper memory management"},
+      "inefficient_code": {"deduction": "3-8 points", "description": "Poor algorithm choices"},
+      "no_error_handling": {"deduction": "5-10 points", "description": "Program crashes on errors"},
+      "late_submission": {"deduction": "5-10 points", "description": "Submitted after deadline"}
+    }
+  },
+  "improvement_recommendations": {
+    "code_structure_improvements": {
+      "separate_concerns": {
+        "problem": "Everything in main() function",
+        "solution": "Create separate functions for different responsibilities",
+        "example": "Extract input reading, processing, and output into separate functions",
+        "benefit": "Easier to test, debug, and maintain"
+      },
+      "use_classes": {
+        "problem": "Using only basic data types",
+        "solution": "Create classes to represent domain objects",
+        "example": "Create Student, Course, Grade classes instead of using arrays",
+        "benefit": "Better organization and encapsulation"
+      },
+      "file_organization": {
+        "problem": "All code in one file",
+        "solution": "Split code into multiple files (.h and .cpp)",
+        "example": "student.h, student.cpp, main.cpp",
+        "benefit": "Better maintainability and reusability"
+      }
+    },
+    "quality_improvements": {
+      "error_handling": {
+        "problem": "No error checking",
+        "solution": "Add try-catch blocks and input validation",
+        "example": "Check file opening, validate user input, handle exceptions",
+        "benefit": "Robust program that doesn't crash"
+      },
+      "documentation": {
+        "problem": "No comments or poor comments",
+        "solution": "Add meaningful comments explaining logic",
+        "example": "Document function purposes, complex algorithms, assumptions",
+        "benefit": "Code is easier to understand and maintain"
+      },
+      "naming_conventions": {
+        "problem": "Poor variable/function names",
+        "solution": "Use descriptive, consistent naming",
+        "example": "studentCount instead of x, calculateGrade() instead of func()",
+        "benefit": "Code is self-documenting"
+      }
+    },
+    "performance_improvements": {
+      "algorithm_efficiency": {
+        "problem": "Inefficient algorithms (O(n²) when O(n) possible)",
+        "solution": "Choose appropriate data structures and algorithms",
+        "example": "Use std::vector instead of arrays, std::map for lookups",
+        "benefit": "Faster execution and better scalability"
+      },
+      "memory_management": {
+        "problem": "Memory leaks or inefficient memory usage",
+        "solution": "Use RAII, smart pointers, proper cleanup",
+        "example": "Use std::unique_ptr, std::shared_ptr, avoid raw pointers",
+        "benefit": "Prevents memory leaks and improves performance"
+      }
+    }
+  },
+  "assignment_specific_guidance": {
+    "A1_basic_cpp": {
+      "focus_areas": ["Basic syntax", "Control structures", "Functions", "Arrays"],
+      "common_mistakes": ["Using goto", "Global variables", "No functions"],
+      "success_tips": ["Use functions for modularity", "Validate input", "Clear variable names"]
+    },
+    "A2_data_handling": {
+      "focus_areas": ["File I/O", "Data structures", "Input validation", "Error handling"],
+      "common_mistakes": ["No file error checking", "Buffer overflows", "Poor data organization"],
+      "success_tips": ["Check file operations", "Use appropriate data structures", "Handle edge cases"]
+    },
+    "A3_algorithms": {
+      "focus_areas": ["Algorithm design", "Complexity analysis", "Data structures", "Problem solving"],
+      "common_mistakes": ["Inefficient algorithms", "Wrong data structures", "Missing edge cases"],
+      "success_tips": ["Analyze time/space complexity", "Choose correct data structures", "Test thoroughly"]
+    },
+    "A4_oop": {
+      "focus_areas": ["Class design", "Inheritance", "Polymorphism", "Encapsulation"],
+      "common_mistakes": ["Everything public", "No inheritance", "Poor class design"],
+      "success_tips": ["Proper encapsulation", "Meaningful inheritance", "Clean interfaces"]
+    },
+    "A5_game_development": {
+      "focus_areas": ["Game logic", "Object interactions", "State management", "User interface"],
+      "common_mistakes": ["Tight coupling", "No game loop", "Poor state management"],
+      "success_tips": ["Modular design", "Clear game states", "Good user feedback"]
+    },
+    "A6_full_stack": {
+      "focus_areas": ["System architecture", "Data persistence", "Web interface", "Integration"],
+      "common_mistakes": ["Poor architecture", "No data validation", "Inconsistent interface"],
+      "success_tips": ["Plan architecture first", "Validate all data", "Consistent user experience"]
+    }
+  }
+}

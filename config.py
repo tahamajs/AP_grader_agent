@@ -1,34 +1,32 @@
-# config.py
-
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+
 load_dotenv()
 
-# Google Sheets Configuration
+
 SHEET_NAME = "1swgtRM3awVelITJdgJC9cc6eUIsBvd5GKq1YhwVFGEg"
 CREDENTIALS_FILE = "credentials.json"
 
-# Local directory to store cloned student projects
+
 PROJECTS_DIR = "student_projects"
 
-# Path to your test cases directory (organized by practice)
+
 TEST_CASES_DIR = "/Users/tahamajs/Documents/uni/LLM/grading_agent/test_cases"
 
-# Path to practice description PDFs
+
 PRACTICES_DIR = "/Users/tahamajs/Documents/uni/LLM/grading_agent/description"
 
-# Clone directory for student repositories
+
 CLONE_DIR = "cloned_repos"
 
-# The command to build a student's project (e.g., 'make', 'cmake . && make')
+
 BUILD_COMMAND = "make"
 
-# The name of the executable produced by the build
+
 EXECUTABLE_NAME = "student_program"
 
-# Model Configuration
+
 MODEL_CONFIG = {
     "api_key": os.getenv("GOOGLE_API_KEY"),
     "model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
@@ -44,20 +42,55 @@ MODEL_CONFIG = {
         "top_k": int(os.getenv("GENERATION_TOP_K", "50")),
         "max_output_tokens": int(os.getenv("GENERATION_MAX_OUTPUT_TOKENS", "2048")),
     },
+    "guidance": {
+        "temperature": float(os.getenv("GUIDANCE_TEMPERATURE", "0.3")),
+        "top_p": float(os.getenv("GUIDANCE_TOP_P", "0.85")),
+        "top_k": int(os.getenv("GUIDANCE_TOP_K", "30")),
+        "max_output_tokens": int(os.getenv("GUIDANCE_MAX_OUTPUT_TOKENS", "6144")),
+    },
     "retry": {
         "max_retries": int(os.getenv("MAX_RETRIES", "3")),
         "delay": float(os.getenv("RETRY_DELAY", "1.0")),
     },
 }
 
-# Logging Configuration
+
+EVALUATION_CONFIG = {
+    "hardness": os.getenv("EVALUATION_HARDNESS", "medium"),
+    "strictness": float(os.getenv("EVALUATION_STRICTNESS", "0.7")),
+    "leniency": float(os.getenv("EVALUATION_LENIENCY", "0.3")),
+    "levels": {
+        "easy": {
+            "strictness": 0.4,
+            "leniency": 0.6,
+            "description": "More lenient evaluation, focuses on effort and basic correctness",
+        },
+        "medium": {
+            "strictness": 0.7,
+            "leniency": 0.3,
+            "description": "Balanced evaluation, considers both correctness and best practices",
+        },
+        "hard": {
+            "strictness": 0.9,
+            "leniency": 0.1,
+            "description": "Strict evaluation, emphasizes code quality, efficiency, and advanced concepts",
+        },
+        "expert": {
+            "strictness": 1.0,
+            "leniency": 0.0,
+            "description": "Expert-level evaluation, requires production-quality code",
+        },
+    },
+}
+
+
 LOG_CONFIG = {
     "level": os.getenv("LOG_LEVEL", "INFO"),
-    "max_size": int(os.getenv("LOG_MAX_SIZE", "10485760")),  # 10MB
+    "max_size": int(os.getenv("LOG_MAX_SIZE", "10485760")),
     "backup_count": int(os.getenv("LOG_BACKUP_COUNT", "5")),
 }
 
-# Practice-specific configurations with detailed grading metrics
+
 PRACTICE_CONFIGS = {
     "A1": {
         "name": "Assignment 1 - Basic Programming",

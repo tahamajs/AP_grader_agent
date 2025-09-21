@@ -1,4 +1,3 @@
-# langchain_integration.py
 import os
 import json
 import logging
@@ -9,13 +8,12 @@ import google.generativeai as genai
 
 load_dotenv()
 
-# Import configuration
+
 from config import MODEL_CONFIG
 
 genai.configure(api_key=MODEL_CONFIG["api_key"])
 
 
-# Setup logging
 def setup_logging():
     """Setup logging configuration for the grading system."""
     log_dir = os.path.join(os.getcwd(), "logs")
@@ -38,7 +36,6 @@ def setup_logging():
 logger = setup_logging()
 
 
-# Define grading output structures for different assignments
 class A1GradingOutput(BaseModel):
     logic_iterators: float = Field(
         description="Score for using iterators (0 to 1)", ge=0, le=1
@@ -176,7 +173,7 @@ class A2GradingOutput(BaseModel):
 
 
 class A3GradingOutput(BaseModel):
-    # Questions 1-4 (71 points total)
+
     q1_recursive_logic: float = Field(
         description="Q1 recursive logic (0 to 2)", ge=0, le=2
     )
@@ -202,7 +199,6 @@ class A3GradingOutput(BaseModel):
         description="Q4 upload testcases (0 to 2)", ge=0, le=2
     )
 
-    # Design (20 points)
     design_io_separation: float = Field(
         description="Design I/O separation (0 to 1)", ge=0, le=1
     )
@@ -229,7 +225,6 @@ class A3GradingOutput(BaseModel):
         description="Design consistency (0 to 1)", ge=0, le=1
     )
 
-    # Git (6 points)
     git_commit_messages: float = Field(
         description="Git commit messages (0 to 1)", ge=0, le=1
     )
@@ -354,7 +349,7 @@ class A5GradingOutput(BaseModel):
 
 
 class A6GradingOutput(BaseModel):
-    # Phase 1
+
     p1_login_signup: float = Field(
         description="Phase 1 Login/SignUp (0 to 2)", ge=0, le=2
     )
@@ -407,7 +402,6 @@ class A6GradingOutput(BaseModel):
         description="Phase 1 Test Cases (0 to 30)", ge=0, le=30
     )
 
-    # Phase 2
     p2_add_joint_event: float = Field(
         description="Phase 2 Add Joint Event (0 to 2)", ge=0, le=2
     )
@@ -440,7 +434,6 @@ class A6GradingOutput(BaseModel):
         description="Phase 2 Test Cases (0 to 15)", ge=0, le=15
     )
 
-    # Phase 3
     p3_signup_page: float = Field(
         description="Phase 3 Signup Page (0 to 2)", ge=0, le=2
     )
@@ -498,10 +491,8 @@ def get_grading_prompt(
 ):
     """Returns the appropriate grading prompt for the assignment type."""
 
-    # Import the prompts module
     from prompts import get_grading_prompt as get_centralized_prompt
 
-    # Use the centralized prompt function
     return get_centralized_prompt(
         assignment_type,
         practice_description,
@@ -526,7 +517,6 @@ def grade_student_project(
     import json
     from datetime import datetime
 
-    # Get the appropriate model and prompt
     grading_model = get_grading_model(assignment_type)
     prompt = get_grading_prompt(
         assignment_type,
@@ -536,7 +526,6 @@ def grade_student_project(
         source_code,
     )
 
-    # Initialize the model with optimized settings
     model = genai.GenerativeModel(
         MODEL_CONFIG["model"],
         generation_config=genai.types.GenerationConfig(
@@ -547,14 +536,12 @@ def grade_student_project(
         ),
     )
 
-    # Format instructions for the specific model
     from prompts import get_format_instructions
 
     format_instructions = get_format_instructions(assignment_type, grading_model)
 
     full_prompt = prompt + format_instructions
 
-    # Generate response with retry logic
     max_retries = MODEL_CONFIG["retry"]["max_retries"]
     for attempt in range(max_retries):
         try:
@@ -564,13 +551,12 @@ def grade_student_project(
 
             response = model.generate_content(full_prompt)
 
-            # Use centralized parser/validator
             from prompts import parse_and_validate_response
 
             response_text = response.text
 
             def _validator(d: dict):
-                # let Pydantic validate types/required fields
+
                 grading_model(**d)
 
             parsed = parse_and_validate_response(
@@ -591,7 +577,6 @@ def grade_student_project(
                 f"Successfully graded student {student_id} for {assignment_type}"
             )
 
-            # Save outputs if requested
             if save_outputs and student_id:
                 saved_path = save_grading_output(
                     grading_output, assignment_type, student_id, result_dict
@@ -625,7 +610,6 @@ def grade_student_project(
                 )
             continue
 
-    # This should never be reached, but just in case
     logger.error(f"Unexpected error in grading function for student {student_id}")
     raise ValueError("Unexpected error in grading function")
 
@@ -637,16 +621,13 @@ def save_grading_output(
     import os
     from datetime import datetime
 
-    # Create outputs directory if it doesn't exist
     outputs_dir = os.path.join(os.getcwd(), "grading_outputs")
     os.makedirs(outputs_dir, exist_ok=True)
 
-    # Generate filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{student_id}_{assignment_type}_{timestamp}.json"
     filepath = os.path.join(outputs_dir, filename)
 
-    # Prepare output data
     output_data = {
         "student_id": student_id,
         "assignment_type": assignment_type,
@@ -660,7 +641,6 @@ def save_grading_output(
         ),
     }
 
-    # Save to JSON file
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 

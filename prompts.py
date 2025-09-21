@@ -1,4 +1,3 @@
-# prompts.py
 """
 Centralized prompt management for the grading agent system.
 All LLM prompts are defined here for easy modification and maintenance.
@@ -10,13 +9,8 @@ import re
 import os
 import logging
 
-# Setup logging for prompts module
+
 logger = logging.getLogger(__name__)
-
-
-# -----------------------------
-# LLM RESPONSE PARSING HELPERS
-# -----------------------------
 
 
 def _normalize_llm_output(text: str) -> str:
@@ -25,11 +19,10 @@ def _normalize_llm_output(text: str) -> str:
         return text
 
     t = text.strip()
-    # Remove triple backtick code fences with optional language
+
     t = re.sub(r"^```[a-zA-Z0-9]*\n", "", t)
     t = re.sub(r"\n```$", "", t)
 
-    # Remove leading and trailing single backticks
     t = t.strip("`")
 
     return t.strip()
@@ -40,23 +33,20 @@ def _attempt_json_fixup(text: str) -> Optional[dict]:
 
     Returns parsed dict on success or None on failure.
     """
-    # Fast try
+
     try:
         return json.loads(text)
     except Exception:
         pass
 
-    # Heuristic: extract the largest {...} block
     brace_matches = list(re.finditer(r"\{", text))
     if not brace_matches:
         return None
 
-    # find last closing brace
     last_close = text.rfind("}")
     first_open = brace_matches[0].start()
     candidate = text[first_open : last_close + 1]
 
-    # Remove trailing commas before } or ]
     candidate = re.sub(r",\s*(\}|\])", r"\1", candidate)
 
     try:
@@ -88,7 +78,6 @@ def parse_and_validate_response(
     """
     txt = _normalize_llm_output(response_text)
 
-    # Save raw response if requested
     if save_raw_to:
         try:
             os.makedirs(os.path.dirname(save_raw_to), exist_ok=True)
@@ -97,11 +86,10 @@ def parse_and_validate_response(
         except Exception as save_err:
             logger.warning(f"Failed to save raw response to {save_raw_to}: {save_err}")
 
-    # Try direct parse
     try:
         parsed = json.loads(txt)
     except Exception as e1:
-        # Try heuristics/fixup
+
         parsed = _attempt_json_fixup(txt)
         if parsed is None:
             ctx = f" for {description}" if description else ""
@@ -109,12 +97,11 @@ def parse_and_validate_response(
                 f"Failed to parse JSON response{ctx}: {e1}\nRaw: {txt[:1000]}"
             )
 
-    # Handle common LLM formatting issues where properties are wrapped
     if isinstance(parsed, dict) and "properties" in parsed and len(parsed) == 1:
-        # Check if this looks like a JSON schema response that wrapped the actual data
+
         properties_data = parsed["properties"]
         if isinstance(properties_data, dict):
-            # Look for grading-related field names to confirm this is the wrapped case
+
             grading_fields = [
                 k
                 for k in properties_data.keys()
@@ -126,7 +113,6 @@ def parse_and_validate_response(
                 )
                 parsed = properties_data
 
-    # Optionally validate using provided callable
     if validator:
         try:
             validator(parsed)
@@ -137,11 +123,6 @@ def parse_and_validate_response(
             )
 
     return parsed
-
-
-# =============================================================================
-# TEST GENERATION PROMPTS
-# =============================================================================
 
 
 def get_test_generation_prompt(description: str, reqs: dict, num_cases: int) -> str:
@@ -200,11 +181,6 @@ IMPORTANT:
 - Input and expected_output should be complete and exact
 - Use proper JSON formatting with double quotes
 - Do not include any text outside the JSON structure"""
-
-
-# =============================================================================
-# GRADING PROMPTS
-# =============================================================================
 
 
 def get_base_grading_prompt(
@@ -684,7 +660,7 @@ def get_a4_grading_criteria() -> str:
       * Award 1.0: Logical file separation (header/implementation)
       * Award 0.0: All code in one file
     - Header Guards (1pt): Proper header protection
-      * Award 1.0: Correct #ifndef/#define/#endif guards
+      * Award 1.0: Correct 
       * Award 0.0: Missing or incorrect header guards
     - Makefile (1pt): Build system completeness
       * Award 1.0: Complete Makefile with all targets
@@ -722,15 +698,15 @@ def get_a4_grading_criteria() -> str:
     **EXAMPLE RECOMMENDATIONS:**
     - **High Priority**: All members public - Implement proper encapsulation with private members and public accessors
     - **Medium Priority**: Large methods in classes - Break down into smaller, focused methods
-    - **Low Priority**: Missing header guards - Add proper #ifndef/#define/#endif protection
+    - **Low Priority**: Missing header guards - Add proper 
 
     **CODE IMPROVEMENT EXAMPLES:**
     - **Before**: `class MyClass { public: int data; void process(); };`
       **After**: `class MyClass { private: int data_; public: int getData() const { return data_; } void setData(int value) { data_ = value; } void process(); };`
     - **Before**: Large method doing multiple things
       **After**: `void process() { validateInput(); performCalculation(); updateState(); }`
-    - **Before**: `#include "myclass.h"` without guards
-      **After**: `#ifndef MYCLASS_H #define MYCLASS_H ... #endif`
+    - **Before**: `
+      **After**: `
 
     **OOP BEST PRACTICES:**
     - Use meaningful class names (PascalCase)
@@ -1109,7 +1085,6 @@ def get_a6_grading_criteria() -> str:
     """
 
 
-# Grading criteria mapping
 GRADING_CRITERIA = {
     "A1": get_a1_grading_criteria,
     "A2": get_a2_grading_criteria,
@@ -1144,17 +1119,11 @@ def get_grading_prompt(
         practice_description, test_results, static_analysis, source_code
     )
 
-    # Get assignment-specific criteria
     criteria_func = GRADING_CRITERIA.get(assignment_type)
     if criteria_func:
         return base_prompt + criteria_func()
     else:
         return base_prompt
-
-
-# =============================================================================
-# FORMAT INSTRUCTIONS
-# =============================================================================
 
 
 def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
@@ -1168,7 +1137,7 @@ def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
     Returns:
         Format instructions string
     """
-    # Get the field names from the model for clearer instructions
+
     field_names = list(grading_model.model_fields.keys())
 
     return f"""
@@ -1214,12 +1183,6 @@ def get_format_instructions(assignment_type: str, grading_model: Any) -> str:
     """
 
 
-# =============================================================================
-# PROMPT CONFIGURATION
-# =============================================================================
-
-# Default prompt settings that can be easily modified
-# Import model configuration from config.py
 try:
     from config import MODEL_CONFIG
 
@@ -1236,7 +1199,7 @@ try:
         },
     }
 except ImportError:
-    # Fallback to hardcoded values if config import fails
+
     PROMPT_CONFIG = {
         "test_generation": {
             "temperature": 0.7,

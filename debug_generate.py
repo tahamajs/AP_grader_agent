@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Debug script for testing generate functionality
 """

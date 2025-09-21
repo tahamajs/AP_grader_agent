@@ -1,4 +1,3 @@
-# tools.py
 import os
 import subprocess
 import xml.etree.ElementTree as ET
@@ -8,10 +7,10 @@ from datetime import datetime
 from git import Repo, GitCommandError
 import config
 from config import MODEL_CONFIG
-import fitz  # PyMuPDF for PDF reading
+import fitz
 import time
 
-# Setup logging for tools
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +19,7 @@ def clone_student_repo(
 ) -> str:
     """Clones a student's repository using HTTPS."""
     try:
-        # Create a unique directory for this student
+
         if student_id:
             repo_name = f"student_{student_id}"
         else:
@@ -28,7 +27,6 @@ def clone_student_repo(
 
         clone_path = os.path.join(config.CLONE_DIR, repo_name)
 
-        # Clean up any existing directory
         if os.path.exists(clone_path):
             import shutil
 
@@ -36,28 +34,25 @@ def clone_student_repo(
 
         os.makedirs(clone_path, exist_ok=True)
 
-        # Use HTTPS URL directly (don't add .git if already present)
         if repo_url.startswith("https://github.com/"):
             if not repo_url.endswith(".git"):
                 https_url = repo_url + ".git"
             else:
                 https_url = repo_url
         else:
-            https_url = repo_url  # fallback
+            https_url = repo_url
 
-        # Clone the repository using HTTPS
         clone_command = ["git", "clone", "--depth", "1", https_url, clone_path]
         process = subprocess.run(
             clone_command,
             capture_output=True,
             text=True,
-            timeout=120,  # 2-minute timeout
+            timeout=120,
         )
 
         if process.returncode != 0:
             raise Exception(f"Git clone failed: {process.stderr}")
 
-        # If commit SHA is specified, checkout that specific commit
         if commit_sha:
             checkout_command = ["git", "checkout", commit_sha]
             process = subprocess.run(
@@ -119,7 +114,6 @@ def read_project_files(project_path: str) -> str:
                     full_code += f"Error reading file: {e}"
                     full_code += f"\n--- END OF FILE: {file} ---\n\n"
 
-    # Add code metrics summary at the beginning
     metrics_summary = f"""
 📈 CODE METRICS SUMMARY:
 - Total Files: {code_metrics['total_files']} ({code_metrics['cpp_files']} .cpp, {code_metrics['header_files']} .h/.hpp)
@@ -158,12 +152,10 @@ def analyze_code_quality(source_code: str) -> dict:
     for line in lines:
         stripped = line.strip()
 
-        # Count comments
         if stripped.startswith("//") or stripped.startswith("/*"):
             analysis["comment_lines"] += 1
             continue
 
-        # Check for iterators
         if (
             "iterator" in stripped.lower()
             or "->begin()" in stripped
@@ -171,18 +163,15 @@ def analyze_code_quality(source_code: str) -> dict:
         ):
             analysis["uses_iterators"] = True
 
-        # Check for containers
         if any(
             container in stripped
             for container in ["std::vector", "std::map", "std::set"]
         ):
             analysis["uses_containers"] = True
 
-        # Check for structs
         if stripped.startswith("struct ") or "struct " in stripped:
             analysis["uses_structs"] = True
 
-        # Check for global variables (simplified)
         if (
             not in_main
             and "=" in stripped
@@ -203,15 +192,13 @@ def analyze_code_quality(source_code: str) -> dict:
             ):
                 analysis["global_variables"] += 1
 
-        # Check for magic numbers (simplified)
         import re
 
         magic_nums = re.findall(r"\b\d+\b", stripped)
         for num in magic_nums:
-            if num not in ["0", "1", "2", "10", "100"]:  # Common acceptable numbers
+            if num not in ["0", "1", "2", "10", "100"]:
                 analysis["magic_numbers"] += 1
 
-        # Track main function
         if "int main(" in stripped or "void main(" in stripped:
             in_main = True
             analysis["function_count"] += 1
@@ -222,7 +209,6 @@ def analyze_code_quality(source_code: str) -> dict:
         elif in_main:
             main_lines += 1
 
-        # Track other functions
         if (
             any(
                 keyword in stripped
@@ -243,7 +229,6 @@ def analyze_code_quality(source_code: str) -> dict:
                 functions.append(current_function_lines)
                 current_function_lines = 0
 
-    # Calculate average function size
     if functions:
         analysis["average_function_size"] = sum(functions) / len(functions)
 
@@ -259,14 +244,11 @@ def read_practice_description(pdf_path: str) -> str:
         for page_num in range(len(doc)):
             page = doc[page_num]
 
-            # Extract text with better formatting preservation
             page_text = page.get_text()
 
-            # Clean up common PDF extraction issues
-            page_text = page_text.replace("\n\n", "\n")  # Remove excessive newlines
-            page_text = page_text.replace("  ", " ")  # Remove double spaces
+            page_text = page_text.replace("\n\n", "\n")
+            page_text = page_text.replace("  ", " ")
 
-            # Add page separator for multi-page documents
             if page_num > 0:
                 text_content.append(f"\n--- Page {page_num + 1} ---\n")
 
@@ -276,7 +258,6 @@ def read_practice_description(pdf_path: str) -> str:
 
         full_text = "".join(text_content)
 
-        # Final cleanup
         full_text = full_text.strip()
 
         if not full_text:
@@ -298,21 +279,18 @@ def extract_practice_requirements(pdf_text: str) -> dict:
         "bonus_features": [],
     }
 
-    # Simple keyword-based extraction (can be enhanced with NLP if needed)
     lines = pdf_text.split("\n")
 
     for line in lines:
         line_lower = line.lower().strip()
 
-        # Extract objectives
         if any(
             keyword in line_lower
             for keyword in ["objective", "goal", "purpose", "task"]
         ):
-            if len(line.strip()) > 10:  # Avoid very short lines
+            if len(line.strip()) > 10:
                 requirements["objectives"].append(line.strip())
 
-        # Extract constraints
         elif any(
             keyword in line_lower
             for keyword in [
@@ -326,7 +304,6 @@ def extract_practice_requirements(pdf_text: str) -> dict:
             if len(line.strip()) > 10:
                 requirements["constraints"].append(line.strip())
 
-        # Extract required features
         elif any(
             keyword in line_lower
             for keyword in ["required", "implement", "create", "write"]
@@ -334,7 +311,6 @@ def extract_practice_requirements(pdf_text: str) -> dict:
             if len(line.strip()) > 10:
                 requirements["required_features"].append(line.strip())
 
-        # Extract grading criteria
         elif any(
             keyword in line_lower
             for keyword in ["grade", "point", "score", "criteria", "evaluation"]
@@ -342,7 +318,6 @@ def extract_practice_requirements(pdf_text: str) -> dict:
             if len(line.strip()) > 10:
                 requirements["grading_criteria"].append(line.strip())
 
-        # Extract bonus features
         elif any(
             keyword in line_lower
             for keyword in ["bonus", "extra", "additional", "optional"]
@@ -358,7 +333,6 @@ def summarize_text(text: str, max_length: int = 500) -> str:
     if len(text) <= max_length:
         return text
 
-    # Simple summarization by truncating and appending ellipsis
     return text[:max_length] + "..."
 
 
@@ -368,7 +342,6 @@ def get_practice_descriptions(practices_dir: str) -> dict:
     if not os.path.exists(practices_dir):
         return practice_descriptions
 
-    # Walk through the directory and subdirectories
     for root, _, files in os.walk(practices_dir):
         for file in files:
             if file.lower().endswith(".pdf"):
@@ -409,11 +382,9 @@ def generate_testcases_from_description(
         f"Starting test case generation for assignment {assignment}, num_cases={num_cases}, use_llm={use_llm}"
     )
 
-    # Create logs directory for comprehensive logging
     logs_dir = os.path.join(os.getcwd(), "test_generation_logs")
     os.makedirs(logs_dir, exist_ok=True)
 
-    # Log generation session start
     session_log = {
         "session_id": datetime.now().strftime("%Y%m%d_%H%M%S"),
         "assignment": assignment,
@@ -430,10 +401,10 @@ def generate_testcases_from_description(
         json.dump(session_log, f, indent=2, ensure_ascii=False)
 
     descriptions = get_practice_descriptions(config.PRACTICES_DIR)
-    # Try exact key, then look for key-containing entry
+
     text = descriptions.get(assignment)
     if not text:
-        # fallback: find first key that contains the assignment substring
+
         for k, v in descriptions.items():
             if assignment.lower() in k.lower():
                 text = v
@@ -443,7 +414,6 @@ def generate_testcases_from_description(
         error_msg = f"No practice description found for assignment '{assignment}'"
         logger.error(error_msg)
 
-        # Update session log with error
         session_log["status"] = "failed"
         session_log["error"] = error_msg
         session_log["end_time"] = datetime.now().isoformat()
@@ -454,11 +424,9 @@ def generate_testcases_from_description(
 
     reqs = extract_practice_requirements(text)
 
-    # Create test directory
     target_dir = os.path.join(config.TEST_CASES_DIR, assignment)
     tests_dir = os.path.join(target_dir, "tests")
 
-    # Log requirements extraction
     reqs_log = {
         "assignment": assignment,
         "description_length": len(text),
@@ -473,19 +441,17 @@ def generate_testcases_from_description(
         json.dump(reqs_log, f, indent=2, ensure_ascii=False)
 
     if use_llm:
-        # Use LLM for better test case generation
+
         test_cases = generate_testcases_with_llm(text, reqs, num_cases)
     else:
-        # Use heuristic approach
+
         test_cases = generate_testcases_heuristic(reqs, num_cases)
 
-    # Save test cases to files
     saved_files = []
     for i, (input_text, output_text) in enumerate(test_cases, 1):
         file_path = _make_testcase_pair(tests_dir, i, input_text, output_text)
         saved_files.append(file_path)
 
-    # Save comprehensive metadata about generation
     metadata = {
         "assignment": assignment,
         "num_cases": num_cases,
@@ -506,7 +472,6 @@ def generate_testcases_from_description(
     with open(metadata_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
-    # Update session log with success
     session_log["status"] = "completed"
     session_log["end_time"] = datetime.now().isoformat()
     session_log["generated_cases"] = len(test_cases)
@@ -528,16 +493,14 @@ def generate_testcases_heuristic(reqs: dict, num_cases: int) -> list:
     """Generate test cases using heuristic approach based on requirements."""
     test_cases = []
 
-    # Simple heuristic to produce input/output based on required features or objectives
     features = reqs.get("required_features", []) or reqs.get("objectives", [])
-    # If no features found, produce generic arithmetic tests
+
     if not features:
         features = ["Sum numbers", "Multiply numbers", "Edge case zero"]
 
-    # Generate testcases
     for i in range(1, num_cases + 1):
         feature = features[(i - 1) % len(features)]
-        # Very simple mapping: if feature mentions 'sum' or 'add' -> sum input
+
         feature_lower = feature.lower()
         if any(w in feature_lower for w in ["sum", "add", "total"]):
             inp = "5\n1 2 3 4 5\n"
@@ -549,7 +512,7 @@ def generate_testcases_heuristic(reqs: dict, num_cases: int) -> list:
             inp = "1\n0\n"
             out = "0\n"
         else:
-            # default numeric test
+
             inp = f"{i}\n{ ' '.join(str(x) for x in range(1, i+2)) }\n"
             out = str(sum(range(1, i + 2))) + "\n"
 
@@ -561,7 +524,7 @@ def generate_testcases_heuristic(reqs: dict, num_cases: int) -> list:
 def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) -> list:
     """Generate test cases using LLM for better quality and relevance."""
     try:
-        # Import here to avoid circular imports
+
         import google.generativeai as genai
         from dotenv import load_dotenv
         from prompts import get_test_generation_prompt
@@ -569,7 +532,6 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
         load_dotenv()
         genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-        # Get the prompt from the centralized prompts module
         prompt = get_test_generation_prompt(description, reqs, num_cases)
 
         logger.info(
@@ -587,13 +549,11 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
         )
         response = model.generate_content(prompt)
 
-        # Use centralized parser/validator from prompts.py
         from prompts import parse_and_validate_response
 
         response_text = response.text
         logger.debug(f"LLM raw response: {response_text[:800]}...")
 
-        # Save raw response for debugging
         raw_dir = os.path.join(os.getcwd(), "test_generation_logs")
         os.makedirs(raw_dir, exist_ok=True)
         raw_file = os.path.join(
@@ -602,7 +562,6 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
         with open(raw_file, "w", encoding="utf-8") as f:
             f.write(response_text)
 
-        # Parse and validate
         def _validator(d: dict):
             if not isinstance(d, dict) or "test_cases" not in d:
                 raise ValueError(
@@ -632,7 +591,6 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
                 logger.warning(f"Test case {i+1} is not a dictionary, skipping")
                 continue
 
-            # Validate required fields
             required_fields = ["input", "expected_output"]
             if not all(field in tc for field in required_fields):
                 logger.warning(f"Test case {i+1} missing required fields, skipping")
@@ -649,7 +607,6 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
 
             test_cases.append((input_data, expected_output))
 
-        # Save parsed metadata
         metadata = {
             "timestamp": datetime.now().isoformat(),
             "assignment_description": (
@@ -678,7 +635,7 @@ def generate_testcases_with_llm(description: str, reqs: dict, num_cases: int) ->
 
     except Exception as e:
         logger.error(f"Failed to generate test cases with LLM: {e}")
-        # Save error information for debugging
+
         error_metadata = {
             "timestamp": datetime.now().isoformat(),
             "error_type": type(e).__name__,
@@ -707,25 +664,23 @@ def run_static_analysis(project_path: str) -> str:
     """Runs cppcheck and returns a detailed summary of the results with severity categorization."""
     xml_output_file = os.path.join(project_path, "cppcheck_results.xml")
 
-    # Enhanced cppcheck command with more options
     command = [
         "cppcheck",
         "--enable=all",
         "--inconclusive",
         "--xml-version=2",
         "--language=c++",
-        "--std=c++11",  # Adjust based on your course requirements
-        "--suppress=missingIncludeSystem",  # Suppress common false positives
-        "--inline-suppr",  # Allow inline suppressions
+        "--std=c++11",
+        "--suppress=missingIncludeSystem",
+        "--inline-suppr",
         project_path,
     ]
 
     try:
-        # Run cppcheck
+
         with open(xml_output_file, "w") as f:
             result = subprocess.run(command, stderr=f, text=True, timeout=60)
 
-        # Parse the XML and create a detailed summary
         tree = ET.parse(xml_output_file)
         root = tree.getroot()
         errors = root.find("errors")
@@ -733,7 +688,6 @@ def run_static_analysis(project_path: str) -> str:
         if errors is None or len(errors) == 0:
             return "✅ Cppcheck Static Analysis: No issues found. Code appears clean."
 
-        # Categorize errors by severity
         severity_counts = {
             "error": 0,
             "warning": 0,
@@ -754,15 +708,12 @@ def run_static_analysis(project_path: str) -> str:
 
                 severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
-                # Format error details
                 error_details.append(
                     f"[{severity.upper()}] {file}:{line} - {msg} (ID: {error_id})"
                 )
 
-        # Create summary report
         summary = "📊 Cppcheck Static Analysis Report:\n\n"
 
-        # Severity breakdown
         summary += "Severity Breakdown:\n"
         for severity, count in severity_counts.items():
             if count > 0:
@@ -770,16 +721,14 @@ def run_static_analysis(project_path: str) -> str:
 
         summary += f"\nTotal Issues: {sum(severity_counts.values())}\n\n"
 
-        # Detailed issues
         if error_details:
             summary += "Detailed Issues:\n"
-            for detail in error_details[:20]:  # Limit to first 20 issues
+            for detail in error_details[:20]:
                 summary += f"  {detail}\n"
 
             if len(error_details) > 20:
                 summary += f"  ... and {len(error_details) - 20} more issues\n"
 
-        # Recommendations based on severity
         if severity_counts["error"] > 0:
             summary += "\n⚠️  CRITICAL: Address error-level issues immediately - these may cause runtime problems.\n"
         if severity_counts["warning"] > 0:
@@ -810,7 +759,6 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
         f"Starting build and test process for practice {practice_name} in {project_path}"
     )
 
-    # Try to use judge.sh for all practices
     judge_results = run_judge_tests(project_path, practice_name)
     if (
         judge_results["total_tests"] > 0
@@ -822,7 +770,6 @@ def build_and_run_tests(project_path: str, practice_name: str = None) -> dict:
         save_test_results(judge_results, practice_name, "judge")
         return judge_results
 
-    # Fallback to original test system if judge.sh is not available
     logger.info(f"Falling back to standard test system for {practice_name}")
     practice_config = config.PRACTICE_CONFIGS.get(practice_name, {})
     standard_results = run_standard_tests(project_path, practice_name, practice_config)
@@ -846,7 +793,6 @@ def run_judge_tests(project_path: str, practice_name: str) -> dict:
         "test_details": [],
     }
 
-    # Find the judge folder for the practice
     judge_dir = None
     test_cases_dir = os.path.join(config.TEST_CASES_DIR, f"practice{practice_name[1:]}")
     if os.path.exists(test_cases_dir):
@@ -869,20 +815,19 @@ def run_judge_tests(project_path: str, practice_name: str) -> dict:
     try:
         logger.info(f"Found judge.sh at {judge_script}, determining if multi-phase")
 
-        # Check if this is a multi-phase assignment (like A6)
         is_multi_phase = practice_name == "A6" or os.path.exists(
             os.path.join(judge_dir, "P1")
         )
 
         if is_multi_phase:
             logger.info(f"Running multi-phase judge tests for {practice_name}")
-            # Handle multi-phase assignment
+
             return run_judge_tests_multi_phase(
                 project_path, practice_name, judge_dir, judge_script
             )
         else:
             logger.info(f"Running single-phase judge tests for {practice_name}")
-            # Handle single-phase assignment
+
             return run_judge_tests_single_phase(
                 project_path, practice_name, judge_dir, judge_script
             )
@@ -910,17 +855,15 @@ def run_judge_tests_single_phase(
     }
 
     try:
-        # Copy student's code to the judge directory
+
         temp_run_dir = os.path.join(judge_dir, "temp-run")
 
-        # Clean and create temp directory
         if os.path.exists(temp_run_dir):
             import shutil
 
             shutil.rmtree(temp_run_dir)
         os.makedirs(temp_run_dir)
 
-        # Copy all source files from student's project
         for root, _, files in os.walk(project_path):
             for file in files:
                 if file.endswith((".cpp", ".h", ".hpp", "Makefile", "makefile")):
@@ -934,25 +877,23 @@ def run_judge_tests_single_phase(
             f"Copied {len([f for f in os.listdir(temp_run_dir) if f.endswith(('.cpp', '.h', '.hpp'))])} source files to judge directory"
         )
 
-        # Run the judge.sh test command
         judge_command = [judge_script, "-t"]
         process = subprocess.run(
             judge_command,
             cwd=judge_dir,
             capture_output=True,
             text=True,
-            timeout=300,  # 5-minute timeout
+            timeout=300,
         )
 
         results["execution_summary"] = process.stdout
         if process.stderr:
             results["execution_summary"] += f"\nSTDERR:\n{process.stderr}"
 
-        # Parse the output to extract test results
         output_lines = process.stdout.split("\n")
         for line in output_lines:
             if "Passed:" in line and "Failed:" in line:
-                # Parse summary line like "Passed: 3 out of 5"
+
                 parts = line.split()
                 if len(parts) >= 5:
                     try:
@@ -966,7 +907,7 @@ def run_judge_tests_single_phase(
                         pass
 
         if results["total_tests"] == 0:
-            # If parsing failed, assume build was successful if no clear errors
+
             if (
                 "Compiled Successfully" in process.stdout
                 or "Compiled successfully" in process.stdout
@@ -1009,15 +950,14 @@ def run_judge_tests_multi_phase(
     }
 
     try:
-        # Copy student's code to judge directory
-        temp_run_dir = os.path.join(judge_dir, "temp-P3")  # Use P3 as default
+
+        temp_run_dir = os.path.join(judge_dir, "temp-P3")
         if os.path.exists(temp_run_dir):
             import shutil
 
             shutil.rmtree(temp_run_dir)
         os.makedirs(temp_run_dir)
 
-        # Copy all source files from student's project
         for root, _, files in os.walk(project_path):
             for file in files:
                 if file.endswith((".cpp", ".h", ".hpp", "Makefile", "makefile")):
@@ -1027,30 +967,26 @@ def run_judge_tests_multi_phase(
 
                     shutil.copy2(src_path, dst_path)
 
-        # Run tests for all phases
         phase_results = {}
         total_passed = 0
         total_tests = 0
 
-        # Determine number of phases by checking P1, P2, P3 directories
         phases = []
-        for i in range(1, 4):  # Check up to 3 phases
+        for i in range(1, 4):
             if os.path.exists(os.path.join(judge_dir, f"P{i}")):
                 phases.append(i)
 
         if not phases:
-            phases = [1, 2, 3]  # Default for A6
+            phases = [1, 2, 3]
 
         for phase in phases:
             print(f"Running Phase {phase} tests...")
 
-            # Change to the specific phase
             change_command = [judge_script, "-p", str(phase)]
             subprocess.run(
                 change_command, cwd=judge_dir, capture_output=True, text=True
             )
 
-            # Run tests for this phase
             test_command = [judge_script, "-t"]
             process = subprocess.run(
                 test_command,
@@ -1064,7 +1000,6 @@ def run_judge_tests_multi_phase(
             if process.stderr:
                 phase_output += f"\nSTDERR:\n{process.stderr}"
 
-            # Parse results for this phase
             passed = 0
             total = 0
             output_lines = phase_output.split("\n")
@@ -1093,7 +1028,6 @@ def run_judge_tests_multi_phase(
         results["phase_results"] = phase_results
         results["build_successful"] = True
 
-        # Combine all phase outputs
         combined_output = ""
         for phase, phase_data in phase_results.items():
             combined_output += f"\n=== PHASE {phase.upper()} ===\n"
@@ -1116,17 +1050,15 @@ def save_test_results(
     test_results: dict, practice_name: str, test_type: str, student_id: str = None
 ):
     """Save test results as JSON file with timestamp."""
-    # Create test results directory if it doesn't exist
+
     results_dir = os.path.join(os.getcwd(), "test_results")
     os.makedirs(results_dir, exist_ok=True)
 
-    # Generate filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     student_part = f"{student_id}_" if student_id else ""
     filename = f"{student_part}{practice_name}_{test_type}_{timestamp}.json"
     filepath = os.path.join(results_dir, filename)
 
-    # Prepare output data
     output_data = {
         "practice_name": practice_name,
         "test_type": test_type,
@@ -1135,7 +1067,6 @@ def save_test_results(
         "test_results": test_results,
     }
 
-    # Save to JSON file
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
@@ -1157,14 +1088,12 @@ def run_standard_tests(
         "test_details": [],
     }
 
-    # Get build command and executable name from config or use defaults
     build_command = practice_config.get("build_command", "make")
     executable_name = practice_config.get("executable_name", "student_program")
     test_cases_dir_rel = practice_config.get(
         "test_cases_dir", f"test_cases/{practice_name}"
     )
 
-    # Convert relative test cases dir to absolute path
     if not test_cases_dir_rel.startswith("/"):
         test_cases_dir = os.path.join(
             config.TEST_CASES_DIR, test_cases_dir_rel.replace("test_cases/", "")
@@ -1172,7 +1101,6 @@ def run_standard_tests(
     else:
         test_cases_dir = test_cases_dir_rel
 
-    # 1. Build the code with better error capture
     try:
         build_process = subprocess.run(
             build_command.split(),
@@ -1180,7 +1108,7 @@ def run_standard_tests(
             check=True,
             capture_output=True,
             text=True,
-            timeout=120,  # 2-minute timeout for build
+            timeout=120,
         )
         results["build_successful"] = True
         results["build_output"] = "✅ Build successful"
@@ -1194,7 +1122,6 @@ def run_standard_tests(
         results["execution_summary"] = f"❌ Build failed: {e.stderr}\n"
         return results
 
-    # 2. Check if executable exists
     executable_path = os.path.join(project_path, executable_name)
     if not os.path.exists(executable_path):
         results[
@@ -1202,7 +1129,6 @@ def run_standard_tests(
         ] += f"❌ Executable '{executable_name}' not found after build.\n"
         return results
 
-    # 3. Run test cases with detailed reporting
     if not os.path.exists(test_cases_dir):
         results[
             "execution_summary"
@@ -1234,24 +1160,22 @@ def run_standard_tests(
         }
 
         try:
-            # Read expected output
+
             with open(output_path, "r") as f_out:
                 expected_output = f_out.read().strip()
 
-            # Run the test
             start_time = time.time()
             run_process = subprocess.run(
                 [executable_path],
                 stdin=open(input_path, "r"),
                 capture_output=True,
                 text=True,
-                timeout=10,  # 10-second timeout per test
+                timeout=10,
             )
             execution_time = time.time() - start_time
 
             actual_output = run_process.stdout.strip()
 
-            # Compare outputs
             if actual_output == expected_output:
                 results["passed_tests"] += 1
                 test_result["passed"] = True
@@ -1296,7 +1220,6 @@ def run_standard_tests(
 
         results["test_details"].append(test_result)
 
-    # Add summary statistics
     pass_rate = (
         (results["passed_tests"] / results["total_tests"]) * 100
         if results["total_tests"] > 0

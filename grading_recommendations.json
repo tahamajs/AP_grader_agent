@@ -1,0 +1,326 @@
+{
+  "grading_recommendations": {
+    "comprehensive_feedback_prompt": {
+      "system_message": "You are an expert C++ programming instructor providing detailed feedback to help students improve their grades. Your recommendations should be specific, actionable, and focused on both fixing current issues and preventing future problems. Consider the evaluation hardness level when providing feedback.",
+      "user_prompt_template": "Please provide comprehensive grading feedback for this {assignment_type} submission:\n\nSTUDENT CODE:\n{code}\n\nASSIGNMENT REQUIREMENTS:\n{requirements}\n\nTEST RESULTS:\n{test_results}\n\nSTATIC ANALYSIS:\n{static_analysis}\n\nCURRENT SCORES:\n{current_scores}\n\nEVALUATION HARDNESS: {hardness_level}\n\nPlease provide:\n1. Overall grade assessment\n2. Detailed breakdown by criteria\n3. Specific recommendations to improve each score\n4. Code examples for improvements\n5. Study priorities for future assignments\n6. Estimated grade improvement potential",
+      "hardness_adjustments": {
+        "easy": {
+          "focus": "Encouragement and basic improvements",
+          "leniency": "More forgiving on minor issues",
+          "emphasis": "Effort and basic correctness over perfection"
+        },
+        "medium": {
+          "focus": "Balanced feedback on quality and functionality",
+          "leniency": "Standard evaluation criteria",
+          "emphasis": "Best practices and code quality"
+        },
+        "hard": {
+          "focus": "Rigorous code quality and efficiency analysis",
+          "leniency": "Strict adherence to standards",
+          "emphasis": "Production-quality code and advanced concepts"
+        },
+        "expert": {
+          "focus": "Industry-standard code review",
+          "leniency": "Minimal tolerance for suboptimal solutions",
+          "emphasis": "Enterprise-level code quality and architecture"
+        }
+      }
+    },
+    "improvement_pathways": {
+      "score_ranges": {
+        "0-60": {
+          "assessment": "Major revision needed - fundamental issues present",
+          "priority_actions": [
+            "Fix compilation errors immediately",
+            "Implement missing core requirements",
+            "Restructure code with proper organization",
+            "Add basic error handling"
+          ],
+          "estimated_improvement": "20-40 points with focused effort",
+          "time_estimate": "1-2 weeks of dedicated work"
+        },
+        "60-75": {
+          "assessment": "Good foundation but needs significant improvements",
+          "priority_actions": [
+            "Improve code organization and structure",
+            "Add comprehensive error handling",
+            "Enhance documentation and comments",
+            "Implement missing advanced features"
+          ],
+          "estimated_improvement": "15-25 points with systematic fixes",
+          "time_estimate": "3-5 days of focused work"
+        },
+        "75-85": {
+          "assessment": "Solid work with room for excellence",
+          "priority_actions": [
+            "Optimize algorithms and data structures",
+            "Add advanced features beyond requirements",
+            "Improve code efficiency and performance",
+            "Enhance testing and edge case handling"
+          ],
+          "estimated_improvement": "10-15 points with polish",
+          "time_estimate": "2-3 days of refinement"
+        },
+        "85-95": {
+          "assessment": "Excellent work needing only minor improvements",
+          "priority_actions": [
+            "Fine-tune performance optimizations",
+            "Add comprehensive documentation",
+            "Implement creative enhancements",
+            "Ensure perfect edge case handling"
+          ],
+          "estimated_improvement": "5-10 points with attention to detail",
+          "time_estimate": "1-2 days of final polish"
+        },
+        "95-100": {
+          "assessment": "Outstanding work - focus on perfection",
+          "priority_actions": [
+            "Micro-optimizations",
+            "Extensive testing and validation",
+            "Comprehensive documentation",
+            "Creative problem-solving enhancements"
+          ],
+          "estimated_improvement": "0-5 points - already excellent",
+          "time_estimate": "Hours of final refinement"
+        }
+      }
+    },
+    "specific_recommendations": {
+      "code_structure": {
+        "single_file_issues": {
+          "problem": "All code in main.cpp",
+          "recommendation": "Split into multiple files: main.cpp, classes.h, classes.cpp, utils.h, utils.cpp",
+          "benefit": "Better organization, easier maintenance, demonstrates understanding of modular design",
+          "grade_impact": "+10-15 points",
+          "difficulty": "Medium"
+        },
+        "god_class_anti_pattern": {
+          "problem": "One class doing everything",
+          "recommendation": "Apply Single Responsibility Principle - split into focused classes",
+          "benefit": "Better encapsulation, easier testing, more maintainable code",
+          "grade_impact": "+8-12 points",
+          "difficulty": "Medium"
+        },
+        "poor_separation_of_concerns": {
+          "problem": "UI, business logic, and data access mixed together",
+          "recommendation": "Separate into layers: Presentation, Business Logic, Data Access",
+          "benefit": "Cleaner architecture, easier to modify and test",
+          "grade_impact": "+12-18 points",
+          "difficulty": "Hard"
+        }
+      },
+      "functionality": {
+        "missing_core_features": {
+          "problem": "Key assignment requirements not implemented",
+          "recommendation": "Review requirements document and implement missing features systematically",
+          "benefit": "Meets assignment goals, demonstrates understanding",
+          "grade_impact": "+15-25 points",
+          "difficulty": "High"
+        },
+        "incorrect_implementation": {
+          "problem": "Features implemented but work incorrectly",
+          "recommendation": "Add comprehensive testing, debug step-by-step, validate against requirements",
+          "benefit": "Correct functionality, reliable code",
+          "grade_impact": "+10-20 points",
+          "difficulty": "Medium"
+        },
+        "edge_case_failures": {
+          "problem": "Works for normal cases but fails edge cases",
+          "recommendation": "Create comprehensive test cases including edge cases, add input validation",
+          "benefit": "Robust code, better error handling",
+          "grade_impact": "+5-10 points",
+          "difficulty": "Low"
+        }
+      },
+      "code_quality": {
+        "no_error_handling": {
+          "problem": "Program crashes on invalid input or errors",
+          "recommendation": "Add try-catch blocks, input validation, graceful error handling",
+          "benefit": "Stable program, better user experience",
+          "grade_impact": "+8-12 points",
+          "difficulty": "Medium"
+        },
+        "poor_documentation": {
+          "problem": "No comments or meaningless comments",
+          "recommendation": "Add function documentation, explain complex logic, document assumptions",
+          "benefit": "Code is understandable, easier maintenance",
+          "grade_impact": "+5-8 points",
+          "difficulty": "Low"
+        },
+        "inefficient_algorithms": {
+          "problem": "O(n²) algorithms when O(n) solutions exist",
+          "recommendation": "Analyze algorithm complexity, choose appropriate data structures",
+          "benefit": "Better performance, demonstrates algorithmic thinking",
+          "grade_impact": "+10-15 points",
+          "difficulty": "Medium"
+        },
+        "magic_numbers": {
+          "problem": "Hardcoded numbers without explanation",
+          "recommendation": "Define constants with meaningful names",
+          "benefit": "Code is self-documenting, easier maintenance",
+          "grade_impact": "+3-5 points",
+          "difficulty": "Low"
+        }
+      },
+      "best_practices": {
+        "memory_leaks": {
+          "problem": "Not properly managing dynamic memory",
+          "recommendation": "Use smart pointers (unique_ptr, shared_ptr), RAII principles",
+          "benefit": "Prevents memory leaks, better resource management",
+          "grade_impact": "+8-12 points",
+          "difficulty": "Medium"
+        },
+        "no_const_correctness": {
+          "problem": "Missing const qualifiers where appropriate",
+          "recommendation": "Add const to parameters and methods that don't modify data",
+          "benefit": "Better API design, prevents accidental modifications",
+          "grade_impact": "+5-8 points",
+          "difficulty": "Low"
+        },
+        "poor_naming": {
+          "problem": "Variables like x, y, temp, func()",
+          "recommendation": "Use descriptive names: studentCount, calculateGrade(), processInput()",
+          "benefit": "Code is self-documenting, easier to understand",
+          "grade_impact": "+5-8 points",
+          "difficulty": "Low"
+        }
+      }
+    },
+    "learning_path_recommendations": {
+      "beginner_focus": {
+        "priority_skills": [
+          "Basic C++ syntax and control structures",
+          "Function creation and usage",
+          "Basic input/output operations",
+          "Simple data structures (arrays, vectors)",
+          "Basic error handling"
+        ],
+        "study_resources": [
+          "C++ Primer chapters 1-6",
+          "Online tutorials for basic syntax",
+          "Practice with simple programming problems"
+        ],
+        "practice_exercises": [
+          "Implement basic calculator",
+          "Create student grade management system",
+          "Build simple file reader/writer"
+        ]
+      },
+      "intermediate_focus": {
+        "priority_skills": [
+          "Object-oriented programming concepts",
+          "Advanced data structures (maps, sets, queues)",
+          "File I/O and data persistence",
+          "Exception handling",
+          "Basic algorithm design"
+        ],
+        "study_resources": [
+          "C++ Primer chapters 7-12",
+          "Data Structures and Algorithms courses",
+          "Design Patterns introduction"
+        ],
+        "practice_exercises": [
+          "Implement class hierarchies",
+          "Create data management systems",
+          "Build algorithm implementations"
+        ]
+      },
+      "advanced_focus": {
+        "priority_skills": [
+          "Advanced OOP (inheritance, polymorphism, templates)",
+          "Memory management and smart pointers",
+          "STL algorithms and containers",
+          "Performance optimization",
+          "Code design patterns"
+        ],
+        "study_resources": [
+          "Effective C++ by Scott Meyers",
+          "C++ Templates: The Complete Guide",
+          "Advanced algorithm design"
+        ],
+        "practice_exercises": [
+          "Implement complex data structures",
+          "Create template-based libraries",
+          "Build high-performance applications"
+        ]
+      }
+    },
+    "grade_improvement_strategies": {
+      "quick_wins": {
+        "description": "Changes that provide immediate grade improvement with minimal effort",
+        "strategies": [
+          {
+            "action": "Add meaningful comments to complex functions",
+            "time": "30 minutes",
+            "impact": "+3-5 points"
+          },
+          {
+            "action": "Use descriptive variable names",
+            "time": "45 minutes",
+            "impact": "+3-5 points"
+          },
+          {
+            "action": "Add basic input validation",
+            "time": "1 hour",
+            "impact": "+5-8 points"
+          },
+          {
+            "action": "Replace magic numbers with named constants",
+            "time": "30 minutes",
+            "impact": "+2-4 points"
+          }
+        ]
+      },
+      "medium_effort": {
+        "description": "Changes requiring moderate effort but significant grade improvement",
+        "strategies": [
+          {
+            "action": "Split large functions into smaller, focused functions",
+            "time": "2-3 hours",
+            "impact": "+8-12 points"
+          },
+          {
+            "action": "Add proper error handling with try-catch blocks",
+            "time": "2-4 hours",
+            "impact": "+8-12 points"
+          },
+          {
+            "action": "Implement missing assignment requirements",
+            "time": "4-6 hours",
+            "impact": "+15-25 points"
+          },
+          {
+            "action": "Improve algorithm efficiency",
+            "time": "3-5 hours",
+            "impact": "+10-15 points"
+          }
+        ]
+      },
+      "major_rework": {
+        "description": "Significant changes requiring substantial effort but major grade improvement",
+        "strategies": [
+          {
+            "action": "Complete code restructure with proper class hierarchy",
+            "time": "8-12 hours",
+            "impact": "+20-30 points"
+          },
+          {
+            "action": "Implement comprehensive testing suite",
+            "time": "6-8 hours",
+            "impact": "+10-15 points"
+          },
+          {
+            "action": "Add advanced features beyond requirements",
+            "time": "6-10 hours",
+            "impact": "+15-25 points"
+          },
+          {
+            "action": "Optimize for performance and memory usage",
+            "time": "4-8 hours",
+            "impact": "+10-20 points"
+          }
+        ]
+      }
+    }
+  }
+}
